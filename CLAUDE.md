@@ -211,7 +211,8 @@ SentenceBuilderBlock | ListeningBlock | WritingBlock`) — `switch (block.type)`
 - **Listening:** ถ้าไม่มี `audioUrl` (หรือโหลดไฟล์ไม่ได้) จะ fallback ไป browser TTS · path relative ใน JSON จะถูกต่อ prefix `/audio/` · ใส่ URL เต็มของ Supabase Storage ก็ได้ · **ตอนนี้ยังไม่มี mp3 จริง → ได้ TTS ทุกครั้ง**
 - **Writing:** เก็บแค่ "ทำเสร็จ" ไม่เก็บข้อความที่พิมพ์ (ตั้งใจ) และไม่คิดคะแนน
 - **ใครได้ certificate:** ต้อง **เล่นทั้ง Unit** (เล่นทีละ Part ไม่ได้ ไม่งั้นใบเยอะเกิน) **และตอบถูก ≥ ครึ่งหนึ่งของจำนวนข้อ** — นับจาก `correctCount / totalQuestions` **ไม่ใช่คะแนนดิบ** (วันนี้ค่าเท่ากันเพราะข้อละ 10 แต่ถ้าคะแนนต่อข้อเปลี่ยน กติกาต้องยังอิงข้อถูก) · เกณฑ์อยู่ที่ `CERTIFICATE_PASS_MARK` ใน `ResultScreen.tsx` ที่เดียว · ไม่ผ่านให้บอกว่าต้องถูกกี่ข้อ อย่าซ่อนปุ่มเฉยๆ
-- **Certificate:** A5 นอน · โลโก้บนหัว + กรอบส้ม + กรอบ dashed + seal · `jspdf` ใช้ฟอนต์ built-in (Latin-1) → **ชื่อไทยจะออกมาเป็นสี่เหลี่ยม** ถ้าต้องรองรับต้อง embed ฟอนต์ไทย · หัวใบใช้ชื่อ **โรงเรียน** (`LITTLE FOX LANGUAGE SCHOOL`) ไม่ใช่ชื่อเกม เพราะคนออกใบคือโรงเรียน
+- **ในใบ certificate มี "ตรา" ได้อย่างเดียวคือโลโก้โรงเรียน** — เคยมี seal เข็มทิศทางขวา (ของเก่าจากตอนแบรนด์ยังเป็นเข็มทิศ) เอาออกแล้ว **ห้ามใส่ badge/seal/ภาพประกอบอะไรกลับเข้าไปอีก** เทส "draws no second emblem" กันไว้ (นับ addImage=1 · circle=0 · triangle=0)
+- **Certificate:** A5 นอน · โลโก้บนหัว + กรอบส้ม + กรอบ dashed · `jspdf` ใช้ฟอนต์ built-in (Latin-1) → **ชื่อไทยจะออกมาเป็นสี่เหลี่ยม** ถ้าต้องรองรับต้อง embed ฟอนต์ไทย · หัวใบใช้ชื่อ **โรงเรียน** (`LITTLE FOX LANGUAGE SCHOOL`) ไม่ใช่ชื่อเกม เพราะคนออกใบคือโรงเรียน
 - **โลโก้ใน PDF — 2 กับดักที่วัดมาแล้ว อย่าแก้กลับ:**
   - ส่ง **`Uint8Array` เข้า `addImage` ห้ามส่ง data URL** — jspdf ถอด data URL ของไฟล์นี้พังแล้วโยน `Incomplete or corrupt PNG file`
   - ใช้ **`public/little-fox-logo-print.png`** (256px ทับพื้นขาว) ไม่ใช่ `little-fox-logo.png` (512px โปร่งใส) — PNG โปร่งใสทำให้ jspdf แตกเป็น raw image + soft mask ไฟล์พองจาก **~40KB เป็น ~1MB**

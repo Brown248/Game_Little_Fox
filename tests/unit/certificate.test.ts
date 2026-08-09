@@ -8,6 +8,7 @@ const calls = {
   save: [] as string[],
   options: [] as unknown[],
   circles: 0,
+  triangles: 0,
   dashPatterns: [] as number[][],
   images: [] as {
     data: unknown;
@@ -40,7 +41,9 @@ vi.mock("jspdf", () => ({
     rect() {}
     roundedRect() {}
     line() {}
-    triangle() {}
+    triangle() {
+      calls.triangles += 1;
+    }
     circle() {
       calls.circles += 1;
     }
@@ -101,6 +104,7 @@ beforeEach(() => {
   calls.save = [];
   calls.options = [];
   calls.circles = 0;
+  calls.triangles = 0;
   calls.dashPatterns = [];
   calls.images = [];
   serveLogo();
@@ -159,11 +163,18 @@ describe("certificate", () => {
     expect(printed()).toContain("3 / 24");
   });
 
-  it("stamps a seal carrying the unit, drawn with dashed rings", async () => {
+  // The school logo is the only emblem the page is allowed to carry.
+  it("draws no second emblem beside the logo", async () => {
     await downloadCertificate(data);
-    expect(printed()).toContain(spaced("UNIT 02"));
-    expect(calls.circles).toBeGreaterThanOrEqual(2);
-    // dashes are turned on for the frame and seal, then always reset to solid
+
+    expect(calls.images).toHaveLength(1); // the logo, and nothing else
+    expect(calls.circles).toBe(0); // the old compass rosette is gone
+    expect(calls.triangles).toBe(0); // ...and so is its needle
+    expect(printed()).not.toContain(spaced("UNIT 02"));
+  });
+
+  it("keeps the dashed inner frame, and always resets the pen to solid", async () => {
+    await downloadCertificate(data);
     expect(calls.dashPatterns.some((p) => p.length === 2)).toBe(true);
     expect(calls.dashPatterns.at(-1)).toEqual([]);
   });

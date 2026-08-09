@@ -1,6 +1,11 @@
 // Client-side PDF certificate — landscape A5, built to the visual direction:
-// white card, the school logo at the head, marigold rule, dashed kraft inner
-// frame, the explorer's name in deep orange, and a stamped seal on the right.
+// white card, marigold rule, dashed kraft inner frame and the explorer's name
+// in deep orange.
+//
+// The school logo is the ONLY emblem on the page. There used to be a second
+// one — a compass rosette stamped on the right, left over from the old brand —
+// and two marks competing on one certificate is one too many. Keep it that way:
+// no badges, no seals, no extra artwork.
 //
 // jspdf is imported lazily so it only reaches the browser when a student
 // actually taps "download" — it never lands in the bundle for the landing page
@@ -27,7 +32,6 @@ const KRAFT: [number, number, number] = [226, 205, 174];
 const EDGE: [number, number, number] = [243, 228, 206];
 const INK: [number, number, number] = [46, 42, 38];
 const INK_SOFT: [number, number, number] = [107, 97, 85];
-const GLOW: [number, number, number] = [255, 232, 201];
 
 /** Where the logo sits on the page, in mm. The block below it is laid out
  *  against these numbers, so the page keeps its shape even when the artwork
@@ -155,10 +159,6 @@ export async function downloadCertificate(data: CertificateData): Promise<void> 
     x += columnWidth;
   }
 
-  // Seal, stamped on the right. Sits high enough that its ring clears the
-  // name's line even when a long name runs the full width.
-  seal(doc, w - 32, 55, data.unitId.replace("-", " ").toUpperCase());
-
   // signature lines
   doc.setDrawColor(...KRAFT);
   doc.setLineWidth(0.5);
@@ -195,61 +195,13 @@ async function loadLogo(): Promise<Uint8Array | null> {
   }
 }
 
-/** Dashed ring, glow disc, marigold diamond — the same seal as on screen. */
-function seal(
-  doc: {
-    setDrawColor: (r: number, g: number, b: number) => void;
-    setFillColor: (r: number, g: number, b: number) => void;
-    setLineWidth: (n: number) => void;
-    setLineDashPattern: (p: number[], o: number) => void;
-    circle: (x: number, y: number, r: number, style?: string) => void;
-    setFont: (f: string, s: string) => void;
-    setFontSize: (n: number) => void;
-    setTextColor: (r: number, g: number, b: number) => void;
-    text: (t: string, x: number, y: number, o?: object) => void;
-    triangle: (
-      x1: number,
-      y1: number,
-      x2: number,
-      y2: number,
-      x3: number,
-      y3: number,
-      style?: string
-    ) => void;
-  },
-  cx: number,
-  cy: number,
-  label: string
-) {
-  doc.setDrawColor(...MARIGOLD);
-  doc.setLineWidth(0.7);
-  doc.setLineDashPattern([1.2, 1.2], 0);
-  doc.circle(cx, cy, 15);
-  doc.setLineDashPattern([], 0);
-
-  doc.setFillColor(...GLOW);
-  doc.setDrawColor(...MARIGOLD);
-  doc.setLineWidth(0.5);
-  doc.circle(cx, cy, 11.5, "FD");
-
-  // compass needle as two triangles
-  doc.setFillColor(...MARIGOLD);
-  doc.triangle(cx, cy - 6, cx - 3, cy, cx + 3, cy, "F");
-  doc.triangle(cx, cy + 6, cx - 3, cy, cx + 3, cy, "F");
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(6);
-  doc.setTextColor(...DEEP);
-  doc.text(spaced(label), cx, cy + 9, { align: "center" });
-}
-
 /** Letter-spacing is not a jspdf feature; spacing the string is close enough
  *  for the small mono-style labels. */
 function spaced(value: string): string {
   return value.split("").join(" ");
 }
 
-/** Long names have to fit between the frame and the seal. */
+/** Long names have to fit inside the frame. */
 function nameSize(name: string): number {
   if (name.length > 26) return 18;
   if (name.length > 18) return 22;
