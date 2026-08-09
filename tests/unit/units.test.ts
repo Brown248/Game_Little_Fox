@@ -159,19 +159,19 @@ describe("unit loader", () => {
     });
   });
 
-  // Every video clue must point at a file that is actually shipped, or a class
-  // watches a broken player with no way to answer.
-  it("every video clue has its file on disk", () => {
+  // Every audio clue must point at a file that is actually shipped, or the
+  // class will fall back to the device voice when it should not.
+  it("every audio clue has its file on disk", () => {
     const clips = loadAllUnits()
       .flatMap((unit) => unit.games)
       .flatMap((block) => (block.type === "listening" ? block.items : []))
-      .map((item) => item.videoUrl)
+      .map((item) => item.audioUrl)
       .filter((url): url is string => Boolean(url) && !/^https?:\/\//.test(url!));
 
     expect(clips.length).toBeGreaterThan(0);
 
     for (const url of clips) {
-      const file = path.join(process.cwd(), "public", "videos", url);
+      const file = path.join(process.cwd(), "public", "audio", url);
       expect(fs.existsSync(file), url).toBe(true);
     }
   });
@@ -314,20 +314,19 @@ describe("unit loader", () => {
       expect(audit.blocks.reduce((n, b) => n + b.count, 0)).toBe(86);
     });
 
-    // The teacher's "what still needs recording" list. A video clue carries its
-    // own soundtrack and must not appear; a clue with no audioUrl at all MUST,
-    // because it is the easiest way to end up on the robot voice unnoticed.
-    it("lists every clue that falls back to the device voice, and no video one", () => {
+    // The teacher's "what still needs recording" list. A clue with no audioUrl
+    // at all MUST appear, because it is the easiest way to end up on the robot
+    // voice unnoticed.
+    it("lists every clue that falls back to the device voice", () => {
       const audit = auditUnits().find((a) => a.id === "unit-02")!;
       const block = getUnit("unit-02")!.games.find((g) => g.type === "listening");
       if (block?.type !== "listening") throw new Error("no listening block");
 
-      const withVideo = block.items.filter((i) => i.videoUrl).length;
-      const withoutVideo = block.items.length - withVideo;
+      const withAudio = block.items.filter((i) => i.audioUrl).length;
+      const withoutAudio = block.items.length - withAudio;
 
-      expect(audit.audio).toHaveLength(withoutVideo);
+      expect(audit.audio).toHaveLength(withoutAudio);
       expect(audit.audio.every((clip) => clip.fileExists === false)).toBe(true);
-      // no mp3 has been recorded yet, so none of them names a file
       expect(audit.audio.every((clip) => clip.audioUrl === "")).toBe(true);
       expect(audit.audio.map((clip) => clip.position)).toEqual([7, 8, 9]);
     });

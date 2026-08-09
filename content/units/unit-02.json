@@ -750,7 +750,7 @@
       "title": "Part D · Mythological Creatures",
       "items": [
         {
-          "videoUrl": "unit-02/clue-1.mp4",
+          "audioUrl": "unit-02/clue-1.mp3",
           "clueText": "I have a long tail and big wings. I can breathe fire. People say I protect treasure.",
           "options": [
             "Dragon",
@@ -760,7 +760,7 @@
           "answerIndex": 0
         },
         {
-          "videoUrl": "unit-02/clue-2.mp4",
+          "audioUrl": "unit-02/clue-2.mp3",
           "clueText": "I look like a beautiful horse. I have one magical horn. I am gentle and kind.",
           "options": [
             "Griffin",
@@ -770,7 +770,7 @@
           "answerIndex": 1
         },
         {
-          "videoUrl": "unit-02/clue-3.mp4",
+          "audioUrl": "unit-02/clue-3.mp3",
           "clueText": "I am a giant sea monster with long arms. I live deep in the ocean. Sailors are afraid of me.",
           "options": [
             "The Great White Shark",
@@ -780,7 +780,7 @@
           "answerIndex": 2
         },
         {
-          "videoUrl": "unit-02/clue-4.mp4",
+          "audioUrl": "unit-02/clue-4.mp3",
           "clueText": "I sing by the sea. My song is beautiful, but it calls sailors to the rocks.",
           "options": [
             "Yeti",
@@ -790,7 +790,7 @@
           "answerIndex": 1
         },
         {
-          "videoUrl": "unit-02/clue-5.mp4",
+          "audioUrl": "unit-02/clue-5.mp3",
           "clueText": "I have the body of a lion. I have the head and wings of an eagle. I guard treasures.",
           "options": [
             "Griffin",
@@ -800,7 +800,7 @@
           "answerIndex": 0
         },
         {
-          "videoUrl": "unit-02/clue-6.mp4",
+          "audioUrl": "unit-02/clue-6.mp3",
           "clueText": "I look like a man, but when the moon is full I become a wolf.",
           "options": [
             "Yeti",

@@ -248,24 +248,21 @@ export function auditUnits(): UnitAudit[] {
     const questionCount = countQuestions(unit);
 
     // Every clue that will NOT play a recording, so the teacher can see what is
-    // left to record. A video clue carries its own soundtrack and is skipped;
-    // a clue with no audioUrl at all is listed, because that is the commonest
-    // way to end up on the device voice and the easiest one to overlook.
+    // left to record. A clue with an audioUrl is already recorded and is
+    // skipped; a clue with no audioUrl at all is listed, because that is the
+    // easiest way to end up on the device voice and the easiest one to overlook.
     const audio: AudioCheck[] = [];
     for (const block of unit.games) {
       if (block.type !== "listening") continue;
       for (const [i, item] of block.items.entries()) {
-        if (item.videoUrl?.trim()) continue;
+        if (item.audioUrl?.trim()) continue;
 
-        const url = item.audioUrl?.trim() ?? "";
-        const remote = /^https?:\/\//.test(url);
         audio.push({
           unitId: unit.id,
-          audioUrl: url,
-          remote,
+          audioUrl: "",
+          remote: false,
           position: i + 1,
-          // A remote URL can't be checked from here; assume it is fine.
-          fileExists: url ? (remote ? true : audioFileExists(url)) : false,
+          fileExists: false,
         });
       }
     }

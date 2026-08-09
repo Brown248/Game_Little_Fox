@@ -524,15 +524,14 @@ describe("the real units are playable", () => {
     expect(screen.getByText(/part 1 of 5/i)).toBeTruthy();
   });
 
-  // Part D's clues are video, which is a different player from the audio one
-  // and must not fall back to the device voice.
-  it("ships every Part D clip as a real file the player can load", () => {
+  // Part D is audio-only now, so every clue should resolve to a real mp3.
+  it("ships every Part D clip as a real audio file the player can load", () => {
     const unit = getUnit("unit-02")!;
     const listening = unit.games.find((g) => g.type === "listening");
     if (listening?.type !== "listening") throw new Error("no listening block");
 
-    const withVideo = listening.items.filter((item) => item.videoUrl);
-    expect(withVideo).toHaveLength(6);
-    expect(withVideo[0].videoUrl).toBe("unit-02/clue-1.mp4");
+    const withAudio = listening.items.filter((item) => item.audioUrl);
+    expect(withAudio).toHaveLength(6);
+    expect(withAudio[0].audioUrl).toBe("unit-02/clue-1.mp3");
   });
 });
