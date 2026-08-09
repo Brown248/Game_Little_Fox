@@ -286,11 +286,22 @@ describe("unit loader", () => {
       expect(audit.blocks.reduce((n, b) => n + b.count, 0)).toBe(91);
     });
 
-    // Video clues carry their own soundtrack, so they are not audio at all and
-    // must not be reported as missing recordings.
-    it("does not report a video clue as a missing audio file", () => {
+    // The teacher's "what still needs recording" list. A video clue carries its
+    // own soundtrack and must not appear; a clue with no audioUrl at all MUST,
+    // because it is the easiest way to end up on the robot voice unnoticed.
+    it("lists every clue that falls back to the device voice, and no video one", () => {
       const audit = auditUnits().find((a) => a.id === "unit-02")!;
-      expect(audit.audio).toHaveLength(0);
+      const block = getUnit("unit-02")!.games.find((g) => g.type === "listening");
+      if (block?.type !== "listening") throw new Error("no listening block");
+
+      const withVideo = block.items.filter((i) => i.videoUrl).length;
+      const withoutVideo = block.items.length - withVideo;
+
+      expect(audit.audio).toHaveLength(withoutVideo);
+      expect(audit.audio.every((clip) => clip.fileExists === false)).toBe(true);
+      // no mp3 has been recorded yet, so none of them names a file
+      expect(audit.audio.every((clip) => clip.audioUrl === "")).toBe(true);
+      expect(audit.audio.map((clip) => clip.position)).toEqual([7, 8, 9]);
     });
 
     it("reports a unit with no listening block as having no clips", () => {

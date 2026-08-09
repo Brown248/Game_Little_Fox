@@ -196,10 +196,14 @@ export function isScored(block: GameBlock): boolean {
 
 export interface AudioCheck {
   unitId: string;
+  /** Empty when the clue names no file at all — the commonest way to end up on
+   *  the device voice, and the one a "no missing files" check used to miss. */
   audioUrl: string;
   /** false = the student will hear browser TTS instead of a recording. */
   fileExists: boolean;
   remote: boolean;
+  /** Which clue it is, 1-based, so the teacher knows what to record. */
+  position: number;
 }
 
 export interface UnitAudit {
@@ -243,24 +247,25 @@ export function auditUnits(): UnitAudit[] {
 
     const questionCount = countQuestions(unit);
 
+    // Every clue that will NOT play a recording, so the teacher can see what is
+    // left to record. A video clue carries its own soundtrack and is skipped;
+    // a clue with no audioUrl at all is listed, because that is the commonest
+    // way to end up on the device voice and the easiest one to overlook.
     const audio: AudioCheck[] = [];
     for (const block of unit.games) {
       if (block.type !== "listening") continue;
-      for (const item of block.items) {
-        // A video clue carries its own soundtrack, and a clue with neither is
-        // read aloud by the device voice on purpose. Neither is a missing
-        // recording, so neither belongs on the teacher's "audio to record" list.
+      for (const [i, item] of block.items.entries()) {
         if (item.videoUrl?.trim()) continue;
-        const url = item.audioUrl?.trim() ?? "";
-        if (!url) continue;
 
+        const url = item.audioUrl?.trim() ?? "";
         const remote = /^https?:\/\//.test(url);
         audio.push({
           unitId: unit.id,
           audioUrl: url,
           remote,
+          position: i + 1,
           // A remote URL can't be checked from here; assume it is fine.
-          fileExists: remote ? true : audioFileExists(url),
+          fileExists: url ? (remote ? true : audioFileExists(url)) : false,
         });
       }
     }

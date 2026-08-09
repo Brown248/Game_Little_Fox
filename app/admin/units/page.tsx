@@ -47,7 +47,7 @@ export default async function AdminUnitsPage() {
         </div>
         <div className="tile">
           <div className="tile__value">{missingAudio.length}</div>
-          <div className="tile__label">Clips without audio</div>
+          <div className="tile__label">Clues on the device voice</div>
         </div>
       </div>
 
@@ -114,15 +114,21 @@ export default async function AdminUnitsPage() {
         ) : (
           <>
             <p className="muted">
-              These clips fall back to the browser voice until an mp3 exists at{" "}
-              <code>public/audio/&lt;path&gt;</code>:
+              These clues are read aloud by the student&apos;s own device
+              instead of a recording. Drop an mp3 at{" "}
+              <code>public/audio/&lt;path&gt;</code> to replace one — video
+              clues carry their own sound and never appear here.
             </p>
             <div className="breakdown">
               {missingAudio.map((clip, i) => (
                 <div className="breakdown__row" key={`${clip.unitId}-${i}`}>
-                  <span>{clip.unitId}</span>
+                  <span>
+                    {clip.unitId} · clue {clip.position}
+                  </span>
                   <span className="muted">
-                    {clip.audioUrl || "(no audioUrl set)"}
+                    {clip.audioUrl
+                      ? `file missing: ${clip.audioUrl}`
+                      : "no audioUrl set yet"}
                   </span>
                 </div>
               ))}
