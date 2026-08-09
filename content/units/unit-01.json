@@ -1,0 +1,228 @@
+{
+  "id": "unit-01",
+  "title": "Shadow Animal Challenge",
+  "games": [
+    {
+      "type": "unscramble",
+      "title": "Part 1 · Shadow Animals",
+      "items": [
+        {
+          "shadow": "🐘",
+          "scrambled": "PHETNALE",
+          "answer": "ELEPHANT"
+        },
+        {
+          "shadow": "🦁",
+          "scrambled": "NOIL",
+          "answer": "LION"
+        },
+        {
+          "shadow": "🐯",
+          "scrambled": "GREIT",
+          "answer": "TIGER"
+        },
+        {
+          "shadow": "🦓",
+          "scrambled": "BREAZ",
+          "answer": "ZEBRA"
+        },
+        {
+          "shadow": "🦒",
+          "scrambled": "AFGERIF",
+          "answer": "GIRAFFE"
+        },
+        {
+          "shadow": "🐒",
+          "scrambled": "EKYMNO",
+          "answer": "MONKEY"
+        },
+        {
+          "shadow": "🦍",
+          "scrambled": "LIGROLA",
+          "answer": "GORILLA"
+        },
+        {
+          "shadow": "🐼",
+          "scrambled": "ANDPA",
+          "answer": "PANDA"
+        },
+        {
+          "shadow": "🦊",
+          "scrambled": "XOF",
+          "answer": "FOX"
+        },
+        {
+          "shadow": "🐺",
+          "scrambled": "FLWO",
+          "answer": "WOLF"
+        },
+        {
+          "shadow": "🦌",
+          "scrambled": "REDE",
+          "answer": "DEER"
+        },
+        {
+          "shadow": "🐰",
+          "scrambled": "BITRAB",
+          "answer": "RABBIT"
+        },
+        {
+          "shadow": "🐻",
+          "scrambled": "REAB",
+          "answer": "BEAR"
+        },
+        {
+          "shadow": "🐫",
+          "scrambled": "EMLCA",
+          "answer": "CAMEL"
+        },
+        {
+          "shadow": "🦘",
+          "scrambled": "RAOKAGNO",
+          "answer": "KANGAROO"
+        },
+        {
+          "shadow": "🐨",
+          "scrambled": "AKAOL",
+          "answer": "KOALA"
+        },
+        {
+          "shadow": "🐊",
+          "scrambled": "DOLICRECO",
+          "answer": "CROCODILE"
+        },
+        {
+          "shadow": "🐍",
+          "scrambled": "AKENS",
+          "answer": "SNAKE"
+        },
+        {
+          "shadow": "🐢",
+          "scrambled": "TTELUR",
+          "answer": "TURTLE"
+        },
+        {
+          "shadow": "🐸",
+          "scrambled": "GORF",
+          "answer": "FROG"
+        },
+        {
+          "shadow": "🦅",
+          "scrambled": "ELGAE",
+          "answer": "EAGLE"
+        },
+        {
+          "shadow": "🦉",
+          "scrambled": "LOW",
+          "answer": "OWL"
+        },
+        {
+          "shadow": "🐧",
+          "scrambled": "NPUNEGI",
+          "answer": "PENGUIN"
+        },
+        {
+          "shadow": "🦩",
+          "scrambled": "OGFLIMAN",
+          "answer": "FLAMINGO"
+        },
+        {
+          "shadow": "🦜",
+          "scrambled": "TORRPA",
+          "answer": "PARROT"
+        },
+        {
+          "shadow": "🦋",
+          "scrambled": "RUBYTLTEF",
+          "answer": "BUTTERFLY"
+        },
+        {
+          "shadow": "🐬",
+          "scrambled": "HODPNIL",
+          "answer": "DOLPHIN"
+        },
+        {
+          "shadow": "🐳",
+          "scrambled": "LWAEH",
+          "answer": "WHALE"
+        },
+        {
+          "shadow": "🦈",
+          "scrambled": "AKRSH",
+          "answer": "SHARK"
+        },
+        {
+          "shadow": "🐙",
+          "scrambled": "TOCPSOU",
+          "answer": "OCTOPUS"
+        }
+      ]
+    },
+    {
+      "type": "unscramble",
+      "title": "Part 2 · Shadow Animals with Pictures",
+      "items": [
+        {
+          "art": "hippopotamus",
+          "shadow": "🦛",
+          "scrambled": "POTAMUSHIPPO",
+          "answer": "HIPPOPOTAMUS"
+        },
+        {
+          "art": "rhinoceros",
+          "shadow": "🦏",
+          "scrambled": "CORNIHOSER",
+          "answer": "RHINOCEROS"
+        },
+        {
+          "art": "lion",
+          "shadow": "🦁",
+          "scrambled": "OLNI",
+          "answer": "LION"
+        },
+        {
+          "art": "elephant",
+          "shadow": "🐘",
+          "scrambled": "PEELHTAN",
+          "answer": "ELEPHANT"
+        },
+        {
+          "art": "polar-bear",
+          "shadow": "🐻‍❄️",
+          "scrambled": "LAROP RABE",
+          "answer": "POLAR BEAR"
+        },
+        {
+          "art": "tiger",
+          "shadow": "🐯",
+          "scrambled": "GRITE",
+          "answer": "TIGER"
+        },
+        {
+          "art": "crocodile",
+          "shadow": "🐊",
+          "scrambled": "ODCORECIL",
+          "answer": "CROCODILE"
+        },
+        {
+          "art": "blue-whale",
+          "shadow": "🐳",
+          "scrambled": "ELUB LAWHE",
+          "answer": "BLUE WHALE"
+        },
+        {
+          "art": "pig",
+          "shadow": "🐷",
+          "scrambled": "GPI",
+          "answer": "PIG"
+        },
+        {
+          "art": "polar-bear-2",
+          "shadow": "🐻‍❄️",
+          "scrambled": "RABE LAROP",
+          "answer": "POLAR BEAR"
+        }
+      ]
+    }
+  ]
+}

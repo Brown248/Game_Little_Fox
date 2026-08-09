@@ -1,0 +1,48 @@
+# Throwaway Postgres + PostgREST that mirrors a Supabase project closely enough
+# to test the real client code and the real supabase/schema.sql:
+#   - the same roles (anon, authenticated, service_role) with the same grants
+#   - RLS enforced for anon, bypassed for service_role
+#   - PostgREST is what Supabase's REST API actually is
+#
+#   docker compose -f tests/db/docker-compose.yml up -d
+#   npm run test:db
+#   docker compose -f tests/db/docker-compose.yml down -v
+#
+# supabase/schema.sql is mounted straight from the repo, so these tests fail if
+# that file stops being valid SQL.
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    # No published port on purpose: PostgREST reaches the database over the
+    # compose network and the tests run SQL through `docker compose exec`, so
+    # nothing on the host needs to bind 5432.
+    volumes:
+      - ./init/00-roles.sql:/docker-entrypoint-initdb.d/00-roles.sql:ro
+      - ../../supabase/schema.sql:/docker-entrypoint-initdb.d/10-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  rest:
+    image: postgrest/postgrest:v12.2.3
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://authenticator:authpass@db:5432/postgres
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      # Must match TEST_JWT_SECRET in vitest.db.config.ts
+      PGRST_JWT_SECRET: little-fox-game-test-jwt-secret-32chars-min
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+    ports:
+      # If Windows has reserved this port ("bind: forbidden by its access
+      # permissions"), pick another and update PROXY/POSTGREST in
+      # tests/db/setup-global.ts to match.
+      - "55430:3000"

@@ -1,0 +1,942 @@
+{
+  "id": "unit-02",
+  "title": "Wild Life and Wonderful Creatures",
+  "games": [
+    {
+      "type": "quiz-choice",
+      "title": "Part B · Guess the Animal",
+      "items": [
+        {
+          "clue": "It has a long neck. It eats leaves from tall trees.",
+          "options": [
+            "Zebra",
+            "Giraffe",
+            "Lion",
+            "Tiger"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "clue": "It has black and white stripes. It looks like a horse.",
+          "options": [
+            "Donkey",
+            "Zebra",
+            "Deer",
+            "Camel"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "clue": "It has sharp claws and loves to hunt at night.",
+          "options": [
+            "Rabbit",
+            "Fox",
+            "Tiger",
+            "Cow"
+          ],
+          "answerIndex": 2
+        },
+        {
+          "clue": "It has a shell. It walks slowly.",
+          "options": [
+            "Turtle",
+            "Frog",
+            "Snake",
+            "Penguin"
+          ],
+          "answerIndex": 0
+        },
+        {
+          "clue": "It has white feathers, an orange beak, and cannot fly.",
+          "options": [
+            "Duck",
+            "Chicken",
+            "Eagle",
+            "Owl"
+          ],
+          "answerIndex": 0
+        },
+        {
+          "clue": "It is the biggest animal on land. It has a long trunk.",
+          "options": [
+            "Hippopotamus",
+            "Elephant",
+            "Rhinoceros",
+            "Buffalo"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "clue": "The father has a big mane. People call it the king of the jungle.",
+          "options": [
+            "Wolf",
+            "Bear",
+            "Lion",
+            "Leopard"
+          ],
+          "answerIndex": 2
+        },
+        {
+          "clue": "It has a long tail. It climbs trees and loves bananas.",
+          "options": [
+            "Monkey",
+            "Koala",
+            "Squirrel",
+            "Panda"
+          ],
+          "answerIndex": 0
+        },
+        {
+          "clue": "It is black and white. It lives in China and eats bamboo.",
+          "options": [
+            "Zebra",
+            "Penguin",
+            "Panda",
+            "Cow"
+          ],
+          "answerIndex": 2
+        },
+        {
+          "clue": "It carries its baby in a pocket. It jumps on two strong legs.",
+          "options": [
+            "Rabbit",
+            "Kangaroo",
+            "Frog",
+            "Deer"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "clue": "It sleeps almost all day in a tree. It eats eucalyptus leaves.",
+          "options": [
+            "Koala",
+            "Sloth",
+            "Monkey",
+            "Bear"
+          ],
+          "answerIndex": 0
+        },
+        {
+          "clue": "It has a hump on its back. It can walk for days with no water.",
+          "options": [
+            "Horse",
+            "Buffalo",
+            "Camel",
+            "Donkey"
+          ],
+          "answerIndex": 2
+        },
+        {
+          "clue": "It has a long body and no legs at all. It says \"hiss\".",
+          "options": [
+            "Worm",
+            "Snake",
+            "Lizard",
+            "Eel"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "clue": "It is green, it jumps, and it lives near the water.",
+          "options": [
+            "Frog",
+            "Turtle",
+            "Snake",
+            "Fish"
+          ],
+          "answerIndex": 0
+        },
+        {
+          "clue": "It is a bird. It sleeps in the day and hunts at night.",
+          "options": [
+            "Parrot",
+            "Eagle",
+            "Owl",
+            "Chicken"
+          ],
+          "answerIndex": 2
+        },
+        {
+          "clue": "It is a big bird with sharp eyes. It flies very high in the sky.",
+          "options": [
+            "Eagle",
+            "Duck",
+            "Penguin",
+            "Flamingo"
+          ],
+          "answerIndex": 0
+        },
+        {
+          "clue": "It is a colourful bird. It can copy the words you say.",
+          "options": [
+            "Owl",
+            "Parrot",
+            "Eagle",
+            "Peacock"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "clue": "It is a pink bird. It often stands on only one leg.",
+          "options": [
+            "Swan",
+            "Duck",
+            "Crane",
+            "Flamingo"
+          ],
+          "answerIndex": 3
+        },
+        {
+          "clue": "It was a caterpillar first. Now it has beautiful wings.",
+          "options": [
+            "Bee",
+            "Butterfly",
+            "Bird",
+            "Bat"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "clue": "It lives in the sea, it is very clever, and it is not a fish.",
+          "options": [
+            "Shark",
+            "Dolphin",
+            "Tuna",
+            "Turtle"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "clue": "It is the biggest animal in the world. It lives in the ocean.",
+          "options": [
+            "Elephant",
+            "Shark",
+            "Blue whale",
+            "Giraffe"
+          ],
+          "answerIndex": 2
+        },
+        {
+          "clue": "It lives in the sea. It has many rows of very sharp teeth.",
+          "options": [
+            "Dolphin",
+            "Shark",
+            "Whale",
+            "Seal"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "clue": "It lives in the sea and it has eight arms.",
+          "options": [
+            "Squid",
+            "Crab",
+            "Octopus",
+            "Starfish"
+          ],
+          "answerIndex": 2
+        },
+        {
+          "clue": "It has hard skin and big teeth. It waits quietly in the river.",
+          "options": [
+            "Hippopotamus",
+            "Crocodile",
+            "Turtle",
+            "Snake"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "clue": "It is orange with a bushy tail. People say it is very clever.",
+          "options": [
+            "Fox",
+            "Wolf",
+            "Dog",
+            "Cat"
+          ],
+          "answerIndex": 0
+        },
+        {
+          "clue": "It looks like a big grey dog. It lives in a group and howls at the moon.",
+          "options": [
+            "Fox",
+            "Hyena",
+            "Wolf",
+            "Bear"
+          ],
+          "answerIndex": 2
+        },
+        {
+          "clue": "It has long ears and a small tail. It hops and eats carrots.",
+          "options": [
+            "Rabbit",
+            "Mouse",
+            "Deer",
+            "Kangaroo"
+          ],
+          "answerIndex": 0
+        },
+        {
+          "clue": "It is the biggest monkey family animal. It is strong and lives in the forest.",
+          "options": [
+            "Chimpanzee",
+            "Gorilla",
+            "Baboon",
+            "Orangutan"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "clue": "It is a small insect with yellow and black stripes. It makes honey.",
+          "options": [
+            "Ant",
+            "Fly",
+            "Bee",
+            "Wasp"
+          ],
+          "answerIndex": 2
+        },
+        {
+          "clue": "It is white and very big. It lives where there is ice and snow.",
+          "options": [
+            "Polar bear",
+            "Panda",
+            "Seal",
+            "Wolf"
+          ],
+          "answerIndex": 0
+        }
+      ]
+    },
+    {
+      "type": "quiz-choice",
+      "title": "Part C1 · Match the Sound",
+      "items": [
+        {
+          "clue": "Which animal says \"Roar!\"?",
+          "options": [
+            "Snake",
+            "Lion",
+            "Cow",
+            "Dog"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "clue": "Which animal says \"Hiss!\"?",
+          "options": [
+            "Snake",
+            "Cat",
+            "Dog",
+            "Cow"
+          ],
+          "answerIndex": 0
+        },
+        {
+          "clue": "Which animal says \"Moo!\"?",
+          "options": [
+            "Dog",
+            "Cat",
+            "Cow",
+            "Lion"
+          ],
+          "answerIndex": 2
+        },
+        {
+          "clue": "Which animal says \"Bark!\"?",
+          "options": [
+            "Cat",
+            "Cow",
+            "Dog",
+            "Snake"
+          ],
+          "answerIndex": 2
+        },
+        {
+          "clue": "Which animal says \"Meow!\"?",
+          "options": [
+            "Dog",
+            "Lion",
+            "Snake",
+            "Cat"
+          ],
+          "answerIndex": 3
+        }
+      ]
+    },
+    {
+      "type": "sentence-builder",
+      "title": "Part C2 · Build the Sentence",
+      "items": [
+        {
+          "prompt": "🐍 Hiss! Hiss!",
+          "words": [
+            "snake",
+            "the",
+            "hiss",
+            "goes"
+          ],
+          "answer": [
+            "the",
+            "snake",
+            "goes",
+            "hiss"
+          ]
+        },
+        {
+          "prompt": "🐶 Woof! Woof!",
+          "words": [
+            "dog",
+            "barks",
+            "the",
+            "loudly"
+          ],
+          "answer": [
+            "the",
+            "dog",
+            "barks",
+            "loudly"
+          ]
+        },
+        {
+          "prompt": "🐄 Moo! Moo!",
+          "words": [
+            "cow",
+            "goes",
+            "the",
+            "moo"
+          ],
+          "answer": [
+            "the",
+            "cow",
+            "goes",
+            "moo"
+          ]
+        },
+        {
+          "prompt": "🦁 Roar!",
+          "words": [
+            "lion",
+            "loudly",
+            "the",
+            "roars"
+          ],
+          "answer": [
+            "the",
+            "lion",
+            "roars",
+            "loudly"
+          ]
+        },
+        {
+          "prompt": "🐦 Tweet! Tweet!",
+          "words": [
+            "bird",
+            "sings",
+            "the",
+            "happily"
+          ],
+          "answer": [
+            "the",
+            "bird",
+            "sings",
+            "happily"
+          ]
+        },
+        {
+          "prompt": "🐱 Meow! Meow!",
+          "words": [
+            "meow",
+            "cat",
+            "goes",
+            "the"
+          ],
+          "answer": [
+            "the",
+            "cat",
+            "goes",
+            "meow"
+          ]
+        },
+        {
+          "prompt": "🦆 Quack! Quack!",
+          "words": [
+            "says",
+            "duck",
+            "the",
+            "quack"
+          ],
+          "answer": [
+            "the",
+            "duck",
+            "says",
+            "quack"
+          ]
+        },
+        {
+          "prompt": "🐷 Oink! Oink!",
+          "words": [
+            "oink",
+            "the",
+            "says",
+            "pig"
+          ],
+          "answer": [
+            "the",
+            "pig",
+            "says",
+            "oink"
+          ]
+        },
+        {
+          "prompt": "🐑 Baa! Baa!",
+          "words": [
+            "baa",
+            "sheep",
+            "the",
+            "says"
+          ],
+          "answer": [
+            "the",
+            "sheep",
+            "says",
+            "baa"
+          ]
+        },
+        {
+          "prompt": "🐺 Howl!",
+          "words": [
+            "howls",
+            "the",
+            "loudly",
+            "wolf"
+          ],
+          "answer": [
+            "the",
+            "wolf",
+            "howls",
+            "loudly"
+          ]
+        },
+        {
+          "prompt": "🦉 Hoot! Hoot!",
+          "words": [
+            "softly",
+            "owl",
+            "hoots",
+            "the"
+          ],
+          "answer": [
+            "the",
+            "owl",
+            "hoots",
+            "softly"
+          ]
+        },
+        {
+          "prompt": "🐸 Ribbit!",
+          "words": [
+            "frog",
+            "high",
+            "the",
+            "jumps"
+          ],
+          "answer": [
+            "the",
+            "frog",
+            "jumps",
+            "high"
+          ]
+        },
+        {
+          "prompt": "🐴 The horse is fast.",
+          "words": [
+            "runs",
+            "the",
+            "fast",
+            "horse"
+          ],
+          "answer": [
+            "the",
+            "horse",
+            "runs",
+            "fast"
+          ]
+        },
+        {
+          "prompt": "🐟 In the water",
+          "words": [
+            "quietly",
+            "fish",
+            "swims",
+            "the"
+          ],
+          "answer": [
+            "the",
+            "fish",
+            "swims",
+            "quietly"
+          ]
+        },
+        {
+          "prompt": "🦅 In the sky",
+          "words": [
+            "flies",
+            "eagle",
+            "high",
+            "the"
+          ],
+          "answer": [
+            "the",
+            "eagle",
+            "flies",
+            "high"
+          ]
+        },
+        {
+          "prompt": "🐢 Slow and steady",
+          "words": [
+            "slowly",
+            "the",
+            "walks",
+            "turtle"
+          ],
+          "answer": [
+            "the",
+            "turtle",
+            "walks",
+            "slowly"
+          ]
+        },
+        {
+          "prompt": "🐒 Up the tree",
+          "words": [
+            "monkey",
+            "climbs",
+            "quickly",
+            "the"
+          ],
+          "answer": [
+            "the",
+            "monkey",
+            "climbs",
+            "quickly"
+          ]
+        },
+        {
+          "prompt": "🐝 Buzz! Buzz!",
+          "words": [
+            "honey",
+            "the",
+            "makes",
+            "bee"
+          ],
+          "answer": [
+            "the",
+            "bee",
+            "makes",
+            "honey"
+          ]
+        },
+        {
+          "prompt": "🕷️ In the corner",
+          "words": [
+            "spins",
+            "spider",
+            "webs",
+            "the"
+          ],
+          "answer": [
+            "the",
+            "spider",
+            "spins",
+            "webs"
+          ]
+        },
+        {
+          "prompt": "🐰 Hop! Hop!",
+          "words": [
+            "fast",
+            "hops",
+            "the",
+            "rabbit"
+          ],
+          "answer": [
+            "the",
+            "rabbit",
+            "hops",
+            "fast"
+          ]
+        },
+        {
+          "prompt": "🐘 Lunch time",
+          "words": [
+            "leaves",
+            "elephant",
+            "the",
+            "eats"
+          ],
+          "answer": [
+            "the",
+            "elephant",
+            "eats",
+            "leaves"
+          ]
+        },
+        {
+          "prompt": "🐼 Lunch time",
+          "words": [
+            "bamboo",
+            "the",
+            "panda",
+            "eats"
+          ],
+          "answer": [
+            "the",
+            "panda",
+            "eats",
+            "bamboo"
+          ]
+        },
+        {
+          "prompt": "🐫 In the desert",
+          "words": [
+            "walks",
+            "camel",
+            "the",
+            "far"
+          ],
+          "answer": [
+            "the",
+            "camel",
+            "walks",
+            "far"
+          ]
+        },
+        {
+          "prompt": "🐧 On the ice",
+          "words": [
+            "well",
+            "penguin",
+            "swims",
+            "the"
+          ],
+          "answer": [
+            "the",
+            "penguin",
+            "swims",
+            "well"
+          ]
+        },
+        {
+          "prompt": "🐳 Deep in the sea",
+          "words": [
+            "loudly",
+            "the",
+            "sings",
+            "whale"
+          ],
+          "answer": [
+            "the",
+            "whale",
+            "sings",
+            "loudly"
+          ]
+        },
+        {
+          "prompt": "🦜 Hello! Hello!",
+          "words": [
+            "talks",
+            "the",
+            "parrot",
+            "loudly"
+          ],
+          "answer": [
+            "the",
+            "parrot",
+            "talks",
+            "loudly"
+          ]
+        },
+        {
+          "prompt": "🐯 In the tall grass",
+          "words": [
+            "quietly",
+            "hunts",
+            "tiger",
+            "the"
+          ],
+          "answer": [
+            "the",
+            "tiger",
+            "hunts",
+            "quietly"
+          ]
+        },
+        {
+          "prompt": "🦌 In the forest",
+          "words": [
+            "deer",
+            "quickly",
+            "the",
+            "runs"
+          ],
+          "answer": [
+            "the",
+            "deer",
+            "runs",
+            "quickly"
+          ]
+        },
+        {
+          "prompt": "🐬 Splash!",
+          "words": [
+            "swims",
+            "dolphin",
+            "fast",
+            "the"
+          ],
+          "answer": [
+            "the",
+            "dolphin",
+            "swims",
+            "fast"
+          ]
+        },
+        {
+          "prompt": "🐜 A tiny worker",
+          "words": [
+            "hard",
+            "the",
+            "works",
+            "ant"
+          ],
+          "answer": [
+            "the",
+            "ant",
+            "works",
+            "hard"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "listening",
+      "title": "Part D · Mythological Creatures",
+      "items": [
+        {
+          "videoUrl": "unit-02/clue-1.mp4",
+          "clueText": "I have a long tail and big wings. I can breathe fire. People say I protect treasure.",
+          "options": [
+            "Dragon",
+            "Griffin",
+            "Godzilla"
+          ],
+          "answerIndex": 0
+        },
+        {
+          "videoUrl": "unit-02/clue-2.mp4",
+          "clueText": "I look like a beautiful horse. I have one magical horn. I am gentle and kind.",
+          "options": [
+            "Griffin",
+            "Unicorn",
+            "Chicken"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "videoUrl": "unit-02/clue-3.mp4",
+          "clueText": "I am a giant sea monster with long arms. I live deep in the ocean. Sailors are afraid of me.",
+          "options": [
+            "The Great White Shark",
+            "Bigfoot",
+            "Kraken"
+          ],
+          "answerIndex": 2
+        },
+        {
+          "videoUrl": "unit-02/clue-4.mp4",
+          "clueText": "I sing by the sea. My song is beautiful, but it calls sailors to the rocks.",
+          "options": [
+            "Yeti",
+            "Siren",
+            "Kraken"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "videoUrl": "unit-02/clue-5.mp4",
+          "clueText": "I have the body of a lion. I have the head and wings of an eagle. I guard treasures.",
+          "options": [
+            "Griffin",
+            "Dragon",
+            "Lion"
+          ],
+          "answerIndex": 0
+        },
+        {
+          "videoUrl": "unit-02/clue-6.mp4",
+          "clueText": "I look like a man, but when the moon is full I become a wolf.",
+          "options": [
+            "Yeti",
+            "Werewolf",
+            "Vampire"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "clueText": "I am a giant bird. When I die, I become ashes. Then I am born again.",
+          "options": [
+            "Griffin",
+            "Phoenix",
+            "Dragon"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "clueText": "I am a mini human with wings. I live deep in the forest. I protect the living things.",
+          "options": [
+            "Mermaid",
+            "Fairy",
+            "Naga"
+          ],
+          "answerIndex": 1
+        },
+        {
+          "clueText": "I look like a beautiful horse. I have one magical horn. I am gentle and kind.",
+          "options": [
+            "Pegasus",
+            "Unicorn",
+            "Centaur"
+          ],
+          "answerIndex": 1
+        }
+      ]
+    },
+    {
+      "type": "writing",
+      "title": "Part E · Speaking and Writing",
+      "prompt": {
+        "questions": [
+          "My spirit animal is…",
+          "It is…",
+          "It can…",
+          "It lives…",
+          "It eats…",
+          "I like it because…",
+          "My spirit animal helps me…",
+          "Speaking Time — ask your partner, then write the answer: What is your favorite animal? Why?",
+          "Speaking Time: Which animal is the cutest?",
+          "Speaking Time: Which animal can fly?",
+          "Speaking Time: Which animal lives in the ocean?",
+          "Speaking Time: Which animal has claws?",
+          "Speaking Time: What animal would you like as a pet?",
+          "Speaking Time: What is the biggest animal in the world?",
+          "Speaking Time: Which animal is the fastest?",
+          "Speaking Time: Do you believe dragons are real? Why or why not?",
+          "Speaking Time: If you could have one mythological creature as a friend, which one would you choose?"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,2349 @@
+/* =============================================================================
+   Little Fox Game — the whole design system lives in this one file.
+   Built from "Quiz app design system": the palette/motion spec
+   (Wildlife Explorer.dc.html) plus the responsive web layout
+   (Wildlife Explorer Web.dc.html).
+
+   One rule from the web file drives the whole layout: RESPONSIVE 360px → 1440px,
+   NO MEDIA QUERIES — fluid grids (auto-fit + minmax) and clamp() type instead.
+   A screen splits into two columns when there is room and stacks when there
+   isn't, without a breakpoint anywhere. Tap targets on the main actions never
+   go under 64px and nothing relies on hover.
+   ========================================================================== */
+
+:root {
+  /* ---- action: orange ---- */
+  --marigold: #f28c28; /* buttons, bars, badges */
+  --marigold-press: #d9741a; /* the hard shadow under every big button */
+  --deep: #c4600f; /* orange text, icons, borders */
+  --glow: #ffe8c9; /* highlights, correct fills */
+  --glow-edge: #f6dcb6;
+
+  /* ---- ground: cream ---- */
+  --page: #fdf3e3;
+  --edge: #f3e4ce; /* hairlines, card borders */
+  --edge-soft: #f0e0c6;
+  --dot: #f0e0c6; /* the paper dots printed across every screen */
+  --kraft: #e2cdae; /* empty tracks, stamps */
+
+  /* ---- surface: white ---- */
+  --surface: #ffffff;
+  --surface-warm: #fffcf6; /* nested panels */
+
+  /* ---- ink ---- */
+  --ink: #2e2a26;
+  --ink-lead: #5c5348; /* the lead paragraph under a display heading */
+  --ink-soft: #6b6155;
+  --ink-mute: #8c8175;
+  --ink-faint: #a79a88;
+
+  /* ---- type ---- */
+  --font-display-stack: var(--font-display), "Baloo 2", "Segoe UI", system-ui,
+    sans-serif;
+  --font-text-stack: var(--font-text), "Nunito", "Segoe UI", system-ui,
+    sans-serif;
+  --font-mono-stack: var(--font-mono), "IBM Plex Mono", ui-monospace, monospace;
+
+  /* ---- shape ---- */
+  --r-card: 26px;
+  --r-card-lg: 36px; /* the hero cards on wide glass */
+  --r-tile: 20px;
+  --r-input: 20px;
+  --r-chip: 16px;
+  --r-btn: 24px;
+  --r-pill: 999px;
+
+  /* ---- rhythm: one fluid gutter and one fluid gap, used everywhere ---- */
+  --shell: 1240px;
+  --gutter: clamp(16px, 4vw, 40px);
+  --gap-screen: clamp(20px, 3vw, 32px);
+  --gap-split: clamp(20px, 3vw, 32px);
+
+  /* ---- motion: one spring, everywhere ---- */
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --lift: 0 26px 50px -20px rgba(46, 42, 38, 0.35);
+  --lift-card: 0 30px 60px -34px rgba(46, 42, 38, 0.4);
+  --lift-soft: 0 24px 48px -34px rgba(46, 42, 38, 0.35);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-text-stack);
+  font-size: 17px; /* body never below 17px in-app */
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  /* cream paper with a printed dot grid — the ground of every screen */
+  background-color: var(--page);
+  background-image: radial-gradient(var(--dot) 1.5px, transparent 1.6px);
+  background-size: 26px 26px;
+  /* stop the rubber-band flash of white behind the cream page on iOS */
+  overscroll-behavior-y: none;
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display-stack);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(34px, 5vw, 58px);
+}
+h2 {
+  font-size: clamp(23px, 2.4vw, 30px);
+}
+h3 {
+  font-size: 20px;
+}
+
+a {
+  color: var(--deep);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+a:hover {
+  color: var(--marigold);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* One focus ring for the whole app.
+   :where() keeps this at zero specificity, so a component can still override
+   it, and the browser draws the outline around the element's own corner radius.
+   Before this, only .btn and .chip showed anything: a child tabbing through
+   four answer tiles saw no highlight at all. */
+:where(a, button, input, select, textarea, video, [tabindex]):focus-visible {
+  outline: 3px solid var(--deep);
+  outline-offset: 3px;
+}
+
+/* Long English words (HIPPOPOTAMUS) must never push a card sideways. */
+h1,
+h2,
+h3,
+p,
+li {
+  overflow-wrap: break-word;
+}
+
+/* Anchor jumps glide; Next 16 no longer forces this off during navigation, and
+   the attribute on <html> is what tells it to keep overriding for route
+   changes so a new screen still starts at the top. */
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: var(--glow);
+}
+
+/* ============================== app shell ================================ */
+
+/* header · content · footer, all pinned to the same 1240px measure */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.shell {
+  width: 100%;
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+}
+
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  backdrop-filter: blur(8px);
+  background: rgba(253, 243, 227, 0.86);
+  border-bottom: 2px solid var(--edge);
+}
+
+.appbar__in {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 2vw, 24px);
+  flex-wrap: wrap;
+  padding-block: 14px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: none;
+  color: inherit;
+  font-weight: inherit;
+}
+
+.brand:hover {
+  color: inherit;
+}
+
+/* The artwork already carries its own ring and cream ground, so the mark needs
+   nothing but a size and a soft shadow to lift it off the bar. */
+.brand__mark {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  filter: drop-shadow(0 3px 5px rgba(46, 42, 38, 0.18));
+}
+
+.brand__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  min-width: 0;
+}
+
+.brand__name {
+  font-family: var(--font-display-stack);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.brand__meta {
+  font-family: var(--font-mono-stack);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--deep);
+  margin-top: 3px;
+}
+
+/* pill group of screen links, right-aligned */
+.tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-left: auto;
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  border-radius: var(--r-pill);
+  padding: 5px;
+}
+
+.tab {
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  transition: transform 0.16s var(--spring), background 0.16s ease,
+    color 0.16s ease;
+}
+
+@media (hover: hover) {
+  .tab:hover {
+    transform: scale(1.05);
+    color: var(--deep);
+  }
+}
+
+.tab:active {
+  transform: scale(0.95);
+}
+
+.tab--on,
+.tab--on:hover {
+  background: var(--marigold);
+  color: var(--surface);
+}
+
+.appfoot {
+  border-top: 2px solid var(--edge);
+  background: var(--surface-warm);
+  margin-top: auto;
+}
+
+.appfoot__in {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 26px;
+  padding-bottom: calc(26px + env(safe-area-inset-bottom));
+}
+
+.appfoot__note {
+  font-size: 14px;
+  color: var(--ink-mute);
+}
+
+/* =============================== layout ================================== */
+
+/* Every screen's content column. Fluid all the way from a 360px phone to a
+   1440px classroom projector — no breakpoint decides anything. */
+.page {
+  width: 100%;
+  max-width: var(--shell);
+  margin: 0 auto;
+  flex: 1;
+  padding: clamp(24px, 4vw, 56px) var(--gutter)
+    calc(clamp(48px, 8vw, 96px) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-screen);
+  animation: weEnter 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* short messages (404, crash, admin login) read better in a narrow measure */
+.page--narrow {
+  max-width: 620px;
+}
+
+.page--admin {
+  max-width: 1080px;
+}
+
+/* The signature split: two columns when there is room, stacked when there is
+   not. minmax(min(100%, X), 1fr) is what makes it work without a media query. */
+.split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  gap: var(--gap-split);
+  align-items: start;
+}
+
+.split--wide {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: clamp(24px, 3vw, 40px);
+}
+
+/* The whole-unit card on the unit screen: the loud option, so it gets the
+   marigold ground and the fox sitting on it rather than another white card. */
+.whole {
+  position: relative;
+  overflow: hidden;
+  background: var(--glow);
+  border: 3px solid var(--marigold);
+  border-radius: var(--r-card-lg);
+  padding: clamp(22px, 3vw, 34px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: var(--lift-card);
+}
+
+.whole__fox {
+  position: absolute;
+  right: -18px;
+  bottom: -22px;
+  width: clamp(110px, 16vw, 168px);
+  height: auto;
+  opacity: 0.22;
+  pointer-events: none;
+  animation: weFloat 5.2s ease-in-out infinite;
+}
+
+/* keep the text above the fox */
+.whole > *:not(.whole__fox) {
+  position: relative;
+}
+
+/* the start screen: story on one side, the card you type into on the other */
+.split--hero {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  gap: clamp(24px, 4vw, 56px);
+  align-items: center;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* blocks of a whole screen breathe on the screen rhythm, not the card one */
+.stack--screen {
+  gap: var(--gap-screen);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.row--between {
+  justify-content: space-between;
+}
+
+.row--tight {
+  gap: 8px;
+}
+
+.center {
+  text-align: center;
+}
+
+/* mono meta line: "UNIT 02 · WILD LIFE" */
+.kicker {
+  font-family: var(--font-mono-stack);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--deep);
+}
+
+.kicker--faint {
+  color: var(--ink-faint);
+  letter-spacing: 0.14em;
+  font-size: 11px;
+}
+
+/* Secondary copy. Carries its own margin reset because it is nearly always a
+   <p> inside a flex stack, where a browser's default margin fights the gap —
+   every use of it used to repeat style={{ margin: 0 }} to undo that. */
+.muted {
+  color: var(--ink-soft);
+  font-size: clamp(15px, 1.3vw, 16px);
+  margin: 0;
+}
+
+.divider {
+  height: 2px;
+  border: 0;
+  background: var(--edge);
+  margin: 4px 0;
+}
+
+/* ================================ hero =================================== */
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+/* left half of the start screen: eyebrow · display line · lead · fact chips */
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2vw, 24px);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  align-self: flex-start;
+  background: var(--glow);
+  border-radius: var(--r-pill);
+  padding: 8px 16px;
+}
+
+.eyebrow::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--marigold);
+  flex: none;
+}
+
+.eyebrow > span {
+  font-family: var(--font-mono-stack);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--deep);
+}
+
+.display {
+  font-family: var(--font-display-stack);
+  font-size: clamp(44px, 7vw, 84px);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  margin: 0;
+}
+
+.lead {
+  font-size: clamp(17px, 1.6vw, 21px);
+  line-height: 1.55;
+  color: var(--ink-lead);
+  max-width: 52ch;
+  text-wrap: pretty;
+  margin: 0;
+}
+
+.facts {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.fact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  border-radius: var(--r-tile);
+  padding: 14px 18px;
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.35;
+}
+
+.fact::before {
+  content: "";
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--glow);
+  border: 2px dashed var(--marigold);
+}
+
+.fact strong {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+/* right half: the card a student actually types into */
+.join {
+  position: relative;
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  border-radius: var(--r-card-lg);
+  padding: clamp(24px, 3vw, 40px);
+  box-shadow: var(--lift-card);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* the fox hanging off the card's top edge, breathing on a slow loop */
+.join__badge {
+  position: absolute;
+  top: -34px;
+  right: clamp(16px, 4vw, 36px);
+  width: clamp(88px, 12vw, 108px);
+  height: auto;
+  animation: weFloat 4.6s ease-in-out infinite;
+  filter: drop-shadow(0 12px 16px rgba(46, 42, 38, 0.22));
+  pointer-events: none;
+}
+
+.join__title {
+  font-family: var(--font-display-stack);
+  font-size: clamp(28px, 3vw, 36px);
+  font-weight: 800;
+  line-height: 1.1;
+  max-width: 14ch;
+}
+
+.join__foot {
+  text-align: center;
+  font-family: var(--font-mono-stack);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* The full lockup, shown big enough to read the school name under the fox.
+   Below ~64px use the mark (public/little-fox-mark.png) instead. */
+.logo {
+  width: clamp(96px, 16vw, 132px);
+  height: auto;
+  flex: none;
+  animation: weFloat 4.5s ease-in-out infinite;
+  filter: drop-shadow(0 14px 18px rgba(46, 42, 38, 0.18));
+}
+
+.logo--sm {
+  width: clamp(84px, 14vw, 104px);
+}
+
+/* ================================ cards ================================== */
+
+.card {
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  border-radius: var(--r-card);
+  padding: clamp(20px, 2.4vw, 28px);
+}
+
+.card--lg {
+  border-radius: var(--r-card-lg);
+  box-shadow: var(--lift-card);
+}
+
+.card--soft {
+  border-radius: 32px;
+  box-shadow: var(--lift-soft);
+}
+
+.card--dashed {
+  background: var(--surface-warm);
+  border-style: dashed;
+  border-color: var(--kraft);
+}
+
+/* =============================== buttons ================================= */
+
+/* The signature: a chunky marigold slab sitting on a hard shadow. Pressing it
+   squashes on the y-axis and eats the shadow — that is the whole "alive" feel. */
+.btn {
+  appearance: none;
+  border: 0;
+  min-height: 74px;
+  padding: 0 28px;
+  border-radius: var(--r-btn);
+  background: var(--marigold);
+  color: var(--surface);
+  box-shadow: 0 8px 0 var(--marigold-press);
+  font-family: var(--font-display-stack);
+  font-weight: 800;
+  font-size: clamp(22px, 2.2vw, 28px);
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 0.18s var(--spring), box-shadow 0.18s ease,
+    background 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+@media (hover: hover) {
+  .btn:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 11px 0 var(--marigold-press);
+  }
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(5px) scaleY(0.96);
+  box-shadow: 0 3px 0 var(--marigold-press);
+}
+
+.btn:disabled {
+  background: var(--kraft);
+  box-shadow: 0 8px 0 #cbb694;
+  color: var(--surface-warm);
+  cursor: not-allowed;
+}
+
+/* white slab with an orange edge — the quieter of two stacked actions */
+.btn--secondary {
+  background: var(--surface);
+  color: var(--deep);
+  border: 3px solid var(--marigold);
+  box-shadow: none;
+  min-height: 68px;
+}
+
+@media (hover: hover) {
+  .btn--secondary:hover:not(:disabled) {
+    transform: scale(1.02);
+    box-shadow: none;
+    background: var(--glow);
+  }
+}
+
+.btn--secondary:active:not(:disabled) {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+.btn--secondary:disabled {
+  background: var(--surface);
+  border-color: var(--kraft);
+  color: var(--ink-faint);
+  box-shadow: none;
+}
+
+/* text-weight action, no slab */
+.btn--ghost {
+  background: transparent;
+  color: var(--deep);
+  box-shadow: none;
+  border: 0;
+  min-height: 48px;
+  font-family: var(--font-text-stack);
+  font-weight: 800;
+  font-size: 16px;
+}
+
+@media (hover: hover) {
+  .btn--ghost:hover:not(:disabled) {
+    transform: none;
+    box-shadow: none;
+    background: var(--glow);
+  }
+}
+
+.btn--ghost:active:not(:disabled) {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+.btn--ghost:disabled {
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink-faint);
+}
+
+.btn--sm {
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: 17px;
+  border-radius: var(--r-chip);
+  box-shadow: 0 4px 0 var(--marigold-press);
+}
+
+.btn--sm:active:not(:disabled) {
+  transform: translateY(3px) scaleY(0.96);
+  box-shadow: 0 1px 0 var(--marigold-press);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+/* two slabs side by side that fall into one column when the space runs out */
+.btn-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-row > .btn {
+  flex: 1 1 220px;
+}
+
+/* ================================ chips ================================== */
+
+/* Class picker and board tabs: pill, springy, 2px edge until chosen. */
+.chip {
+  appearance: none;
+  min-height: 54px;
+  padding: 0 18px;
+  border-radius: var(--r-chip);
+  border: 2px solid var(--edge);
+  background: var(--surface-warm);
+  color: var(--ink-soft);
+  font-family: var(--font-display-stack);
+  font-weight: 700;
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.16s var(--spring), background 0.16s ease,
+    border-color 0.16s ease, color 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+@media (hover: hover) {
+  .chip:hover {
+    transform: scale(1.06);
+    border-color: var(--marigold);
+    color: var(--deep);
+  }
+}
+
+.chip:active {
+  transform: scale(0.94);
+}
+
+.chip[aria-pressed="true"],
+.chip--on {
+  background: var(--glow);
+  border-color: var(--marigold);
+  color: var(--deep);
+}
+
+/* small pill used for tabs and labels */
+.chip--pill {
+  min-height: 46px;
+  border-radius: var(--r-pill);
+  font-family: var(--font-text-stack);
+  font-weight: 800;
+  font-size: 15px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  background: var(--surface);
+}
+
+.chip--pill.chip--on {
+  background: var(--marigold);
+  border-color: var(--marigold);
+  color: var(--surface);
+}
+
+/* =============================== fields ================================== */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field__label {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  min-height: 68px;
+  border-radius: var(--r-input);
+  border: 2px solid var(--edge);
+  background: var(--surface-warm);
+  padding: 0 22px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.input::placeholder {
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--marigold);
+  background: var(--surface);
+}
+
+.select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--deep) 50%),
+    linear-gradient(135deg, var(--deep) 50%, transparent 50%);
+  background-position: calc(100% - 22px) 50%, calc(100% - 15px) 50%;
+  background-size: 7px 7px, 7px 7px;
+  background-repeat: no-repeat;
+  padding-right: 44px;
+}
+
+.textarea {
+  min-height: 108px;
+  padding: 16px 20px;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+/* ============================= unit picker =============================== */
+
+.unit-list {
+  display: grid;
+  gap: 12px;
+}
+
+/* The unit and part lists arrive the same way the leaderboard rows do — one
+   short rise, 50ms apart. Capped at six so a long list never feels slow. */
+.unit-list > * {
+  animation: weTick 0.3s var(--spring) both;
+}
+.unit-list > *:nth-child(1) {
+  animation-delay: 0.04s;
+}
+.unit-list > *:nth-child(2) {
+  animation-delay: 0.09s;
+}
+.unit-list > *:nth-child(3) {
+  animation-delay: 0.14s;
+}
+.unit-list > *:nth-child(4) {
+  animation-delay: 0.19s;
+}
+.unit-list > *:nth-child(5) {
+  animation-delay: 0.24s;
+}
+.unit-list > *:nth-child(n + 6) {
+  animation-delay: 0.28s;
+}
+
+.unit {
+  appearance: none;
+  width: 100%;
+  min-height: 78px;
+  text-align: left;
+  background: var(--surface-warm);
+  border: 2px solid var(--edge);
+  border-radius: var(--r-tile);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: transform 0.16s var(--spring), border-color 0.16s ease,
+    background 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+@media (hover: hover) {
+  .unit:hover:not(:disabled) {
+    transform: scale(1.02);
+    border-color: var(--marigold);
+    background: var(--glow);
+  }
+}
+
+.unit:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.unit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.unit[aria-pressed="true"] {
+  background: var(--glow);
+  border-color: var(--marigold);
+}
+
+.unit__no {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 14px;
+  background: var(--page);
+  border: 2px solid var(--edge);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display-stack);
+  font-weight: 800;
+  font-size: 19px;
+  color: var(--deep);
+}
+
+.unit__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.unit__title {
+  display: block;
+  font-family: var(--font-display-stack);
+  font-weight: 700;
+  font-size: 21px;
+  line-height: 1.15;
+}
+
+.unit__meta {
+  display: block;
+  font-family: var(--font-mono-stack);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.unit__go {
+  flex: none;
+  font-family: var(--font-display-stack);
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--marigold);
+}
+
+/* ============================== play chrome ============================== */
+
+/* Four stat cards that wrap into 2×2 on a phone and a single row on a laptop. */
+.hud {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.hud__tile {
+  flex: 1 1 180px;
+  min-width: 0;
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  border-radius: 22px;
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* the explorer's own name — glow fill, so the board knows who is playing */
+.hud__tile--me {
+  background: var(--glow);
+  border-color: var(--glow-edge);
+}
+
+.hud__label {
+  font-family: var(--font-mono-stack);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.hud__tile--me .hud__label {
+  color: var(--deep);
+}
+
+.hud__value {
+  font-family: var(--font-display-stack);
+  font-weight: 800;
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud__value--orange {
+  color: var(--deep);
+}
+
+.hud__value--name {
+  font-size: clamp(22px, 2.2vw, 28px);
+  line-height: 1.1;
+  color: var(--deep);
+  overflow-wrap: anywhere;
+}
+
+/* the number re-keys on change so each digit rises and settles */
+.tick {
+  display: inline-block;
+  animation: weTick 0.32s var(--spring);
+}
+
+.exit {
+  appearance: none;
+  border: 2px solid var(--edge);
+  background: var(--surface);
+  color: var(--ink-soft);
+  border-radius: var(--r-pill);
+  min-height: 44px;
+  padding: 0 16px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.16s var(--spring), color 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.exit:active {
+  transform: scale(0.95);
+}
+
+@media (hover: hover) {
+  .exit:hover {
+    border-color: var(--marigold);
+    color: var(--deep);
+  }
+}
+
+/* segmented progress: done · now · to come */
+.segs {
+  display: flex;
+  gap: 6px;
+}
+
+.seg {
+  flex: 1 1 0;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--kraft);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.seg--done {
+  background: var(--marigold);
+}
+
+.seg--now {
+  background: var(--glow);
+  box-shadow: 0 0 0 2px var(--marigold);
+}
+
+.progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.progress-head__count {
+  font-family: var(--font-text-stack);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================== question ================================= */
+
+.q {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: weSlide 0.26s ease-out;
+}
+
+/* the prompt card and the answers sit side by side once there is room */
+.q.split {
+  display: grid;
+  gap: var(--gap-split);
+}
+
+.q__text {
+  font-size: clamp(23px, 2.6vw, 34px);
+  font-weight: 800;
+  line-height: 1.28;
+  text-wrap: pretty;
+}
+
+/* prompts that are a whole sentence to rebuild, not a one-line clue */
+.q__text--sm {
+  font-size: clamp(21px, 2vw, 27px);
+}
+
+/* A dashed warm strip holding the words behind a clue — the listening
+   transcript when a student asks to see it. */
+.clue {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface-warm);
+  border: 2px dashed var(--kraft);
+  border-radius: var(--r-tile);
+  padding: 14px 18px;
+  margin: 0;
+  font-size: clamp(16px, 1.5vw, 19px);
+  line-height: 1.45;
+  color: var(--ink-soft);
+  animation: weTick 0.3s var(--spring);
+}
+
+.clue::before {
+  content: "";
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--glow);
+  border: 2px solid var(--marigold);
+}
+
+.clue strong {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+/* a video clue — same frame language as the artwork, controls left to the
+   browser so a phone gets its native full-screen and volume */
+.clip {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 22px;
+  border: 2px solid var(--edge);
+  background: var(--ink);
+  display: block;
+}
+
+/* ---------- drawn artwork ---------- */
+
+/* The photo frame from the design doc, finally holding a real picture: the
+   silhouette sits underneath, the coloured animal crossfades over it the moment
+   the word is right, and the dashed frame goes solid marigold to match. */
+.art {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 2px dashed var(--kraft);
+  /* the same kraft hatch the mock used for an empty photo slot, so a slow
+     connection shows the frame rather than a white hole */
+  background: repeating-linear-gradient(
+    135deg,
+    var(--page) 0 11px,
+    var(--edge) 11px 22px
+  );
+  transition: border-color 0.35s ease;
+}
+
+.art img {
+  object-fit: cover;
+}
+
+.art__reveal {
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.art--lit {
+  border-style: solid;
+  border-color: var(--marigold);
+}
+
+.art--lit .art__reveal {
+  opacity: 1;
+}
+
+/* ---------- shadow animal ---------- */
+
+/* The emoji is rendered as a pure silhouette (brightness(0) keeps the alpha
+   shape and blacks out every pixel), then lights up in colour when answered. */
+.shadow-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 0 6px;
+}
+
+.shadow-animal {
+  font-size: clamp(76px, 18vw, 140px);
+  line-height: 1;
+  filter: brightness(0) drop-shadow(0 8px 10px rgba(46, 42, 38, 0.18));
+  transition: filter 0.45s ease, transform 0.45s var(--spring);
+  animation: weFloat 4s ease-in-out infinite;
+  will-change: filter, transform;
+}
+
+.shadow-animal--lit {
+  filter: drop-shadow(0 10px 14px rgba(46, 42, 38, 0.16));
+  animation: weReveal 0.6s var(--spring);
+}
+
+.shadow-stage__hint {
+  animation: weTick 0.4s var(--spring);
+}
+
+/* the scrambled letters */
+.scrambled {
+  font-family: var(--font-display-stack);
+  font-size: clamp(30px, 6vw, 46px);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-align: center;
+  color: var(--deep);
+  margin: 2px 0 4px;
+  word-break: break-all;
+  animation: wePop 0.4s var(--spring);
+}
+
+.input--answer {
+  text-align: center;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-family: var(--font-display-stack);
+  font-size: 26px;
+}
+
+/* =============================== choices ================================= */
+
+.choices {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.choice {
+  appearance: none;
+  position: relative;
+  width: 100%;
+  min-height: 78px;
+  text-align: left;
+  background: var(--surface);
+  border: 3px solid var(--edge);
+  border-radius: var(--r-btn);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: transform 0.16s var(--spring), background 0.2s ease,
+    border-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+@media (hover: hover) {
+  .choice:hover:not(:disabled) {
+    transform: scale(1.02);
+    border-color: var(--marigold);
+  }
+}
+
+.choice:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.choice:disabled {
+  cursor: default;
+}
+
+.choice__key {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 14px;
+  background: var(--page);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display-stack);
+  font-weight: 800;
+  font-size: 21px;
+  color: var(--deep);
+}
+
+.choice__text {
+  font-size: clamp(18px, 1.7vw, 22px);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* Correct fills with glow — the only state that changes colour. */
+.choice--correct {
+  background: var(--glow);
+  border-color: var(--marigold);
+}
+
+.choice--correct .choice__key {
+  background: var(--marigold);
+  color: var(--surface);
+}
+
+/* Wrong shakes and goes kraft. Never red: no colour punishment. */
+.choice--wrong {
+  border-color: var(--kraft);
+  background: var(--surface-warm);
+  animation: weShake 0.45s ease;
+}
+
+.choice--wrong .choice__key {
+  background: var(--kraft);
+  color: var(--ink-mute);
+}
+
+/* the seal that pops onto a correct answer, with its one expanding ring */
+.seal {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
+  border-radius: 50%;
+  background: var(--marigold);
+  display: grid;
+  place-items: center;
+  animation: wePop 0.42s var(--spring);
+  pointer-events: none;
+}
+
+.seal__needle {
+  width: 17px;
+  height: 17px;
+  background: var(--surface);
+  transform: rotate(45deg);
+  border-radius: 4px 1px 4px 1px;
+}
+
+.seal__burst {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
+  border-radius: 50%;
+  border: 3px solid var(--marigold);
+  animation: weBurst 0.6s ease-out forwards;
+  pointer-events: none;
+}
+
+.float-points {
+  position: absolute;
+  right: 72px;
+  top: 8px;
+  font-family: var(--font-display-stack);
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--deep);
+  animation: weRise 0.6s ease-out forwards;
+  pointer-events: none;
+}
+
+/* ========================== sentence builder ============================= */
+
+.tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-content: flex-start;
+  min-height: 68px;
+  padding: 12px;
+  border-radius: var(--r-tile);
+  border: 2px dashed var(--kraft);
+  background: var(--page);
+}
+
+.tray--answer {
+  border-style: solid;
+  border-color: var(--marigold);
+  background: var(--glow);
+}
+
+.tray__hint {
+  align-self: center;
+  color: var(--ink-mute);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.wordchip {
+  appearance: none;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--marigold);
+  background: var(--surface);
+  color: var(--deep);
+  font-family: var(--font-display-stack);
+  font-weight: 700;
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.16s var(--spring), background 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  animation: wePop 0.24s var(--spring);
+}
+
+@media (hover: hover) {
+  .wordchip:hover:not(:disabled) {
+    transform: scale(1.06);
+    background: var(--glow);
+  }
+}
+
+.wordchip:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.wordchip:disabled {
+  cursor: default;
+  opacity: 0.8;
+}
+
+/* ============================== feedback ================================= */
+
+.feedback {
+  border-radius: var(--r-tile);
+  padding: 16px 18px;
+  font-weight: 800;
+  font-size: 18px;
+  animation: weTick 0.3s var(--spring);
+}
+
+.feedback--correct {
+  background: var(--glow);
+  border: 2px solid var(--marigold);
+  color: var(--deep);
+}
+
+/* kraft, not red */
+.feedback--wrong {
+  background: var(--surface-warm);
+  border: 2px solid var(--kraft);
+  color: var(--ink-soft);
+}
+
+.feedback__answer {
+  display: block;
+  margin-top: 4px;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.notice {
+  background: var(--glow);
+  border: 2px solid var(--glow-edge);
+  border-radius: var(--r-tile);
+  padding: 14px 16px;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.notice--error {
+  background: var(--surface-warm);
+  border-color: var(--kraft);
+  border-left: 6px solid var(--deep);
+  color: var(--ink);
+}
+
+/* =============================== results ================================= */
+
+.result-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(18px, 2vw, 26px);
+}
+
+.rank-seal {
+  align-self: center;
+  width: clamp(160px, 22vw, 240px);
+  height: clamp(160px, 22vw, 240px);
+  border-radius: 50%;
+  background: var(--surface);
+  border: 5px dashed var(--marigold);
+  display: grid;
+  place-items: center;
+  animation: wePop 0.55s var(--spring);
+}
+
+.rank-seal__inner {
+  width: 78%;
+  height: 78%;
+  border-radius: 50%;
+  background: var(--marigold);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: var(--surface);
+}
+
+.rank-seal__label {
+  font-family: var(--font-display-stack);
+  font-size: clamp(14px, 1.4vw, 17px);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--glow);
+}
+
+.rank-seal__value {
+  font-family: var(--font-display-stack);
+  font-size: clamp(52px, 7vw, 78px);
+  font-weight: 800;
+  line-height: 0.88;
+}
+
+.rank-seal__of {
+  font-family: var(--font-mono-stack);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--glow);
+}
+
+.result-title {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* everything under the seal spans the column: title, buttons, links */
+.result-hero > *:not(.rank-seal) {
+  align-self: stretch;
+}
+
+/* drifting confetti shapes behind the seal */
+.confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti i {
+  position: absolute;
+  display: block;
+  animation: weFloat 3.6s ease-in-out infinite;
+}
+
+.confetti i:nth-child(1) {
+  top: 18px;
+  left: 6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--marigold);
+  animation-duration: 3.2s;
+}
+
+.confetti i:nth-child(2) {
+  top: 64px;
+  right: 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--glow);
+  border: 2px solid var(--marigold);
+  animation-duration: 4.1s;
+}
+
+.confetti i:nth-child(3) {
+  top: 6px;
+  right: 46px;
+  width: 12px;
+  height: 12px;
+  background: var(--kraft);
+  transform: rotate(45deg);
+  animation-duration: 3.7s;
+}
+
+.score-line {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.score-big {
+  font-family: var(--font-display-stack);
+  font-size: clamp(56px, 7vw, 76px);
+  font-weight: 800;
+  line-height: 0.92;
+  color: var(--deep);
+  font-variant-numeric: tabular-nums;
+}
+
+.score-big small {
+  font-size: 0.4em;
+  color: var(--ink-faint);
+}
+
+.tag {
+  padding: 9px 18px;
+  border-radius: var(--r-pill);
+  background: var(--glow);
+  color: var(--deep);
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 18px;
+}
+
+.stat {
+  min-width: 0;
+}
+
+.stat__label {
+  font-family: var(--font-mono-stack);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.stat__value {
+  font-family: var(--font-display-stack);
+  font-size: clamp(30px, 3vw, 38px);
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the stat row and the reward row stagger in, 60ms apart */
+.stagger > * {
+  animation: weTick 0.34s var(--spring) both;
+}
+.stagger > *:nth-child(1) {
+  animation-delay: 0.06s;
+}
+.stagger > *:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.stagger > *:nth-child(3) {
+  animation-delay: 0.18s;
+}
+.stagger > *:nth-child(4) {
+  animation-delay: 0.24s;
+}
+.stagger > *:nth-child(5) {
+  animation-delay: 0.3s;
+}
+
+.breakdown {
+  display: grid;
+  gap: 2px;
+}
+
+.breakdown__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 2px solid var(--edge);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.breakdown__row:last-child {
+  border-bottom: 0;
+}
+
+.breakdown__score {
+  font-family: var(--font-display-stack);
+  font-weight: 800;
+  font-size: 19px;
+  color: var(--deep);
+  font-variant-numeric: tabular-nums;
+}
+
+.rank-line {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: var(--page);
+}
+
+.rank-line__place {
+  font-family: var(--font-display-stack);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--deep);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================= leaderboard =============================== */
+
+.board-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* the top three, raised onto cards; the winner's card stands taller */
+.podium {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 16px;
+  align-items: end;
+}
+
+.podium__card {
+  background: var(--surface);
+  border: 3px solid var(--edge);
+  border-radius: 30px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 22px 44px -34px rgba(46, 42, 38, 0.45);
+  min-height: 230px;
+  justify-content: center;
+  animation: weTick 0.4s var(--spring) both;
+}
+
+.podium__card--first {
+  min-height: 260px;
+}
+
+.podium__card--me {
+  border-color: var(--marigold);
+}
+
+.podium__card:nth-child(1) {
+  animation-delay: 0.06s;
+}
+.podium__card:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.podium__card:nth-child(3) {
+  animation-delay: 0.18s;
+}
+
+.podium__medal {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: var(--page);
+  color: var(--deep);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display-stack);
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.podium__card--first .podium__medal {
+  background: var(--marigold);
+  color: var(--surface);
+}
+
+.podium__card--me .podium__medal {
+  background: var(--glow);
+}
+
+.podium__name {
+  font-family: var(--font-display-stack);
+  font-size: clamp(24px, 2.4vw, 30px);
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.podium__meta {
+  font-family: var(--font-mono-stack);
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+.podium__score {
+  font-family: var(--font-display-stack);
+  font-size: clamp(30px, 3vw, 40px);
+  font-weight: 800;
+  color: var(--deep);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the full list, every explorer, inside one white sheet */
+.board-sheet {
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  border-radius: 32px;
+  padding: clamp(14px, 2vw, 22px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.board-cols {
+  display: flex;
+  gap: 16px;
+  padding: 6px 18px;
+  font-family: var(--font-mono-stack);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.board-cols__rank {
+  width: 44px;
+  flex: none;
+}
+
+.board-cols__who {
+  flex: 1;
+}
+
+.board-cols__score {
+  width: 92px;
+  flex: none;
+  text-align: right;
+}
+
+.board {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.board__row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface-warm);
+  border: 2px solid var(--edge);
+  border-radius: 22px;
+  padding: 14px 18px;
+  animation: weTick 0.3s var(--spring) both;
+  transition: transform 0.16s ease;
+}
+
+@media (hover: hover) {
+  .board__row:hover {
+    transform: translateX(4px);
+  }
+}
+
+.board__row:nth-child(1) {
+  animation-delay: 0.04s;
+}
+.board__row:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.board__row:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.board__row:nth-child(4) {
+  animation-delay: 0.16s;
+}
+.board__row:nth-child(5) {
+  animation-delay: 0.2s;
+}
+.board__row:nth-child(n + 6) {
+  animation-delay: 0.24s;
+}
+
+/* the student's own row: glow, thicker edge, and a YOU tab */
+.board__row--me {
+  background: var(--glow);
+  border: 3px solid var(--marigold);
+  padding: 17px 18px;
+  box-shadow: 0 6px 0 rgba(242, 140, 40, 0.28);
+  margin: 6px 0;
+}
+
+.board__you {
+  position: absolute;
+  top: -13px;
+  right: 18px;
+  padding: 3px 14px;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--surface);
+  font-family: var(--font-mono-stack);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+
+.board__place {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--page);
+  color: var(--ink-mute);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display-stack);
+  font-weight: 800;
+  font-size: 21px;
+}
+
+/* top three get the marigold disc */
+.board__place--top {
+  background: var(--marigold);
+  color: var(--surface);
+}
+
+.board__row--me .board__place {
+  background: var(--surface);
+  color: var(--deep);
+}
+
+.board__who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.board__name {
+  font-size: clamp(18px, 1.8vw, 21px);
+  font-weight: 800;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.board__meta {
+  font-family: var(--font-mono-stack);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+}
+
+.board__row--me .board__meta {
+  color: var(--deep);
+}
+
+.board__score {
+  width: 92px;
+  flex: none;
+  text-align: right;
+  font-family: var(--font-display-stack);
+  font-weight: 800;
+  font-size: clamp(22px, 2.2vw, 28px);
+  color: var(--deep);
+  font-variant-numeric: tabular-nums;
+}
+
+.board__row--faded {
+  opacity: 0.72;
+}
+
+/* dashed strip that closes the board: one line of context + one action */
+.board-foot {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-warm);
+  border: 2px dashed var(--kraft);
+  border-radius: 26px;
+  padding: 20px 24px;
+}
+
+.board-foot__note {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  min-width: 0;
+}
+
+.board-foot__note::before {
+  content: "";
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--glow);
+  border: 2px solid var(--marigold);
+}
+
+/* ============================ admin (teacher) ============================ */
+
+.adminbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  border-radius: var(--r-tile);
+  padding: 10px 14px;
+}
+
+.adminbar__links {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.adminbar__link {
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.adminbar__link--on {
+  background: var(--glow);
+  color: var(--deep);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.tile {
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  border-radius: var(--r-tile);
+  padding: 14px 16px;
+}
+
+.tile__value {
+  font-family: var(--font-display-stack);
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--deep);
+  font-variant-numeric: tabular-nums;
+}
+
+.tile__label {
+  font-family: var(--font-mono-stack);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--edge);
+  white-space: nowrap;
+}
+
+.table th {
+  font-family: var(--font-mono-stack);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+
+.table tr.is-me td {
+  background: var(--glow);
+}
+
+/* =============================== keyframes =============================== */
+
+@keyframes wePop {
+  0% {
+    transform: scale(0.55);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.14);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes weBurst {
+  0% {
+    transform: scale(0.35);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(2.3);
+    opacity: 0;
+  }
+}
+
+@keyframes weShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  18% {
+    transform: translateX(-7px);
+  }
+  38% {
+    transform: translateX(6px);
+  }
+  58% {
+    transform: translateX(-4px);
+  }
+  78% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes weTick {
+  0% {
+    transform: translateY(7px) scale(0.88);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes weFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes weSlide {
+  0% {
+    transform: translateX(26px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* a whole screen arriving: up 16px, never a cut */
+@keyframes weEnter {
+  0% {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes weRise {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-24px);
+    opacity: 0;
+  }
+}
+
+/* the shadow stepping into the light */
+@keyframes weReveal {
+  0% {
+    transform: scale(0.9) rotate(-4deg);
+  }
+  55% {
+    transform: scale(1.12) rotate(3deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes weWipe {
+  0% {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.wipe-up {
+  animation: weWipe 0.34s ease-out;
+}
+
+/* ============================ accessibility ============================== */
+
+/* Keep the meaning, drop the movement: fades stay, transforms/loops/shakes go. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* the endless loops go entirely — a 0.01ms infinite animation still runs */
+  .logo,
+  .join__badge,
+  .whole__fox,
+  .confetti i,
+  .shadow-animal {
+    animation: none !important;
+  }
+
+  .btn:active:not(:disabled),
+  .btn--sm:active:not(:disabled),
+  .chip:active,
+  .choice:active:not(:disabled),
+  .unit:active:not(:disabled),
+  .wordchip:active:not(:disabled),
+  .board__row:hover,
+  .tab:active {
+    transform: none;
+  }
+}
+
+/* ================================ print ================================== */
+
+@media print {
+  .no-print,
+  .appbar,
+  .appfoot,
+  .adminbar {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    background-image: none;
+  }
+
+  .print-area {
+    border: 0;
+  }
+}

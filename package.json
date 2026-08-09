@@ -1,0 +1,41 @@
+{
+  "name": "little-fox-game",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:db": "vitest run --config vitest.db.config.ts",
+    "brand": "node scripts/build-brand-assets.mjs",
+    "images": "node scripts/build-animal-images.mjs",
+    "check:db": "node --env-file=.env.local scripts/check-supabase.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "jspdf": "^2.5.2",
+    "next": "^16.3.0",
+    "qrcode": "^1.5.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.3",
+    "@types/node": "^20.0.0",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "eslint": "^9.39.0",
+    "eslint-config-next": "^16.3.0",
+    "jsdom": "^25.0.1",
+    "sharp": "^0.35.3",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.9"
+  }
+}

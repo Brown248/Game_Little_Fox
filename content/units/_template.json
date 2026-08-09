@@ -1,0 +1,54 @@
+{
+  "id": "unit-NN",
+  "title": "Unit title students will see",
+  "games": [
+    {
+      "type": "unscramble",
+      "items": [
+        { "shadow": "🐘", "scrambled": "PHETNALE", "answer": "ELEPHANT" },
+        { "scrambled": "NOIL", "answer": "LION" }
+      ]
+    },
+    {
+      "type": "quiz-choice",
+      "items": [
+        {
+          "clue": "A clue sentence describing the animal.",
+          "options": ["Wrong", "Right", "Wrong", "Wrong"],
+          "answerIndex": 1
+        }
+      ]
+    },
+    {
+      "type": "sentence-builder",
+      "items": [
+        {
+          "prompt": "Hiss! Hiss!",
+          "words": ["the", "snake", "hiss", "goes"],
+          "answer": ["the", "snake", "goes", "hiss"]
+        }
+      ]
+    },
+    {
+      "type": "listening",
+      "items": [
+        {
+          "audioUrl": "unit-NN/clue-1.mp3",
+          "clueText": "The exact words spoken in the recording.",
+          "options": ["Wrong", "Right", "Wrong", "Wrong"],
+          "answerIndex": 1
+        }
+      ]
+    },
+    {
+      "type": "writing",
+      "prompt": {
+        "questions": [
+          "An open question.",
+          "Another open question.",
+          "Five is a good number."
+        ]
+      }
+    }
+  ]
+}
