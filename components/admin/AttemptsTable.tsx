@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { deleteAttemptAction } from "@/app/admin/actions";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { formatDateTime, formatPercent, formatTime } from "@/lib/format";
 import type { AttemptWithPlayer } from "@/lib/types";
 
@@ -15,17 +16,10 @@ interface Props {
 export default function AttemptsTable({ attempts, showPlayer = false }: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [asking, setAsking] = useState<AttemptWithPlayer | null>(null);
   const [pending, startTransition] = useTransition();
 
   function remove(attempt: AttemptWithPlayer) {
-    const who = attempt.players?.name ?? "this student";
-    if (
-      !window.confirm(
-        `Delete this attempt by ${who} on ${attempt.unit_id}? Attempts are meant to be kept — only remove test rows.`
-      )
-    ) {
-      return;
-    }
     setError(null);
     startTransition(async () => {
       const result = await deleteAttemptAction(attempt.id);
@@ -82,7 +76,7 @@ export default function AttemptsTable({ attempts, showPlayer = false }: Props) {
                     className="btn btn--ghost btn--sm"
                     type="button"
                     disabled={pending}
-                    onClick={() => remove(attempt)}
+                    onClick={() => setAsking(attempt)}
                   >
                     Delete
                   </button>
@@ -92,6 +86,24 @@ export default function AttemptsTable({ attempts, showPlayer = false }: Props) {
           </tbody>
         </table>
       </div>
+
+      <ConfirmDialog
+        open={asking !== null}
+        title="Delete this attempt?"
+        body={
+          asking
+            ? `${asking.players?.name ?? "This student"} on ${asking.unit_id}. Attempts are meant to be kept — only remove test rows.`
+            : undefined
+        }
+        confirmLabel="Delete it"
+        cancelLabel="Keep it"
+        onConfirm={() => {
+          const attempt = asking;
+          setAsking(null);
+          if (attempt) remove(attempt);
+        }}
+        onCancel={() => setAsking(null)}
+      />
     </>
   );
 }

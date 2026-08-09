@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { deletePlayerAction, renamePlayerAction } from "@/app/admin/actions";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { formatDateTime, formatPercent, gameLabel } from "@/lib/format";
 import type { PlayerSummary } from "@/lib/types";
 
@@ -113,6 +114,7 @@ function EditRow({
 }) {
   const router = useRouter();
   const [name, setName] = useState(summary.player.name);
+  const [asking, setAsking] = useState(false);
   const [pending, startTransition] = useTransition();
 
   function save() {
@@ -129,13 +131,6 @@ function EditRow({
   }
 
   function remove() {
-    if (
-      !window.confirm(
-        `Delete ${summary.player.name} and all ${summary.attemptCount} of their attempts? This cannot be undone — to fix a duplicate, merge instead.`
-      )
-    ) {
-      return;
-    }
     onError(null);
     startTransition(async () => {
       const result = await deletePlayerAction(summary.player.id);
@@ -183,12 +178,25 @@ function EditRow({
           <button
             className="btn btn--ghost"
             type="button"
-            onClick={remove}
+            onClick={() => setAsking(true)}
             disabled={pending}
           >
             Delete
           </button>
         </div>
+
+        <ConfirmDialog
+          open={asking}
+          title={`Delete ${summary.player.name}?`}
+          body={`All ${summary.attemptCount} of their attempts go too, and this cannot be undone. To fix a duplicate name, merge instead.`}
+          confirmLabel="Delete them"
+          cancelLabel="Keep them"
+          onConfirm={() => {
+            setAsking(false);
+            remove();
+          }}
+          onCancel={() => setAsking(false)}
+        />
       </td>
     </tr>
   );

@@ -256,6 +256,7 @@ SentenceBuilderBlock | ListeningBlock | WritingBlock`) — `switch (block.type)`
   - ทั้งคู่ + ไอคอนใน `app/` **สร้างจาก `brand/little-fox-logo-master.png` ด้วย `npm run brand`** — เปลี่ยนแบรนด์ = วาง master ใหม่แล้วรันคำสั่งนี้ **อย่าแก้ไฟล์ปลายทางด้วยมือ**
   - รูปทุกใบใช้ `next/image` (ESLint ห้าม `<img>`) · โลโก้ในภาพมีวงแหวน/พื้นครีมของตัวเองอยู่แล้ว **อย่าครอบวง dashed ซ้อนอีก**
 - **`prefers-reduced-motion`** ตัด transform/loop/shake เหลือแต่ fade — มีอยู่ท้าย globals.css แล้ว **อย่าลบ**
+- **ห้ามใช้ `window.confirm/alert/prompt`** — ใช้ `components/ConfirmDialog.tsx` แทนทุกที่ (สร้างบน `<dialog>` ได้ focus trap · Esc · backdrop ฟรี) · กล่องของเบราว์เซอร์จัดสไตล์ไม่ได้และขึ้นชื่อโดเมนแบบน่าตกใจกลางคาบเรียน · jsdom ไม่มี `showModal()` เลยมี shim ใน `tests/setup.ts` **อย่าไปใส่ guard ในคอมโพเนนต์**
 
 **จุดที่ตั้งใจไม่ทำตาม design doc** (design เดิมออกแบบมาสำหรับกติกาที่ต่างจากของเรา):
 - doc มี pill "try again" = ให้ลองใหม่ · **ของเราตอบครั้งเดียว** จึงโชว์เฉลยแทน (กติกาอันดับต้องเทียบกันได้)

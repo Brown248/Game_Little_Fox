@@ -115,7 +115,25 @@ beforeEach(() => {
     value: audioPlayMock,
   });
 
-  vi.spyOn(window, "confirm").mockReturnValue(true);
+  // jsdom has <dialog> but not showModal()/close() — a long-standing gap, not
+  // a browser one: every browser the design already needs (Safari 15.4+, for
+  // aspect-ratio alone) has them. Stub them here rather than guarding the
+  // component, so ConfirmDialog stays written for the real platform.
+  for (const [name, isOpen] of [
+    ["showModal", true],
+    ["show", true],
+    ["close", false],
+  ] as const) {
+    Object.defineProperty(window.HTMLDialogElement.prototype, name, {
+      configurable: true,
+      writable: true,
+      value: function (this: HTMLDialogElement) {
+        this.open = isOpen;
+      },
+    });
+  }
+
+  vi.spyOn(window, "print").mockImplementation(() => {});
   vi.spyOn(window, "print").mockImplementation(() => {});
   vi.spyOn(console, "error").mockImplementation(() => {});
   vi.spyOn(console, "warn").mockImplementation(() => {});

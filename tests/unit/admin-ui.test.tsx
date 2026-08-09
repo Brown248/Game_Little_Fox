@@ -171,12 +171,18 @@ describe("PlayersTable", () => {
     render(<PlayersTable summaries={[summary]} totalUnits={20} />);
 
     await user.click(screen.getByRole("button", { name: "Edit" }));
-    vi.mocked(window.confirm).mockReturnValueOnce(false);
     await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    // the question names the student and the cost, and nothing has happened yet
+    expect(screen.getByText("Delete Mint?")).toBeTruthy();
+    expect(screen.getByText(/All 4 of their attempts go too/)).toBeTruthy();
     expect(deletePlayerAction).not.toHaveBeenCalled();
-    expect(vi.mocked(window.confirm).mock.calls[0][0]).toContain("4 of their attempts");
+
+    await user.click(screen.getByRole("button", { name: "Keep them" }));
+    expect(deletePlayerAction).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Delete them" }));
     await waitFor(() => expect(deletePlayerAction).toHaveBeenCalledWith("p1"));
   });
 
@@ -222,27 +228,32 @@ describe("MergePlayers", () => {
     expect(values).not.toContain("p1");
   });
 
+  /** Picks both records and opens the question. */
+  async function askToMerge(user: ReturnType<typeof userEvent.setup>) {
+    await user.selectOptions(screen.getByLabelText("Duplicate to remove"), "p2");
+    await user.selectOptions(screen.getByLabelText("Record to keep"), "p1");
+    await user.click(screen.getByRole("button", { name: "Merge" }));
+  }
+
   it("confirms with the number of attempts being moved, then merges", async () => {
     const user = userEvent.setup();
     render(<MergePlayers players={players} />);
 
-    await user.selectOptions(screen.getByLabelText("Duplicate to remove"), "p2");
-    await user.selectOptions(screen.getByLabelText("Record to keep"), "p1");
-    await user.click(screen.getByRole("button", { name: "Merge" }));
+    await askToMerge(user);
+    expect(screen.getByText(/1 attempt\(s\) move from "mint" onto "Mint"/)).toBeTruthy();
+    expect(mergePlayersAction).not.toHaveBeenCalled();
 
-    expect(vi.mocked(window.confirm).mock.calls[0][0]).toContain("1 attempt(s)");
+    await user.click(screen.getByRole("button", { name: "Merge them" }));
     await waitFor(() => expect(mergePlayersAction).toHaveBeenCalledWith("p2", "p1"));
     expect(await screen.findByText("Merged.")).toBeTruthy();
   });
 
-  it("does nothing when the confirm is declined", async () => {
-    vi.mocked(window.confirm).mockReturnValue(false);
+  it("does nothing when the question is declined", async () => {
     const user = userEvent.setup();
     render(<MergePlayers players={players} />);
 
-    await user.selectOptions(screen.getByLabelText("Duplicate to remove"), "p2");
-    await user.selectOptions(screen.getByLabelText("Record to keep"), "p1");
-    await user.click(screen.getByRole("button", { name: "Merge" }));
+    await askToMerge(user);
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(mergePlayersAction).not.toHaveBeenCalled();
   });
@@ -252,9 +263,8 @@ describe("MergePlayers", () => {
     const user = userEvent.setup();
     render(<MergePlayers players={players} />);
 
-    await user.selectOptions(screen.getByLabelText("Duplicate to remove"), "p2");
-    await user.selectOptions(screen.getByLabelText("Record to keep"), "p1");
-    await user.click(screen.getByRole("button", { name: "Merge" }));
+    await askToMerge(user);
+    await user.click(screen.getByRole("button", { name: "Merge them" }));
 
     expect(await screen.findByText("Not authorised")).toBeTruthy();
   });
@@ -279,12 +289,15 @@ describe("AttemptsTable", () => {
     const user = userEvent.setup();
     render(<AttemptsTable attempts={[attempt]} showPlayer />);
 
-    vi.mocked(window.confirm).mockReturnValueOnce(false);
     await user.click(screen.getByRole("button", { name: "Delete" }));
+    expect(screen.getByText(/meant to be kept/)).toBeTruthy();
     expect(deleteAttemptAction).not.toHaveBeenCalled();
-    expect(vi.mocked(window.confirm).mock.calls[0][0]).toContain("meant to be kept");
+
+    await user.click(screen.getByRole("button", { name: "Keep it" }));
+    expect(deleteAttemptAction).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Delete it" }));
     await waitFor(() => expect(deleteAttemptAction).toHaveBeenCalledWith("a1"));
   });
 

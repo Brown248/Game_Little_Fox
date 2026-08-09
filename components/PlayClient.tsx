@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import Listening from "@/components/games/Listening";
 import QuizChoice from "@/components/games/QuizChoice";
 import SentenceBuilder from "@/components/games/SentenceBuilder";
@@ -55,6 +56,7 @@ export default function PlayClient({ unit, totalUnits, partIndex }: Props) {
   const [saveFailure, setSaveFailure] = useState<ScoreboardFailure | null>(null);
   // Display only: consecutive correct answers, never stored or ranked.
   const [streak, setStreak] = useState(0);
+  const [askingToLeave, setAskingToLeave] = useState(false);
   const savingRef = useRef(false);
 
   const finished = finalSeconds !== null;
@@ -114,9 +116,7 @@ export default function PlayClient({ unit, totalUnits, partIndex }: Props) {
   }
 
   function exit() {
-    if (window.confirm("Leave this expedition? Your score will not be saved.")) {
-      router.push("/");
-    }
+    setAskingToLeave(true);
   }
 
   if (!checkedSession) {
@@ -222,6 +222,16 @@ export default function PlayClient({ unit, totalUnits, partIndex }: Props) {
       </div>
 
       {renderBlock(block, blockIndex, handleAnswer, handleDone)}
+
+      <ConfirmDialog
+        open={askingToLeave}
+        title="Leave this expedition?"
+        body="Your score will not be saved, and you would start this one again from the beginning."
+        confirmLabel="Leave"
+        cancelLabel="Keep playing"
+        onConfirm={() => router.push("/")}
+        onCancel={() => setAskingToLeave(false)}
+      />
     </main>
   );
 }

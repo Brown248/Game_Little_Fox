@@ -398,17 +398,25 @@ describe("PlayClient — the engine loop", () => {
     await waitFor(() => expect(screen.getByText("30")).toBeTruthy());
   });
 
-  it("confirms before abandoning a unit", async () => {
+  it("asks before abandoning a unit, in the game's own dialog", async () => {
     savePlayer(PLAYER);
     const user = userEvent.setup();
     render(<PlayClient unit={UNIT} totalUnits={20} />);
     await screen.findByText(UNIT.title);
 
-    vi.mocked(window.confirm).mockReturnValueOnce(false);
+    // nothing is asked until Exit is pressed
+    expect(screen.queryByText("Leave this expedition?")).toBeNull();
+
     await user.click(screen.getByRole("button", { name: "Exit" }));
+    expect(screen.getByText("Leave this expedition?")).toBeTruthy();
+    expect(routerMock.push).not.toHaveBeenCalled();
+
+    // backing out leaves the run untouched
+    await user.click(screen.getByRole("button", { name: "Keep playing" }));
     expect(routerMock.push).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("button", { name: "Exit" }));
+    await user.click(screen.getByRole("button", { name: "Leave" }));
     expect(routerMock.push).toHaveBeenCalledWith("/");
     expect(saveAttempt).not.toHaveBeenCalled();
   });

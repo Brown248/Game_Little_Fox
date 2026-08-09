@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { mergePlayersAction } from "@/app/admin/actions";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 interface Option {
   id: string;
@@ -18,6 +19,7 @@ export default function MergePlayers({ players }: { players: Option[] }) {
   const [targetId, setTargetId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [asking, setAsking] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const source = players.find((p) => p.id === sourceId);
@@ -25,13 +27,6 @@ export default function MergePlayers({ players }: { players: Option[] }) {
 
   function merge() {
     if (!source || !target) return;
-    if (
-      !window.confirm(
-        `Move ${source.attemptCount} attempt(s) from "${source.name}" onto "${target.name}", then delete the duplicate?`
-      )
-    ) {
-      return;
-    }
     setError(null);
     setDone(false);
     startTransition(async () => {
@@ -101,11 +96,27 @@ export default function MergePlayers({ players }: { players: Option[] }) {
       <button
         className="btn"
         type="button"
-        onClick={merge}
+        onClick={() => setAsking(true)}
         disabled={pending || !source || !target}
       >
         {pending ? "Merging…" : "Merge"}
       </button>
+
+      <ConfirmDialog
+        open={asking}
+        title="Merge these two records?"
+        body={
+          source && target
+            ? `${source.attemptCount} attempt(s) move from "${source.name}" onto "${target.name}", and the duplicate is deleted.`
+            : undefined
+        }
+        confirmLabel="Merge them"
+        onConfirm={() => {
+          setAsking(false);
+          merge();
+        }}
+        onCancel={() => setAsking(false)}
+      />
     </div>
   );
 }

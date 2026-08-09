@@ -1474,6 +1474,70 @@ html {
   opacity: 0.8;
 }
 
+/* ================================ dialog ================================= */
+
+/* The in-app replacement for window.confirm(). A card on the same cream paper
+   as everything else, arriving with the one spring the whole game uses. */
+.ask {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  max-width: min(460px, calc(100vw - 2 * var(--gutter)));
+  width: 100%;
+  color: var(--ink);
+}
+
+.ask::backdrop {
+  background: rgba(46, 42, 38, 0.55);
+  backdrop-filter: blur(3px);
+  animation: weFade 0.2s ease-out;
+}
+
+.ask[open] .ask__body {
+  animation: wePop 0.32s var(--spring);
+}
+
+.ask__body {
+  background: var(--surface);
+  border: 3px solid var(--marigold);
+  border-radius: var(--r-card-lg);
+  padding: clamp(24px, 4vw, 34px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: var(--lift-card);
+}
+
+.ask__title {
+  font-family: var(--font-display-stack);
+  font-size: clamp(24px, 3vw, 30px);
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0;
+  text-wrap: balance;
+}
+
+/* Both actions read equally on a phone; the destructive one is never the one
+   under a resting thumb by accident because Cancel takes focus on open. */
+.ask .btn-row {
+  margin-top: 4px;
+}
+
+.ask .btn-row > .btn {
+  flex: 1 1 150px;
+  min-height: 62px;
+  font-size: clamp(19px, 2vw, 22px);
+}
+
+@keyframes weFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* ============================== feedback ================================= */
 
 .feedback {
