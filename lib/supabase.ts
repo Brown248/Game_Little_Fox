@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type {
   AttemptRecord,
+  AttemptRow,
   OverallRankingRow,
   Player,
   UnitRankingRow,
@@ -129,6 +130,26 @@ function escapeLike(value: string): string {
 export async function saveAttempt(record: AttemptRecord) {
   const { error } = await supabase.from("attempts").insert(record);
   if (error) throw error;
+}
+
+/** Every run this explorer has ever finished, newest first.
+ *
+ *  This is what the teacher meant by "มีบันทึกข้อมูลดูไง" — until now a result
+ *  screen was the only place a score existed, so closing the tab meant playing
+ *  the whole unit again to see it, and to get the certificate back. RLS already
+ *  grants anon select on attempts, so no schema change was needed.
+ *
+ *  Not filtered by anything but the id: a student sees their own history
+ *  because /me reads the id out of their own localStorage. */
+export async function getPlayerAttempts(playerId: string): Promise<AttemptRow[]> {
+  const { data, error } = await supabase
+    .from("attempts")
+    .select("*")
+    .eq("player_id", playerId)
+    .order("completed_at", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as AttemptRow[];
 }
 
 export async function getUnitRanking(unitId: string): Promise<UnitRankingRow[]> {

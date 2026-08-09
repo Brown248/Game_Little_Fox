@@ -70,13 +70,16 @@ export default function Unscramble({ items, onAnswer, onDone }: Props) {
                 sizes="(max-width: 820px) 100vw, 560px"
                 priority
               />
-              {/* preloaded underneath so the reveal never waits on the network */}
+              {/* Also priority. It sits under an opacity:0 layer, so without
+                  this Next marks it lazy and a phone never fetches it at all —
+                  the reveal then had nothing to show and stayed black. */}
               <Image
                 className="art__reveal"
                 src={art.reveal}
                 alt={answered ? item.answer : ""}
                 fill
                 sizes="(max-width: 820px) 100vw, 560px"
+                priority
               />
             </div>
           ) : (

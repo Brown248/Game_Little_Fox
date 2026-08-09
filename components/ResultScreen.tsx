@@ -5,6 +5,8 @@ import Link from "next/link";
 import Failure from "@/components/Failure";
 import { downloadCertificate } from "@/lib/certificate";
 import {
+  certificateNeeds,
+  earnsCertificate,
   formatPercent,
   formatTime,
   gameLabel,
@@ -34,10 +36,6 @@ interface Props {
   onRetrySave: () => void;
 }
 
-/** Half the questions right. Kept here rather than inline so the rule has one
- *  home — the certificate is the one reward with a bar to clear. */
-const CERTIFICATE_PASS_MARK = 0.5;
-
 interface RankInfo {
   unitPlace: number | null;
   unitTotal: number;
@@ -61,6 +59,7 @@ export default function ResultScreen({
   const [rank, setRank] = useState<RankInfo | null>(null);
   const [rankError, setRankError] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   const accuracy = scoring.maxScore > 0 ? scoring.score / scoring.maxScore : 0;
   const shownScore = useCountUp(scoring.score);
@@ -104,6 +103,7 @@ export default function ResultScreen({
 
   async function certificate() {
     setPdfBusy(true);
+    setPdfError(null);
     try {
       await downloadCertificate({
         name: player.name,
@@ -118,7 +118,11 @@ export default function ResultScreen({
           rank?.unitPlace ? `${rank.unitPlace} / ${rank.unitTotal}` : undefined,
       });
     } catch (err) {
-      console.error(err);
+      // Never swallow this. A button that does nothing when pressed is the
+      // worst possible outcome for a child who has earned the certificate —
+      // and it left us with no idea why it failed either.
+      console.error("[little-fox] certificate failed:", err);
+      setPdfError(err instanceof Error ? err.message : String(err));
     } finally {
       setPdfBusy(false);
     }
@@ -126,17 +130,15 @@ export default function ResultScreen({
 
   const perfect = scoring.maxScore > 0 && scoring.score === scoring.maxScore;
 
-  // A certificate is for finishing a whole unit, not a single part — one unit
-  // is one certificate, or a class ends up printing five of them each.
+  // Both halves of the rule live in lib/format so /me issues exactly the same
+  // certificates this screen does.
   const playedOnePart = parsePartId(scoreId) !== null;
-  // Counted in answers, not points: "half the questions right" is the rule the
-  // teacher set, and it stays true even if a question is ever worth more or
-  // less than ten.
-  const passed =
-    scoring.totalQuestions > 0 &&
-    scoring.correctCount / scoring.totalQuestions >= CERTIFICATE_PASS_MARK;
-  const earnedCertificate = !playedOnePart && passed;
-  const needed = Math.ceil(scoring.totalQuestions * CERTIFICATE_PASS_MARK);
+  const earnedCertificate = earnsCertificate(
+    scoreId,
+    scoring.correctCount,
+    scoring.totalQuestions
+  );
+  const needed = certificateNeeds(scoring.totalQuestions);
 
   return (
     // Payoff on the left (seal, headline, what to do next), the numbers on the
@@ -190,6 +192,13 @@ export default function ResultScreen({
           </button>
         </div>
 
+        {pdfError && (
+          <div className="notice notice--error">
+            <strong>The certificate would not open.</strong> Show this to your
+            teacher: <code>{pdfError}</code>
+          </div>
+        )}
+
         {/* Say what the certificate needs, so a near miss reads as one more go
             rather than a missing button. */}
         {!earnedCertificate && (
@@ -201,12 +210,19 @@ export default function ResultScreen({
         )}
 
         <div className="row row--between">
-          <Link href="/">Pick another unit</Link>
+          <Link href="/units">Pick another unit</Link>
           <Link href={`/leaderboard/${scoreId}`}>
             {parsePartId(scoreId) ? "Part board" : "Unit board"}
           </Link>
           <Link href="/leaderboard/overall">Top explorers</Link>
         </div>
+
+        {/* The way back to this score after the tab is closed — and to the
+            certificate, which used to exist only on this screen. */}
+        <p className="muted center">
+          This run is saved. Find it again under{" "}
+          <Link href="/me">My scores</Link>.
+        </p>
       </div>
 
       <div className="stack" style={{ gap: 20 }}>

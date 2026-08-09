@@ -159,7 +159,9 @@ export default function PlayClient({ unit, totalUnits, partIndex }: Props) {
 
   return (
     <main className="page">
-      {/* Four stat cards: one row on a laptop, 2×2 on a phone, no breakpoint. */}
+      {/* Sticky strip: three short numbers that stay on one line at 360px, so
+          the clock never leaves the screen. The explorer's name moved to the
+          line below — it does not change, so it does not need pinning. */}
       <div className="hud">
         <div className="hud__tile">
           <div className="hud__label">Score</div>
@@ -187,11 +189,6 @@ export default function PlayClient({ unit, totalUnits, partIndex }: Props) {
             </span>
           </div>
         </div>
-
-        <div className="hud__tile hud__tile--me">
-          <div className="hud__label">Explorer</div>
-          <div className="hud__value hud__value--name">{player.name}</div>
-        </div>
       </div>
 
       <div className="row row--between">
@@ -205,7 +202,10 @@ export default function PlayClient({ unit, totalUnits, partIndex }: Props) {
               </>
             )}
           </div>
-          <div style={{ fontWeight: 800 }}>{unit.title}</div>
+          <div style={{ fontWeight: 800 }}>
+            <span>{unit.title}</span>
+            <span className="muted"> · {player.name}</span>
+          </div>
         </div>
         <button className="exit" type="button" onClick={exit}>
           Exit
@@ -229,7 +229,7 @@ export default function PlayClient({ unit, totalUnits, partIndex }: Props) {
         body="Your score will not be saved, and you would start this one again from the beginning."
         confirmLabel="Leave"
         cancelLabel="Keep playing"
-        onConfirm={() => router.push("/")}
+        onConfirm={() => router.push("/units")}
         onCancel={() => setAskingToLeave(false)}
       />
     </main>

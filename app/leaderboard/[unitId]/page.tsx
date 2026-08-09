@@ -29,11 +29,7 @@ export default async function UnitLeaderboardPage({
     : (unit?.title ?? scoreId);
 
   return (
-    <Shell
-      active="unit"
-      unitId={part ? part.unitId : scoreId}
-      kicker={`${label} · leaderboard`}
-    >
+    <Shell active="ranking" kicker={`${label} · leaderboard`}>
       <main className="page">
         <header className="board-head">
           <div className="stack" style={{ gap: 6 }}>
@@ -41,7 +37,8 @@ export default async function UnitLeaderboardPage({
             <h1>Top explorers</h1>
           </div>
 
-          <nav className="row row--tight no-print">
+          {/* Which board, and nothing else — Play is in the bar above. */}
+          <nav className="row row--tight no-print" aria-label="Which board">
             <span className="chip chip--pill chip--on">
               {part ? "This part" : "This unit"}
             </span>
@@ -52,9 +49,6 @@ export default async function UnitLeaderboardPage({
             )}
             <Link className="chip chip--pill" href="/leaderboard/overall">
               All units
-            </Link>
-            <Link className="chip chip--pill" href="/">
-              Play
             </Link>
           </nav>
         </header>

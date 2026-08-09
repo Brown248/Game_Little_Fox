@@ -4,9 +4,10 @@
 // Not a game type of its own; it holds no scoring logic, it just renders
 // options and reports which one was tapped.
 //
-// Motion, straight from the direction doc: correct fills glow, a seal pops in
-// over one expanding ring and the points float up. Wrong shakes once and turns
-// kraft — never red, never a deduction.
+// Motion, straight from the direction doc: a seal pops in over one expanding
+// ring and the points float up. The colours are the teacher's, not the doc's —
+// green for the right answer, red for the one that was tapped instead. Still
+// never a deduction: a wrong tap costs nothing but the mark.
 
 interface Props {
   options: string[];

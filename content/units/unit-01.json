@@ -27,11 +27,6 @@
           "answer": "ZEBRA"
         },
         {
-          "shadow": "🦒",
-          "scrambled": "AFGERIF",
-          "answer": "GIRAFFE"
-        },
-        {
           "shadow": "🐒",
           "scrambled": "EKYMNO",
           "answer": "MONKEY"
@@ -122,16 +117,6 @@
           "answer": "PENGUIN"
         },
         {
-          "shadow": "🦩",
-          "scrambled": "OGFLIMAN",
-          "answer": "FLAMINGO"
-        },
-        {
-          "shadow": "🦜",
-          "scrambled": "TORRPA",
-          "answer": "PARROT"
-        },
-        {
           "shadow": "🦋",
           "scrambled": "RUBYTLTEF",
           "answer": "BUTTERFLY"
@@ -167,12 +152,6 @@
           "shadow": "🦛",
           "scrambled": "POTAMUSHIPPO",
           "answer": "HIPPOPOTAMUS"
-        },
-        {
-          "art": "rhinoceros",
-          "shadow": "🦏",
-          "scrambled": "CORNIHOSER",
-          "answer": "RHINOCEROS"
         },
         {
           "art": "lion",
@@ -215,12 +194,6 @@
           "shadow": "🐷",
           "scrambled": "GPI",
           "answer": "PIG"
-        },
-        {
-          "art": "polar-bear-2",
-          "shadow": "🐻‍❄️",
-          "scrambled": "RABE LAROP",
-          "answer": "POLAR BEAR"
         }
       ]
     }

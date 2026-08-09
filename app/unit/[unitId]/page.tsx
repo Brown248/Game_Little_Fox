@@ -26,7 +26,7 @@ export default async function UnitPage({
   const label = unitId.replace("-", " ");
 
   return (
-    <Shell active="start" unitId={unitId} kicker={`${label} · ${unit.title}`}>
+    <Shell active="start" kicker={`${label} · ${unit.title}`}>
       <main className="page">
         <header className="stack" style={{ gap: 8 }}>
           <span className="kicker">{label}</span>
@@ -99,7 +99,7 @@ export default async function UnitPage({
         </div>
 
         <div className="row row--between no-print">
-          <Link href="/">← Pick another unit</Link>
+          <Link href="/units">← Pick another unit</Link>
           <Link href={`/leaderboard/${unitId}`}>Unit leaderboard →</Link>
         </div>
       </main>

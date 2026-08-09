@@ -1,19 +1,23 @@
 import Image from "next/image";
 import Link from "next/link";
 
-// The sticky bar at the top of every student screen: compass mark, the app
+// The sticky bar at the top of every student screen: the fox mark, the app
 // name with a mono line underneath, and the screen tabs on the right.
 // Server component on purpose — the active tab is passed in rather than read
 // from usePathname, so no page has to become a client component for chrome.
 
-export type Tab = "start" | "unit" | "overall";
+// Two tabs, and there is a reason it is only two. It used to carry
+// Play · This unit · Top explorers, and the board screens then repeated the
+// same choice as a row of chips underneath — three sets of controls saying
+// nearly the same thing. The teacher's verdict: "มีแถบไว้เล่น กับ ranking
+// ก็พอแล้ว". WHICH board to read is a question for the board screen, not for a
+// bar that every screen has to carry.
+export type Tab = "start" | "ranking";
 
 interface Props {
   /** Mono line under the wordmark, e.g. "UNIT 02 · WILD LIFE". */
   kicker?: string;
   active?: Tab;
-  /** Unit board to link to; omitted when no unit is in play. */
-  unitId?: string;
   /** Hidden mid-expedition so a stray tap can't throw the run away. */
   nav?: boolean;
 }
@@ -21,7 +25,6 @@ interface Props {
 export default function SiteHeader({
   kicker = "A ranked English expedition",
   active,
-  unitId,
   nav = true,
 }: Props) {
   return (
@@ -52,19 +55,11 @@ export default function SiteHeader({
             >
               Play
             </Link>
-            {unitId && (
-              <Link
-                className={`tab${active === "unit" ? " tab--on" : ""}`}
-                href={`/leaderboard/${unitId}`}
-              >
-                This unit
-              </Link>
-            )}
             <Link
-              className={`tab${active === "overall" ? " tab--on" : ""}`}
+              className={`tab${active === "ranking" ? " tab--on" : ""}`}
               href="/leaderboard/overall"
             >
-              Top explorers
+              Ranking
             </Link>
           </nav>
         )}

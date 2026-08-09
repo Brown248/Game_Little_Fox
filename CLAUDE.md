@@ -35,7 +35,7 @@ npm run lint     # eslint . — ESLint CLI ตรงๆ (`next lint` ถูก�
 npm test         # vitest — 165 เทส (logic + คอมโพเนนต์ ใน jsdom) ไม่ต้องมีอะไรรันอยู่
 npm run test:db  # vitest — 64 เทส ยิง Postgres + PostgREST จริงใน docker (ดู tests/README.md)
 npm run brand    # สร้างไฟล์โลโก้ทุกขนาดใหม่จาก brand/little-fox-logo-master.png
-npm run images -- "C:/path/to/ภาพประกอบ"   # แปลงภาพวาดสัตว์ PNG → WebP ลง public/images/animals (คู่เงา/เฉลย ดู PAIRS ในสคริปต์)
+npm run images -- "C:/path/to/ภาพประกอบ"   # แปลงภาพวาดสัตว์ PNG → WebP โปร่งใส ลง public/images/animals (คู่เงา/เฉลย ดู PAIRS ในสคริปต์)
 npm run check:db # เช็ก Supabase "ตัวจริง" ที่อยู่ใน .env.local — key ใช้ได้ไหม · รัน schema.sql แล้วยัง · RLS เปิดอยู่ไหม (อ่านอย่างเดียว ไม่เขียนข้อมูล)
 ```
 
@@ -65,13 +65,14 @@ app/                  Next.js App Router (route + layout) · globals.css = ธ�
   error.tsx · not-found.tsx   error boundary + 404 ทั้งแอป
   icon.png · apple-icon.png · opengraph-image.png · manifest.ts   ไอคอนแท็บ/โฮมสกรีน/ลิงก์พรีวิว (Next ต่อสายให้เอง ห้ามเปลี่ยนชื่อไฟล์)
   admin/actions.ts     server actions ทั้งหมดของหลังบ้าน
-components/            Shell (SiteHeader + main + SiteFooter) · StartForm · PlayClient (engine loop) · ResultScreen · UnitLeaderboard · OverallLeaderboard
+components/            Shell (SiteHeader + main + SiteFooter) · StartForm (ชื่ออย่างเดียว) · ExplorerGreeting · PlayClient (engine loop) · ResultScreen · MyScores (ประวัติ + ออกใบซ้ำ) · UnitLeaderboard · OverallLeaderboard · ConfirmDialog
 components/games/      คอมโพเนนต์มินิเกม 5 แบบ + ตัวช่วยที่ใช้ร่วม: ChoiceList (A/B/C/D + seal/burst) · Progress (หัวข้อ+แทร็ก) · Feedback
 components/admin/      AdminLogin · AdminNav · PlayersTable · MergePlayers · AttemptsTable · SetupNotice · PrintButton
 lib/                   ดูตารางข้างล่าง
 content/units/         นิยามยูนิตเป็นไฟล์ JSON + `_template.json` + `README.md` (กติกาการเขียนยูนิต)
 public/audio/          ไฟล์เสียง — path ใน JSON เป็น relative แล้วต่อ prefix `/audio/` ให้ (URL เต็มก็ใส่ได้)
 public/images/animals/ ภาพวาดสัตว์ คู่ `<slug>-shadow.webp` + `<slug>.webp` — สร้างด้วย `npm run images` **อย่าแก้ด้วยมือ**
+                       (ไฟล์ต้นฉบับพื้นม่วง + มีคำเฉลยพิมพ์อยู่ · สคริปต์ครอบตัดคำทิ้งแล้วคีย์พื้นออกให้โปร่งใส)
 brand/                 ต้นฉบับโลโก้ (`little-fox-logo-master.png`) — ไฟล์เดียวที่เป็น "ของจริง"
 scripts/               `build-brand-assets.mjs` = ตัดโลโก้ทุกขนาดจาก master (`npm run brand`)
 supabase/schema.sql    DDL + RLS ของ Postgres (รันครั้งเดียวตอนตั้ง · re-run ได้)
@@ -83,8 +84,8 @@ tests/                 unit + component (jsdom) · tests/db = integration กั
 | ไฟล์ | ฝั่ง | หน้าที่ |
 |------|-----|---------|
 | `types.ts` | ทั้งสอง | type ทั้งโปรเจกต์ **นิยามที่นี่ก่อนเสมอ** (รวม shape ของ admin summary เพื่อให้ client import ได้) |
-| `format.ts` | ทั้งสอง | `formatTime` `formatPercent` `formatDateTime` `formatDate` `gameLabel`/`GAME_LABELS` — **ต้อง client-safe** |
-| `supabase.ts` | client | anon client + query ของนักเรียน |
+| `format.ts` | ทั้งสอง | `formatTime` `formatPercent` `formatDateTime` `formatDate` `gameLabel`/`GAME_LABELS` · `partScoreId`/`parsePartId`/`scoreIdLabel` · `earnsCertificate`/`certificateNeeds`/`CERTIFICATE_PASS_MARK` · `animalArt` — **ต้อง client-safe** |
+| `supabase.ts` | client | anon client + query ของนักเรียน (`findOrCreatePlayer` `saveAttempt` `getPlayerAttempts` `getUnitRanking` `getOverallRanking`) |
 | `scoring.ts` | client | state คะแนน/เวลา |
 | `session.ts` | client | player ที่ล็อกอินไว้ใน `localStorage["we.player"]` (ไม่ใช่ sessionStorage) |
 | `certificate.ts` | client | `downloadCertificate()` (lazy-load jspdf) |
@@ -100,7 +101,10 @@ tests/                 unit + component (jsdom) · tests/db = integration กั
 
 | เส้นทาง | ไฟล์ | หน้าที่ |
 |---------|------|---------|
-| `/` | `app/page.tsx` | เลือกห้อง/กรอกชื่อ/เลือกยูนิต — ลิสต์ยูนิตมาจาก `listUnits()` |
+| `/` | `app/page.tsx` | **กรอกชื่ออย่างเดียว** แล้วเด้งไป `/units` — หน้าแรกถามคำถามเดียว |
+| `/units` | `app/units/page.tsx` | เลือกยูนิต — ลิสต์มาจาก `listUnits()` |
+| `/unit/[unitId]` | `app/unit/[unitId]/page.tsx` | เล่นทั้งยูนิต หรือเลือก Part เดียว |
+| `/me` | `app/me/page.tsx` | ประวัติของนักเรียนเอง + **โหลด certificate ซ้ำ** (query ฝั่ง client เพราะ id อยู่ใน localStorage) |
 | `/play/[unitId]` | `app/play/[unitId]/page.tsx` | server: resolve unit → `components/PlayClient.tsx` คือ engine จริง |
 | `/leaderboard/[unitId]` | `app/leaderboard/[unitId]/page.tsx` | อันดับรายยูนิต |
 | `/leaderboard/overall` | `app/leaderboard/overall/page.tsx` | อันดับรวมทุกยูนิต |
@@ -210,7 +214,13 @@ SentenceBuilderBlock | ListeningBlock | WritingBlock`) — `switch (block.type)`
 
 - **Listening:** ถ้าไม่มี `audioUrl` (หรือโหลดไฟล์ไม่ได้) จะ fallback ไป browser TTS · path relative ใน JSON จะถูกต่อ prefix `/audio/` · ใส่ URL เต็มของ Supabase Storage ก็ได้ · **ตอนนี้ยังไม่มี mp3 จริง → ได้ TTS ทุกครั้ง**
 - **Writing:** เก็บแค่ "ทำเสร็จ" ไม่เก็บข้อความที่พิมพ์ (ตั้งใจ) และไม่คิดคะแนน
-- **ใครได้ certificate:** ต้อง **เล่นทั้ง Unit** (เล่นทีละ Part ไม่ได้ ไม่งั้นใบเยอะเกิน) **และตอบถูก ≥ ครึ่งหนึ่งของจำนวนข้อ** — นับจาก `correctCount / totalQuestions` **ไม่ใช่คะแนนดิบ** (วันนี้ค่าเท่ากันเพราะข้อละ 10 แต่ถ้าคะแนนต่อข้อเปลี่ยน กติกาต้องยังอิงข้อถูก) · เกณฑ์อยู่ที่ `CERTIFICATE_PASS_MARK` ใน `ResultScreen.tsx` ที่เดียว · ไม่ผ่านให้บอกว่าต้องถูกกี่ข้อ อย่าซ่อนปุ่มเฉยๆ
+- **ภาพสัตว์ (`scripts/build-animal-images.mjs`) — 4 จุดที่วัดมาแล้ว อย่าแก้กลับ:**
+  - ครอบตัดที่ **81% ของความสูง** เพื่อตัดคำเฉลยที่พิมพ์อยู่ (คำอยู่แถว 896–1016 · สัตว์ต่ำสุดแถว 856) — เปลี่ยนไฟล์ต้นฉบับต้องวัดใหม่
+  - พื้นหลังเป็นไล่เฉดแนวตั้ง → อ่านสีอ้างอิง **ต่อแถว** ไม่ใช่คีย์สีเดียวทั้งภาพ ไม่งั้นกินหมีขาว/วาฬฟ้า
+  - อ้างอิงต้องเอา **median จาก 6 คอลัมน์ทั้งขอบซ้ายและขวา** — ภาพหมูมีแถบเข้มที่ขอบซ้าย ถ้าเชื่อ x=2 อย่างเดียวค่าจะเพี้ยน 45 พอดี แล้วเหลือแถบม่วงคาดกลางภาพ
+  - เก็บเฉพาะ **ก้อนที่ต่อกันใหญ่ที่สุด** (ทุกภาพมีสัตว์ตัวเดียว) — ทุกเฟรมมีรอยม่วงเข้มมุมซ้ายบนที่หลุดออกมาเป็นเศษลอย
+  - `blend: "dest-in"` อ่าน **alpha ของ overlay ไม่ใช่ความสว่าง** → ต้องยัด mask ลง alpha channel เอง · `.art img` ใช้ `object-fit: contain` เพราะภาพถูก trim ชิดตัวสัตว์แล้ว (จระเข้กว้างกว่าสูง 3.5 เท่า cover จะกินหาย)
+- **ใครได้ certificate:** ต้อง **เล่นทั้ง Unit** (เล่นทีละ Part ไม่ได้ ไม่งั้นใบเยอะเกิน) **และตอบถูก ≥ ครึ่งหนึ่งของจำนวนข้อ** — นับจาก `correctCount / totalQuestions` **ไม่ใช่คะแนนดิบ** (วันนี้ค่าเท่ากันเพราะข้อละ 10 แต่ถ้าคะแนนต่อข้อเปลี่ยน กติกาต้องยังอิงข้อถูก) · กติกาอยู่ที่ `earnsCertificate()` / `CERTIFICATE_PASS_MARK` ใน **`lib/format.ts`** ที่เดียว (ย้ายออกจาก `ResultScreen.tsx` ตอนเพิ่มหน้า `/me` เพราะสองหน้าออกใบแล้ว ห้ามให้เกณฑ์ต่างกัน) · ไม่ผ่านให้บอกว่าต้องถูกกี่ข้อ อย่าซ่อนปุ่มเฉยๆ
 - **ในใบ certificate มี "ตรา" ได้อย่างเดียวคือโลโก้โรงเรียน** — เคยมี seal เข็มทิศทางขวา (ของเก่าจากตอนแบรนด์ยังเป็นเข็มทิศ) เอาออกแล้ว **ห้ามใส่ badge/seal/ภาพประกอบอะไรกลับเข้าไปอีก** เทส "draws no second emblem" กันไว้ (นับ addImage=1 · circle=0 · triangle=0)
 - **Certificate:** A5 นอน · โลโก้บนหัว + กรอบส้ม + กรอบ dashed · `jspdf` ใช้ฟอนต์ built-in (Latin-1) → **ชื่อไทยจะออกมาเป็นสี่เหลี่ยม** ถ้าต้องรองรับต้อง embed ฟอนต์ไทย · หัวใบใช้ชื่อ **โรงเรียน** (`LITTLE FOX LANGUAGE SCHOOL`) ไม่ใช่ชื่อเกม เพราะคนออกใบคือโรงเรียน
 - **โลโก้ใน PDF — 2 กับดักที่วัดมาแล้ว อย่าแก้กลับ:**
@@ -231,7 +241,8 @@ SentenceBuilderBlock | ListeningBlock | WritingBlock`) — `switch (block.type)`
 | กลุ่ม | token | ใช้ทำอะไร |
 |------|-------|-----------|
 | action | `--marigold #F28C28` · `--marigold-press #D9741A` · `--deep #C4600F` · `--glow #FFE8C9` | ปุ่ม · เงาแข็งใต้ปุ่ม · ตัวอักษร/ขอบสีส้ม · พื้นคำตอบที่ถูก |
-| ground | `--page #FDF3E3` · `--edge #F3E4CE` · `--kraft #E2CDAE` | พื้นทุกหน้า · เส้นขอบการ์ด · แทร็กว่าง/ตอบผิด |
+| ground | `--page #FDF3E3` · `--edge #F3E4CE` · `--kraft #E2CDAE` | พื้นทุกหน้า · เส้นขอบการ์ด · แทร็กว่าง |
+| marking | `--right #2F8F4E` · `--right-fill` · `--wrong #CF4436` · `--wrong-fill` | **ถูก = เขียว · ผิด = แดง** (คำสั่งครู) |
 | surface | `--surface #FFF` · `--surface-warm #FFFCF6` | การ์ด · แผงซ้อนใน |
 | ink | `--ink #2E2A26` · `--ink-soft #6B6155` · `--ink-mute` · `--ink-faint` | ตัวหนังสือไล่น้ำหนัก |
 
@@ -240,7 +251,9 @@ SentenceBuilderBlock | ListeningBlock | WritingBlock`) — `switch (block.type)`
 - **spring เดียวทั้งระบบ:** `var(--spring)` = `cubic-bezier(.34,1.56,.64,1)` · hover `scale 1.02–1.06` · tap `0.94–0.97`
 - **ปุ่มหลัก** (`.btn`) นั่งบนเงาแข็ง 8px · กดแล้ว `translateY(5px) scaleY(.96)` + เงาเหลือ 3px นี่คือลายเซ็นของงาน
 - **ตอบถูก:** พื้น glow + seal เด้ง (`wePop`) + ring ขยายหายไป (`weBurst`) + คะแนนลอยขึ้น (`weRise`) รวมไม่เกิน 600ms
-- **ตอบผิด:** สั่น 4 จังหวะ ±7px (`weShake`) + เปลี่ยนเป็น kraft — **ห้ามใช้สีแดง ห้ามหักคะแนน**
+- **ตอบผิด:** สั่น 4 จังหวะ ±7px (`weShake`) + **พื้นแดง `--wrong-fill` ขอบ `--wrong`**
+  ⚠️ **จงใจไม่ตาม design doc** — doc สั่งห้ามใช้แดงเพราะ "ไม่ลงโทษด้วยสี" แต่**ครูสั่งให้ใช้เขียว/แดงแบบที่ครูตรวจกระดาษ** เพราะเด็กอ่าน kraft เงียบๆ ว่า "ไม่มีอะไรเกิดขึ้น" → **ยึดครู** · ที่ยังคงไว้คือ **ห้ามหักคะแนน** และต้องโชว์เฉลยให้เสมอ
+- **สีมาร์กใช้ที่:** `.choice--correct/--wrong` · `.feedback--correct/--wrong` · `.seal` · `.seal__burst` · `.float-points` — ทั้งหมดอิง token ไม่มีเลขดิบ
 - **เลขที่เปลี่ยน** (คะแนน/เวลา/streak) ใส่ `key` แล้วให้คลาส `.tick` เล่น `weTick` 300ms
 - **หน้าจอ/ข้อถัดไป** เลื่อนเข้า `weSlide` 260ms · ผลลัพธ์เข้าด้วย `.wipe-up` · ไม่ตัดภาพแข็งๆ
 - **idle หายใจได้:** badge ลอย `weFloat` 7px รอบ 3–4.5s ห้ามเร็วกว่านี้
@@ -248,6 +261,9 @@ SentenceBuilderBlock | ListeningBlock | WritingBlock`) — `switch (block.type)`
   - `.page--narrow` 620px (404 · error · หน้า login แอดมิน) · `.page--admin` 1080px
   - tap target ปุ่มหลัก ≥66px · เผื่อ `env(safe-area-inset-bottom)`
 - **โครงทุกหน้าของนักเรียน:** `components/Shell.tsx` = `SiteHeader` (แถบ sticky + โลโก้เข็มทิศ + tab pill) → `<main className="page">` → `SiteFooter` · หน้า play ส่ง `nav={false}` เพื่อไม่ให้กดออกกลางเกม (มีปุ่ม Exit ที่ถามก่อนอยู่แล้ว) · `/admin` ไม่ใช้ Shell (มี `AdminNav` ของตัวเอง)
+- **แถบบนมีแค่ 2 tab: `Play` กับ `Ranking` — ห้ามเพิ่ม** (เทส `tests/unit/chrome.test.tsx` ล็อกไว้)
+  เคยมี Play · This unit · Top explorers แล้วหน้าลีดเดอร์บอร์ดยังมีแถวชิปให้เลือกซ้ำอีก ครูบอก "มีแถบไว้เล่น กับ ranking ก็พอแล้ว...เหมือนกันเกินไป"
+  → **เลือกว่าจะดูบอร์ดไหน เป็นหน้าที่ของหน้าบอร์ดเอง** (แถวชิป `All units` / `unit NN` / `This part`) ไม่ใช่ของแถบบน · หน้า `/me` ไม่มี tab ของตัวเอง เข้าจากหน้าเลือกยูนิต · หน้าผลคะแนน · footer
 - **พื้นหลังทุกหน้า** = ครีม + จุด `radial-gradient(var(--dot) 1.5px, transparent 1.6px)` ขนาด 26px อยู่ที่ `body` **อย่าเอาออก**
 - **โลโก้มี 2 แบบ อย่าใช้สลับกัน:**
   - `public/little-fox-logo.png` = โลโก้เต็ม (จิ้งจอก + ชื่อโรงเรียน) ใช้ **ตั้งแต่ 96px ขึ้นไป** — คลาส `.logo` / `.join__badge` · หน้าแรก · 404 · โปสเตอร์ QR
@@ -282,17 +298,30 @@ SentenceBuilderBlock | ListeningBlock | WritingBlock`) — `switch (block.type)`
 
 ## หมายเหตุสถานะ
 
-**ระบบเสร็จครบทุกหน้า + ลงดีไซน์ + ต่อ Supabase จริงแล้ว** (เทส 235 ตัว: 171 unit + 64 DB)
+**ระบบเสร็จครบทุกหน้า + ลงดีไซน์ + ต่อ Supabase จริง + ผ่านการใช้จริงในห้องเรียนแล้ว** (เทส 249 ตัว: 185 unit + 64 DB)
 
-| ยูนิต | เนื้อหา | ข้อ / คะแนนเต็ม |
-|-------|---------|-----------------|
-| `unit-01` **Shadow Animal Challenge** | unscramble 30 ข้อ · เงาเป็น **emoji** (PDF Part 1 ครบทั้งไฟล์) | 30 / 300 |
-| `unit-02` **Shadow Animals with Pictures** | unscramble 10 ข้อ · **ภาพวาดจริงทุกข้อ** (ชุดคำของครู · POLAR BEAR ซ้ำ 2 ข้อ ใช้คนละรูป) | 10 / 100 |
-| `unit-03` **Guess the Animal** | quiz-choice 30 ข้อ (ต้นฉบับ 5 + แต่งเพิ่ม 25) | 30 / 300 |
-| `unit-04` **Animal Sounds and Sentences** | quiz เสียงสัตว์ 5 + เรียงประโยค 30 (ต้นฉบับ 5 + แต่งเพิ่ม 25) | 35 / 350 |
-| `unit-05` **Mythological Creatures** | listening 9 ข้อ (**วิดีโอ 6** + อ่าน 3) + writing 17 หัวข้อ (spirit animal 7 + Speaking Time 10) | 9 / 90 |
+**มี 2 ยูนิต ตามที่ครูยืนยัน** (เท่ากับ Unit 1 / Unit 2 ของใบงาน) — ยูนิตหนึ่งมีหลาย Part:
 
-> ยูนิตถูกแยกตาม part ของ PDF **โดยตั้งใจ** — เอนจินบันทึกคะแนนตอนจบยูนิตครั้งเดียว ถ้ายัดรวมเป็นยูนิตเดียว 114 ข้อ เด็กที่เล่นไม่จบจะไม่ได้คะแนนเลย
+| ยูนิต | Part | ข้อ / คะแนนเต็ม |
+|-------|------|-----------------|
+| `unit-01` **Shadow Animal Challenge** | 1 unscramble เงา **emoji** 27 ข้อ · 2 unscramble **ภาพวาดจริง** 8 ข้อ | **35 / 350** |
+| `unit-02` **Wild Life and Wonderful Creatures** | B quiz 30 · C1 เสียงสัตว์ 5 · C2 เรียงประโยค 25 · D listening 9 (**วิดีโอ 6** + อ่าน 3) · E writing 17 (ไม่คิดคะแนน) | **69 / 690** |
+
+> **เล่นได้ 2 แบบ** — ทั้งยูนิต หรือทีละ Part · จับเวลา/คิดคะแนน/มีอันดับเหมือนกัน แต่**แยกลีดเดอร์บอร์ด**
+> id ของ Part คือ `unit-NN-part-N` (ดู `partScoreId` ใน `lib/format.ts`) และ `v_overall_ranking` กรอง
+> `^unit-[0-9]{2}$` ทิ้ง Part ออก **คนที่เล่นทั้ง Part และทั้งยูนิตจึงไม่ถูกนับซ้ำ** — แก้ format นี้ต้องแก้ SQL ด้วย
+
+**สิ่งที่แก้ตามฟีดแบ็กครูหลังใช้จริง (ตั้งใจ · อย่าแก้กลับ):**
+- **ตัดสัตว์ออก 5 ตัว** จาก unit-01 ตามรายชื่อที่ครูให้ — Part 1 ตัด giraffe · flamingo · parrot · Part 2 ตัด rhinoceros + POLAR BEAR ตัวที่ซ้ำ → เหลือ 27 + 8 (เดิม 30 + 10)
+- **ถูกเขียว ผิดแดง** (ดูหัวข้อดีไซน์)
+- **หน้าแรกพิมพ์ชื่ออย่างเดียว** — เดิมมีชื่อ + ลิสต์ยูนิตในจอเดียว ครูว่า "เข้าใจยากมาก"
+- **นาฬิกาติดจอตลอด** — `.hud` เป็น sticky แถบเดียว (คะแนน · streak · เวลา) `top: 74px` = ความสูงของ `.appbar` พอดี **แก้ค่าหนึ่งต้องแก้อีกค่า**
+- **หน้า `/me`** — ดูคะแนนย้อนหลังและโหลด certificate ซ้ำได้โดยไม่ต้องเล่นใหม่
+- **ภาพประกอบลบพื้นม่วง + ตัดคำศัพท์ทิ้ง** (ดู `scripts/build-animal-images.mjs`)
+- **แถบบนเหลือ 2 tab** (ดูหัวข้อดีไซน์)
+- **Part C2 (เรียงประโยค): หัวข้อเหลือ "อิโมจิอย่างเดียว"** — เดิมเขียน `🐍 Hiss! Hiss!` ซึ่งบอกกริยาให้ฟรี = ครึ่งประโยคที่เด็กต้องแต่งเอง · คอมโพเนนต์เช็คว่า prompt ไม่มีตัวอักษร/ตัวเลขแล้วเรนเดอร์ใหญ่ด้วยคลาส `.q__emoji`
+- **ตัดประโยคที่ใช้ `loudly` ออกทั้งหมด 5 ข้อ** (dog · lion · wolf · whale · parrot) → C2 เหลือ 25 ข้อ · เทสใน `units.test.ts` ล็อกกฎทั้งสองข้อไว้
+  > ⚠️ ครูบอกว่า **Part นี้จะส่งเนื้อหาใหม่มาทั้งชุด** — ของที่อยู่ตอนนี้เป็นของชั่วคราว
 
 **สิ่งที่แก้จากต้นฉบับ PDF (ตั้งใจ · อย่าแก้กลับ):**
 - Part 1 ข้อ 26 **BUTTERFLY**: ต้นฉบับเขียน `RUBYTLTETF` (10 ตัว มี T สามตัว) ซึ่งเรียงเป็น BUTTERFLY ไม่ได้ → ใช้ `RUBYTLTEF` · เทส "anagram จริง" จับให้ทุกยูนิต

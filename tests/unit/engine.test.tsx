@@ -417,7 +417,8 @@ describe("PlayClient — the engine loop", () => {
 
     await user.click(screen.getByRole("button", { name: "Exit" }));
     await user.click(screen.getByRole("button", { name: "Leave" }));
-    expect(routerMock.push).toHaveBeenCalledWith("/");
+    // back to the unit picker, not the door: the name is already known
+    expect(routerMock.push).toHaveBeenCalledWith("/units");
     expect(saveAttempt).not.toHaveBeenCalled();
   });
 
@@ -466,7 +467,8 @@ describe("the real units are playable", () => {
 
     expect(await screen.findByText("Shadow Animal Challenge")).toBeTruthy();
     expect(screen.getByText("PHETNALE")).toBeTruthy();
-    expect(screen.getByText("1 / 30")).toBeTruthy();
+    // Part 1 lost giraffe, flamingo and parrot on the teacher's list
+    expect(screen.getByText("1 / 27")).toBeTruthy();
     expect(screen.getByText(/whose shadow is this/)).toBeTruthy();
     // this unit is the emoji silhouette version
     expect(screen.getByLabelText("shadow of an animal")).toBeTruthy();

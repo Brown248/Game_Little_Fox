@@ -53,6 +53,37 @@ export function scoreIdLabel(scoreId: string): string {
     : scoreId.replace("-", " ");
 }
 
+/* ------------------------------ certificates ------------------------------ */
+
+/** Half the questions right. */
+export const CERTIFICATE_PASS_MARK = 0.5;
+
+/** Does this run earn a certificate?
+ *
+ *  Two conditions, both the teacher's:
+ *   · a WHOLE unit, never a single part — one unit is one certificate, or a
+ *     class ends up printing five each;
+ *   · at least half the QUESTIONS right, counted in answers rather than points
+ *     so the rule holds even if a question is ever worth other than ten.
+ *
+ *  Lives here, not on a screen, because two screens ask it now: the result at
+ *  the end of a run, and /me when re-issuing an old certificate. They must not
+ *  be able to disagree. */
+export function earnsCertificate(
+  scoreId: string,
+  correctCount: number,
+  totalQuestions: number
+): boolean {
+  if (parsePartId(scoreId) !== null) return false;
+  if (totalQuestions <= 0) return false;
+  return correctCount / totalQuestions >= CERTIFICATE_PASS_MARK;
+}
+
+/** How many right answers a run of this length needs. */
+export function certificateNeeds(totalQuestions: number): number {
+  return Math.ceil(totalQuestions * CERTIFICATE_PASS_MARK);
+}
+
 /** Where `npm run images` writes the Shadow Animal artwork. */
 export const ANIMAL_ART_DIR = "/images/animals";
 

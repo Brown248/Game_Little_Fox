@@ -22,6 +22,11 @@ export default function SentenceBuilder({ items, onAnswer, onDone }: Props) {
   const item = items[index];
   const isLast = index === items.length - 1;
   const answered = result !== null;
+  // A cue with no letters or digits in it is a picture, and gets drawn big.
+  // Unit 2's cues used to read "🐍 Hiss! Hiss!" — the teacher had the words
+  // taken out, because the sound spelled beside the animal handed over the
+  // verb, which is half of the sentence being built.
+  const pictureOnly = !/\p{L}|\p{N}/u.test(item.prompt);
   const remaining = item.words.map((_, i) => i).filter((i) => !built.includes(i));
 
   function check() {
@@ -57,7 +62,9 @@ export default function SentenceBuilder({ items, onAnswer, onDone }: Props) {
       <div className="q split" key={index}>
         <div className="card card--soft stack" style={{ gap: 10 }}>
           <span className="kicker--faint kicker">tap in order</span>
-          <span className="q__text q__text--sm">{item.prompt}</span>
+          <span className={pictureOnly ? "q__emoji" : "q__text q__text--sm"}>
+            {item.prompt}
+          </span>
         </div>
 
         <div className="stack" style={{ gap: 14 }}>

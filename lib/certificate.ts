@@ -173,7 +173,36 @@ export async function downloadCertificate(data: CertificateData): Promise<void> 
     align: "right",
   });
 
-  doc.save(`little-fox-${data.unitId}-${slug(data.name)}.pdf`);
+  deliver(doc, `little-fox-${data.unitId}-${slug(data.name)}.pdf`);
+}
+
+/** Hands the finished PDF to the student.
+ *
+ *  doc.save() builds a blob URL and clicks a hidden <a download>. That is the
+ *  nice path, but a browser can refuse it — an aggressive pop-up/download
+ *  blocker, or an in-app webview with no download manager — and jspdf gives no
+ *  signal beyond throwing. When it does, open the PDF in a tab instead: the
+ *  child can still read it and save it by hand, which beats a button that
+ *  looks broken. */
+function deliver(doc: JsPdfLike, filename: string): void {
+  try {
+    doc.save(filename);
+    return;
+  } catch (saveError) {
+    try {
+      const url = doc.output("bloburl") as unknown as string;
+      const opened = window.open(String(url), "_blank");
+      if (opened) return;
+    } catch {
+      // fall through to the original error, which is the more useful one
+    }
+    throw saveError;
+  }
+}
+
+interface JsPdfLike {
+  save: (filename: string) => unknown;
+  output: (type: string) => unknown;
 }
 
 /** The logo as raw bytes, ready for addImage.

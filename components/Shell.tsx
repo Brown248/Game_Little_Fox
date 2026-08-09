@@ -9,20 +9,13 @@ interface Props {
   children: React.ReactNode;
   kicker?: string;
   active?: Tab;
-  unitId?: string;
   nav?: boolean;
 }
 
-export default function Shell({
-  children,
-  kicker,
-  active,
-  unitId,
-  nav,
-}: Props) {
+export default function Shell({ children, kicker, active, nav }: Props) {
   return (
     <div className="app">
-      <SiteHeader kicker={kicker} active={active} unitId={unitId} nav={nav} />
+      <SiteHeader kicker={kicker} active={active} nav={nav} />
       {children}
       <SiteFooter />
     </div>

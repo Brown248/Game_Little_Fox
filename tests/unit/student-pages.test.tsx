@@ -39,7 +39,7 @@ const UNITS = [
 ];
 
 const NAME_LABEL = /explorer name/i;
-const START = { name: /Start the expedition/ };
+const START = { name: /^Start$/ };
 
 beforeEach(() => {
   findOrCreatePlayer.mockReset().mockResolvedValue({
@@ -51,76 +51,59 @@ beforeEach(() => {
 });
 
 describe("StartForm", () => {
-  it("lists every unit with how much it is worth", () => {
-    render(<StartForm units={UNITS} />);
-    expect(screen.getByText("Wild Life and Wonderful Creatures")).toBeTruthy();
-    expect(screen.getByText("Ocean Friends")).toBeTruthy();
-    expect(screen.getByText(/19 questions · 190 points/)).toBeTruthy();
-  });
+  // The whole point of this screen after the first lesson: ONE question. The
+  // unit list used to sit here too, and the teacher's verdict on arriving to
+  // both at once was "เข้าใจยากมาก".
+  it("asks for a name and nothing else", () => {
+    render(<StartForm unitCount={UNITS.length} />);
 
-  it("says so when there are no units yet", () => {
-    render(<StartForm units={[]} />);
-    expect(screen.getByText(/No units found/)).toBeTruthy();
-  });
-
-  it("asks for nothing but a name — there is no class to pick", () => {
-    render(<StartForm units={UNITS} />);
     expect(screen.getByLabelText(NAME_LABEL)).toBeTruthy();
-    expect(screen.queryByText(/class/i)).toBeNull();
     expect(screen.queryByRole("combobox")).toBeNull();
+    expect(screen.queryByText(/class/i)).toBeNull();
+    // no unit anywhere on the first screen
+    expect(screen.queryByText("Wild Life and Wonderful Creatures")).toBeNull();
+    expect(screen.queryByText("Ocean Friends")).toBeNull();
+    expect(screen.getAllByRole("button")).toHaveLength(1);
   });
 
   it("will not start until a name is typed", async () => {
     const user = userEvent.setup();
-    render(<StartForm units={UNITS} />);
+    render(<StartForm unitCount={UNITS.length} />);
 
     expect(screen.getByRole("button", START)).toHaveProperty("disabled", true);
     expect(screen.getByText(/Type your name above/)).toBeTruthy();
 
     await user.type(screen.getByLabelText(NAME_LABEL), "Mint");
     expect(screen.getByRole("button", START)).toHaveProperty("disabled", false);
+    expect(screen.getByText(/pick one of 2 units/)).toBeTruthy();
   });
 
-  it("preselects the first unit and lets another be chosen", async () => {
+  it("resolves the player, stores the session and opens the unit picker", async () => {
     const user = userEvent.setup();
-    render(<StartForm units={UNITS} />);
-
-    const first = screen.getByRole("button", { name: /Wild Life/ });
-    const second = screen.getByRole("button", { name: /Ocean Friends/ });
-    expect(first.getAttribute("aria-pressed")).toBe("true");
-
-    await user.click(second);
-    expect(second.getAttribute("aria-pressed")).toBe("true");
-    expect(first.getAttribute("aria-pressed")).toBe("false");
-  });
-
-  it("resolves the player, stores the session and opens the chosen unit", async () => {
-    const user = userEvent.setup();
-    render(<StartForm units={UNITS} />);
+    render(<StartForm unitCount={UNITS.length} />);
 
     await user.type(screen.getByLabelText(NAME_LABEL), "  Mint  ");
-    await user.click(screen.getByRole("button", { name: /Ocean Friends/ }));
     await user.click(screen.getByRole("button", START));
 
     await waitFor(() => expect(findOrCreatePlayer).toHaveBeenCalledWith("Mint"));
     expect(loadPlayer()).toEqual({ id: "player-1", name: "Mint" });
-    // the unit page comes next, where they pick whole unit or a single part
-    expect(routerMock.push).toHaveBeenCalledWith("/unit/unit-03");
+    // choosing happens on the next screen, one decision at a time
+    expect(routerMock.push).toHaveBeenCalledWith("/units");
   });
 
   it("starts from the keyboard when Enter is pressed in the name field", async () => {
     const user = userEvent.setup();
-    render(<StartForm units={UNITS} />);
+    render(<StartForm unitCount={UNITS.length} />);
 
     await user.type(screen.getByLabelText(NAME_LABEL), "Mint{Enter}");
 
-    await waitFor(() => expect(routerMock.push).toHaveBeenCalledWith("/unit/unit-02"));
+    await waitFor(() => expect(routerMock.push).toHaveBeenCalledWith("/units"));
   });
 
   it("blames the connection only when the connection is the problem", async () => {
     findOrCreatePlayer.mockRejectedValue(new TypeError("Failed to fetch"));
     const user = userEvent.setup();
-    render(<StartForm units={UNITS} />);
+    render(<StartForm unitCount={UNITS.length} />);
 
     await user.type(screen.getByLabelText(NAME_LABEL), "Mint");
     await user.click(screen.getByRole("button", START));
@@ -138,7 +121,7 @@ describe("StartForm", () => {
       code: "42P01",
     });
     const user = userEvent.setup();
-    render(<StartForm units={UNITS} />);
+    render(<StartForm unitCount={UNITS.length} />);
 
     await user.type(screen.getByLabelText(NAME_LABEL), "Mint");
     await user.click(screen.getByRole("button", START));
@@ -151,7 +134,7 @@ describe("StartForm", () => {
 
   it("prefills a returning explorer's name", async () => {
     savePlayer({ id: "p", name: "Ploy" });
-    render(<StartForm units={UNITS} />);
+    render(<StartForm unitCount={UNITS.length} />);
 
     await waitFor(() =>
       expect(screen.getByLabelText(NAME_LABEL)).toHaveProperty("value", "Ploy")

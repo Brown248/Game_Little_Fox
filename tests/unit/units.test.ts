@@ -38,9 +38,12 @@ describe("unit loader", () => {
   it("reports each unit's scored question count and points", () => {
     const units = listUnits();
     const first = units.find((u) => u.id === "unit-01")!;
-    // Part 1's 30 emoji shadows + Part 2's 10 illustrated ones
-    expect(first.questionCount).toBe(40);
-    expect(first.maxScore).toBe(400);
+    // Part 1's 27 emoji shadows + Part 2's 8 illustrated ones. Five animals
+    // came out on the teacher's list after the first lesson: giraffe, flamingo
+    // and parrot from Part 1, and from Part 2 the rhinoceros plus the second
+    // polar bear, which was the same word twice.
+    expect(first.questionCount).toBe(35);
+    expect(first.maxScore).toBe(350);
 
     for (const unit of units) {
       expect(unit.maxScore).toBe(unit.questionCount * 10);
@@ -54,8 +57,8 @@ describe("unit loader", () => {
     expect(listBrokenUnitFiles()).toEqual([]);
   });
 
-  // Unit 1 is the worksheet's Part 1 (30 emoji silhouettes) followed by Part 2,
-  // the ten animals that have been drawn for real.
+  // Unit 1 is the worksheet's Part 1 (emoji silhouettes) followed by Part 2,
+  // the animals that have been drawn for real.
   it("loads the shadow challenge with both of its parts", () => {
     const unit = getUnit("unit-01");
     expect(unit).not.toBeNull();
@@ -66,10 +69,10 @@ describe("unit loader", () => {
     if (part1.type !== "unscramble" || part2.type !== "unscramble")
       throw new Error("wrong block type");
 
-    expect(part1.items).toHaveLength(30);
+    expect(part1.items).toHaveLength(27);
     expect(part1.items.every((item) => item.shadow && !item.art)).toBe(true);
 
-    expect(part2.items).toHaveLength(10);
+    expect(part2.items).toHaveLength(8);
     expect(part2.items.every((item) => item.art)).toBe(true);
   });
 
@@ -129,7 +132,31 @@ describe("unit loader", () => {
     const counts = unit!.games.map((g) =>
       g.type === "writing" ? g.prompt.questions.length : g.items.length
     );
-    expect(counts).toEqual([30, 5, 30, 9, 17]);
+    expect(counts).toEqual([30, 5, 25, 9, 17]);
+  });
+
+  // Two rules the teacher set for Part C2 after watching a class use it.
+  describe("Part C2 — build the sentence", () => {
+    const partC2 = () => {
+      const block = getUnit("unit-02")!.games[2];
+      if (block.type !== "sentence-builder") throw new Error("wrong block type");
+      return block.items;
+    };
+
+    // The cue read "🐍 Hiss! Hiss!", which gave away the verb — half the
+    // sentence the child is supposed to be building.
+    it("cues with the animal alone, never a word", () => {
+      for (const item of partC2()) {
+        expect(/\p{L}|\p{N}/u.test(item.prompt), item.prompt).toBe(false);
+        expect(item.prompt.length).toBeGreaterThan(0);
+      }
+    });
+
+    it("has no sentence built on 'loudly'", () => {
+      for (const item of partC2()) {
+        expect([...item.words, ...item.answer].join(" ")).not.toMatch(/loudly/i);
+      }
+    });
   });
 
   // Every video clue must point at a file that is actually shipped, or a class
@@ -270,9 +297,10 @@ describe("unit loader", () => {
   describe("audit", () => {
     it("computes questions and max score, excluding writing", () => {
       const audit = auditUnits().find((a) => a.id === "unit-02")!;
-      // 30 quiz + 5 sounds + 30 sentences + 9 creatures = 74 scored questions
-      expect(audit.questionCount).toBe(74);
-      expect(audit.maxScore).toBe(740);
+      // 30 quiz + 5 sounds + 25 sentences + 9 creatures = 69 scored questions.
+      // Part C2 lost its five "loudly" sentences on the teacher's instruction.
+      expect(audit.questionCount).toBe(69);
+      expect(audit.maxScore).toBe(690);
       expect(audit.gameCount).toBe(5);
       expect(audit.hasWriting).toBe(true);
       expect(audit.writingIsLast).toBe(true);
@@ -283,7 +311,7 @@ describe("unit loader", () => {
       const writing = audit.blocks.find((b) => b.type === "writing")!;
       // 7 spirit-animal frames + 10 speaking prompts
       expect(writing.count).toBe(17);
-      expect(audit.blocks.reduce((n, b) => n + b.count, 0)).toBe(91);
+      expect(audit.blocks.reduce((n, b) => n + b.count, 0)).toBe(86);
     });
 
     // The teacher's "what still needs recording" list. A video clue carries its

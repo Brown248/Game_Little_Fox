@@ -1,8 +1,11 @@
 "use client";
 
 // One shot per question, so this is where the explorer learns the answer.
-// Correct glows orange; wrong is kraft and neutral — the direction is
-// deliberately "no colour punishment", so nothing here goes red.
+// Green for right, red for wrong — the teacher's own marking, asked for after
+// the first lesson. The design doc kept wrong answers in neutral kraft on a
+// "no colour punishment" principle; in the room that read as nothing having
+// happened at all, so the classroom convention wins. The wrong answer is never
+// scolded, only shown: the real answer comes with it every time.
 
 interface Props {
   correct: boolean;

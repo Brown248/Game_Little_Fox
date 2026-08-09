@@ -1,6 +1,7 @@
-// Landing page: the expedition pitch on one side, the card a student types
-// into on the other. The unit list comes from whatever JSON files exist in
-// content/units/, so a new unit shows up here with no code change.
+// Landing page: the expedition pitch on one side, one name field on the other.
+// Nothing else is asked here — picking a unit happens on /units, once the
+// student is through the door. The counts below come from whatever JSON files
+// exist in content/units/, so a new unit shows up with no code change.
 
 import Shell from "@/components/Shell";
 import StartForm from "@/components/StartForm";
@@ -14,7 +15,7 @@ export default function HomePage() {
   const points = units.reduce((total, unit) => total + unit.maxScore, 0);
 
   return (
-    <Shell active="start" unitId={units[0]?.id}>
+    <Shell active="start">
       <main className="page">
         <div className="split split--hero">
           <div className="hero-copy">
@@ -25,8 +26,8 @@ export default function HomePage() {
             <h1 className="display">Ready for today&apos;s expedition?</h1>
 
             <p className="lead">
-              Learn animal words in English by playing. Type your name, pick a
-              unit, and every answer you get right puts you higher on the class
+              Learn animal words in English by playing. Type your name to begin
+              — every answer you get right puts you higher on the class
               leaderboard.
             </p>
 
@@ -57,7 +58,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <StartForm units={units} />
+          <StartForm unitCount={units.length} />
         </div>
       </main>
     </Shell>

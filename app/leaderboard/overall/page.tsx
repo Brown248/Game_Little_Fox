@@ -12,11 +12,7 @@ export default function OverallLeaderboardPage() {
   const units = listUnits();
 
   return (
-    <Shell
-      active="overall"
-      unitId={units[0]?.id}
-      kicker="All units · leaderboard"
-    >
+    <Shell active="ranking" kicker="All units · leaderboard">
       <main className="page">
         <header className="board-head">
           <div className="stack" style={{ gap: 6 }}>
@@ -24,19 +20,20 @@ export default function OverallLeaderboardPage() {
             <h1>Top explorers</h1>
           </div>
 
-          <nav className="row row--tight no-print">
+          {/* The only board switcher in the app. It says which board, and
+              nothing else — Play lives in the bar above and does not need
+              saying twice. */}
+          <nav className="row row--tight no-print" aria-label="Which board">
             <span className="chip chip--pill chip--on">All units</span>
-            {units[0] && (
+            {units.map((unit) => (
               <Link
+                key={unit.id}
                 className="chip chip--pill"
-                href={`/leaderboard/${units[0].id}`}
+                href={`/leaderboard/${unit.id}`}
               >
-                {units[0].id.replace("-", " ")}
+                {unit.id.replace("-", " ")}
               </Link>
-            )}
-            <Link className="chip chip--pill" href="/">
-              Play
-            </Link>
+            ))}
           </nav>
         </header>
 

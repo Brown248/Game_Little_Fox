@@ -30,6 +30,19 @@
   --surface: #ffffff;
   --surface-warm: #fffcf6; /* nested panels */
 
+  /* ---- marking: green right, red wrong ----
+     The design doc marked a wrong answer in kraft and reserved colour for
+     praise. The teacher asked for the marking she uses on paper instead, and
+     in the classroom she wins: children read a red tick as "look again", and
+     were reading the quiet kraft as "nothing happened". Both shades are pulled
+     towards the warm ground so they sit on cream without buzzing. */
+  --right: #2f8f4e;
+  --right-fill: #e4f5e6;
+  --right-edge: #b6e0bf;
+  --wrong: #cf4436;
+  --wrong-fill: #fdeae6;
+  --wrong-edge: #f3c2b8;
+
   /* ---- ink ---- */
   --ink: #2e2a26;
   --ink-lead: #5c5348; /* the lead paragraph under a display heading */
@@ -992,29 +1005,38 @@ html {
 /* ============================== play chrome ============================== */
 
 /* Four stat cards that wrap into 2×2 on a phone and a single row on a laptop. */
+/* The run bar: score, streak and clock in one strip, pinned under the app bar
+   so the clock is on screen at every single question.
+   It used to be four stat cards, which wrapped to 2×2 on a phone and scrolled
+   away the moment a child looked down at the question — "ขึ้นจับเวลาไปเรื่อยๆ
+   ให้รู้". Three short numbers stay on one line even at 360px, so this needs no
+   breakpoint either. */
 .hud {
+  position: sticky;
+  /* the app bar's own height: a 44px mark, 14px of padding above and below,
+     and its 2px rule. Change one, change the other. */
+  top: 74px;
+  z-index: 20;
   display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
+  gap: 6px;
   align-items: stretch;
+  background: rgba(255, 255, 255, 0.93);
+  backdrop-filter: blur(8px);
+  border: 2px solid var(--edge);
+  border-radius: var(--r-pill);
+  padding: 7px;
+  box-shadow: var(--lift-soft);
 }
 
 .hud__tile {
-  flex: 1 1 180px;
+  flex: 1 1 0;
   min-width: 0;
-  background: var(--surface);
-  border: 2px solid var(--edge);
-  border-radius: 22px;
-  padding: 14px 20px;
+  border-radius: var(--r-pill);
+  padding: 5px 10px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
-}
-
-/* the explorer's own name — glow fill, so the board knows who is playing */
-.hud__tile--me {
-  background: var(--glow);
-  border-color: var(--glow-edge);
+  align-items: center;
+  gap: 1px;
 }
 
 .hud__label {
@@ -1025,27 +1047,16 @@ html {
   color: var(--ink-faint);
 }
 
-.hud__tile--me .hud__label {
-  color: var(--deep);
-}
-
 .hud__value {
   font-family: var(--font-display-stack);
   font-weight: 800;
-  font-size: clamp(28px, 3vw, 38px);
+  font-size: clamp(24px, 2.6vw, 32px);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .hud__value--orange {
   color: var(--deep);
-}
-
-.hud__value--name {
-  font-size: clamp(22px, 2.2vw, 28px);
-  line-height: 1.1;
-  color: var(--deep);
-  overflow-wrap: anywhere;
 }
 
 /* the number re-keys on change so each digit rises and settles */
@@ -1145,6 +1156,17 @@ html {
   font-size: clamp(21px, 2vw, 27px);
 }
 
+/* A cue that is a picture and nothing else — one animal, no words. Drawn large
+   and centred, and breathing on the same slow loop as the rest of the idle
+   motion, so it reads as the question rather than a stray character. */
+.q__emoji {
+  display: block;
+  text-align: center;
+  font-size: clamp(72px, 16vw, 116px);
+  line-height: 1.15;
+  animation: weFloat 3.8s ease-in-out infinite;
+}
+
 /* A dashed warm strip holding the words behind a clue — the listening
    transcript when a student asks to see it. */
 .clue {
@@ -1199,18 +1221,20 @@ html {
   border-radius: 22px;
   overflow: hidden;
   border: 2px dashed var(--kraft);
-  /* the same kraft hatch the mock used for an empty photo slot, so a slow
-     connection shows the frame rather than a white hole */
-  background: repeating-linear-gradient(
-    135deg,
-    var(--page) 0 11px,
-    var(--edge) 11px 22px
-  );
+  /* Flat cream, not the mock's hatch for an empty photo slot. The artwork is
+     cut out of its purple backdrop now, so the frame is seen THROUGH the
+     animal — a hatch behind a polar bear reads as stripes on the bear. */
+  background: var(--page);
   transition: border-color 0.35s ease;
 }
 
+/* contain, not cover. The cut-outs are trimmed tight to the animal, so cover
+   would crop it — and the crocodile is three and a half times as wide as it is
+   tall, half of which the frame would eat. The padding keeps a nose or a tail
+   off the dashed border. */
 .art img {
-  object-fit: cover;
+  object-fit: contain;
+  padding: 12px;
 }
 
 .art__reveal {
@@ -1341,27 +1365,28 @@ html {
   line-height: 1.3;
 }
 
-/* Correct fills with glow — the only state that changes colour. */
+/* Right is green, wrong is red — the teacher's marking, and the one thing on
+   these screens that is not orange, so it reads instantly. */
 .choice--correct {
-  background: var(--glow);
-  border-color: var(--marigold);
+  background: var(--right-fill);
+  border-color: var(--right);
 }
 
 .choice--correct .choice__key {
-  background: var(--marigold);
+  background: var(--right);
   color: var(--surface);
 }
 
-/* Wrong shakes and goes kraft. Never red: no colour punishment. */
+/* Still shakes: the colour says what happened, the movement says it now. */
 .choice--wrong {
-  border-color: var(--kraft);
-  background: var(--surface-warm);
+  border-color: var(--wrong);
+  background: var(--wrong-fill);
   animation: weShake 0.45s ease;
 }
 
 .choice--wrong .choice__key {
-  background: var(--kraft);
-  color: var(--ink-mute);
+  background: var(--wrong);
+  color: var(--surface);
 }
 
 /* the seal that pops onto a correct answer, with its one expanding ring */
@@ -1373,7 +1398,8 @@ html {
   height: 44px;
   margin-top: -22px;
   border-radius: 50%;
-  background: var(--marigold);
+  /* green, to match the answer it is stamped on */
+  background: var(--right);
   display: grid;
   place-items: center;
   animation: wePop 0.42s var(--spring);
@@ -1396,7 +1422,7 @@ html {
   height: 44px;
   margin-top: -22px;
   border-radius: 50%;
-  border: 3px solid var(--marigold);
+  border: 3px solid var(--right);
   animation: weBurst 0.6s ease-out forwards;
   pointer-events: none;
 }
@@ -1408,7 +1434,7 @@ html {
   font-family: var(--font-display-stack);
   font-weight: 800;
   font-size: 22px;
-  color: var(--deep);
+  color: var(--right);
   animation: weRise 0.6s ease-out forwards;
   pointer-events: none;
 }
@@ -1549,16 +1575,15 @@ html {
 }
 
 .feedback--correct {
-  background: var(--glow);
-  border: 2px solid var(--marigold);
-  color: var(--deep);
+  background: var(--right-fill);
+  border: 2px solid var(--right-edge);
+  color: var(--right);
 }
 
-/* kraft, not red */
 .feedback--wrong {
-  background: var(--surface-warm);
-  border: 2px solid var(--kraft);
-  color: var(--ink-soft);
+  background: var(--wrong-fill);
+  border: 2px solid var(--wrong-edge);
+  color: var(--wrong);
 }
 
 .feedback__answer {

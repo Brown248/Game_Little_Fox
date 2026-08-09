@@ -369,7 +369,7 @@
       "title": "Part C2 · Build the Sentence",
       "items": [
         {
-          "prompt": "🐍 Hiss! Hiss!",
+          "prompt": "🐍",
           "words": [
             "snake",
             "the",
@@ -384,22 +384,7 @@
           ]
         },
         {
-          "prompt": "🐶 Woof! Woof!",
-          "words": [
-            "dog",
-            "barks",
-            "the",
-            "loudly"
-          ],
-          "answer": [
-            "the",
-            "dog",
-            "barks",
-            "loudly"
-          ]
-        },
-        {
-          "prompt": "🐄 Moo! Moo!",
+          "prompt": "🐄",
           "words": [
             "cow",
             "goes",
@@ -414,22 +399,7 @@
           ]
         },
         {
-          "prompt": "🦁 Roar!",
-          "words": [
-            "lion",
-            "loudly",
-            "the",
-            "roars"
-          ],
-          "answer": [
-            "the",
-            "lion",
-            "roars",
-            "loudly"
-          ]
-        },
-        {
-          "prompt": "🐦 Tweet! Tweet!",
+          "prompt": "🐦",
           "words": [
             "bird",
             "sings",
@@ -444,7 +414,7 @@
           ]
         },
         {
-          "prompt": "🐱 Meow! Meow!",
+          "prompt": "🐱",
           "words": [
             "meow",
             "cat",
@@ -459,7 +429,7 @@
           ]
         },
         {
-          "prompt": "🦆 Quack! Quack!",
+          "prompt": "🦆",
           "words": [
             "says",
             "duck",
@@ -474,7 +444,7 @@
           ]
         },
         {
-          "prompt": "🐷 Oink! Oink!",
+          "prompt": "🐷",
           "words": [
             "oink",
             "the",
@@ -489,7 +459,7 @@
           ]
         },
         {
-          "prompt": "🐑 Baa! Baa!",
+          "prompt": "🐑",
           "words": [
             "baa",
             "sheep",
@@ -504,22 +474,7 @@
           ]
         },
         {
-          "prompt": "🐺 Howl!",
-          "words": [
-            "howls",
-            "the",
-            "loudly",
-            "wolf"
-          ],
-          "answer": [
-            "the",
-            "wolf",
-            "howls",
-            "loudly"
-          ]
-        },
-        {
-          "prompt": "🦉 Hoot! Hoot!",
+          "prompt": "🦉",
           "words": [
             "softly",
             "owl",
@@ -534,7 +489,7 @@
           ]
         },
         {
-          "prompt": "🐸 Ribbit!",
+          "prompt": "🐸",
           "words": [
             "frog",
             "high",
@@ -549,7 +504,7 @@
           ]
         },
         {
-          "prompt": "🐴 The horse is fast.",
+          "prompt": "🐴",
           "words": [
             "runs",
             "the",
@@ -564,7 +519,7 @@
           ]
         },
         {
-          "prompt": "🐟 In the water",
+          "prompt": "🐟",
           "words": [
             "quietly",
             "fish",
@@ -579,7 +534,7 @@
           ]
         },
         {
-          "prompt": "🦅 In the sky",
+          "prompt": "🦅",
           "words": [
             "flies",
             "eagle",
@@ -594,7 +549,7 @@
           ]
         },
         {
-          "prompt": "🐢 Slow and steady",
+          "prompt": "🐢",
           "words": [
             "slowly",
             "the",
@@ -609,7 +564,7 @@
           ]
         },
         {
-          "prompt": "🐒 Up the tree",
+          "prompt": "🐒",
           "words": [
             "monkey",
             "climbs",
@@ -624,7 +579,7 @@
           ]
         },
         {
-          "prompt": "🐝 Buzz! Buzz!",
+          "prompt": "🐝",
           "words": [
             "honey",
             "the",
@@ -639,7 +594,7 @@
           ]
         },
         {
-          "prompt": "🕷️ In the corner",
+          "prompt": "🕷️",
           "words": [
             "spins",
             "spider",
@@ -654,7 +609,7 @@
           ]
         },
         {
-          "prompt": "🐰 Hop! Hop!",
+          "prompt": "🐰",
           "words": [
             "fast",
             "hops",
@@ -669,7 +624,7 @@
           ]
         },
         {
-          "prompt": "🐘 Lunch time",
+          "prompt": "🐘",
           "words": [
             "leaves",
             "elephant",
@@ -684,7 +639,7 @@
           ]
         },
         {
-          "prompt": "🐼 Lunch time",
+          "prompt": "🐼",
           "words": [
             "bamboo",
             "the",
@@ -699,7 +654,7 @@
           ]
         },
         {
-          "prompt": "🐫 In the desert",
+          "prompt": "🐫",
           "words": [
             "walks",
             "camel",
@@ -714,7 +669,7 @@
           ]
         },
         {
-          "prompt": "🐧 On the ice",
+          "prompt": "🐧",
           "words": [
             "well",
             "penguin",
@@ -729,37 +684,7 @@
           ]
         },
         {
-          "prompt": "🐳 Deep in the sea",
-          "words": [
-            "loudly",
-            "the",
-            "sings",
-            "whale"
-          ],
-          "answer": [
-            "the",
-            "whale",
-            "sings",
-            "loudly"
-          ]
-        },
-        {
-          "prompt": "🦜 Hello! Hello!",
-          "words": [
-            "talks",
-            "the",
-            "parrot",
-            "loudly"
-          ],
-          "answer": [
-            "the",
-            "parrot",
-            "talks",
-            "loudly"
-          ]
-        },
-        {
-          "prompt": "🐯 In the tall grass",
+          "prompt": "🐯",
           "words": [
             "quietly",
             "hunts",
@@ -774,7 +699,7 @@
           ]
         },
         {
-          "prompt": "🦌 In the forest",
+          "prompt": "🦌",
           "words": [
             "deer",
             "quickly",
@@ -789,7 +714,7 @@
           ]
         },
         {
-          "prompt": "🐬 Splash!",
+          "prompt": "🐬",
           "words": [
             "swims",
             "dolphin",
@@ -804,7 +729,7 @@
           ]
         },
         {
-          "prompt": "🐜 A tiny worker",
+          "prompt": "🐜",
           "words": [
             "hard",
             "the",
