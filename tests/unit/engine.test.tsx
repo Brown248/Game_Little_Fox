@@ -106,6 +106,77 @@ async function playWholeUnit(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("button", { name: /Finish and see my score/ }));
 }
 
+/** The same walk, but every answer wrong: 0 of 5. */
+async function playWholeUnitBadly(user: ReturnType<typeof userEvent.setup>) {
+  await user.type(screen.getByLabelText("Your answer"), "WRONG{Enter}");
+  await user.click(screen.getByRole("button", { name: "Next word" }));
+  await user.type(screen.getByLabelText("Your answer"), "WRONG{Enter}");
+  await user.click(screen.getByRole("button", { name: "Finish this part" }));
+
+  await user.click(screen.getByRole("button", { name: /Zebra/ }));
+  await user.click(screen.getByRole("button", { name: "Finish this part" }));
+
+  for (const word of ["snake", "the"]) {
+    await user.click(screen.getByRole("button", { name: word }));
+  }
+  await user.click(screen.getByRole("button", { name: "Check" }));
+  await user.click(screen.getByRole("button", { name: "Finish this part" }));
+
+  await user.click(screen.getByRole("button", { name: /Unicorn/ }));
+  await user.click(screen.getByRole("button", { name: "Finish this part" }));
+
+  await user.click(screen.getByRole("button", { name: /Finish and see my score/ }));
+}
+
+// The certificate is the one reward with a bar to clear: a whole unit, and at
+// least half the questions right. Anything else must not offer the button.
+describe("the certificate", () => {
+  const CERT = { name: "Get my certificate" };
+
+  it("is offered after a whole unit with half the answers right", async () => {
+    savePlayer(PLAYER);
+    const user = userEvent.setup();
+    render(<PlayClient unit={UNIT} totalUnits={20} />);
+    await screen.findByText(UNIT.title);
+
+    await playWholeUnit(user); // 3 of 5 = 60%
+
+    expect(await screen.findByRole("button", CERT)).toBeTruthy();
+    expect(screen.queryByText(/right to earn a certificate/)).toBeNull();
+  });
+
+  it("is withheld below half, and says how many were needed", async () => {
+    savePlayer(PLAYER);
+    const user = userEvent.setup();
+    render(<PlayClient unit={UNIT} totalUnits={20} />);
+    await screen.findByText(UNIT.title);
+
+    await playWholeUnitBadly(user); // 0 of 5
+
+    expect(
+      await screen.findByText(/Answer 3 of 5 right to earn a certificate. You got 0./)
+    ).toBeTruthy();
+    expect(screen.queryByRole("button", CERT)).toBeNull();
+  });
+
+  it("is never offered for a single part, however well it went", async () => {
+    savePlayer(PLAYER);
+    const user = userEvent.setup();
+    // block 1 is the one-question quiz; answering it right is a perfect score
+    render(<PlayClient unit={UNIT} partIndex={1} totalUnits={20} />);
+    await screen.findByText(UNIT.title);
+
+    await user.click(screen.getByRole("button", { name: /Giraffe/ }));
+    await user.click(screen.getByRole("button", { name: "Finish this part" }));
+
+    expect(
+      await screen.findByText(/Certificates come from playing a whole unit/)
+    ).toBeTruthy();
+    expect(screen.queryByRole("button", CERT)).toBeNull();
+    expect(screen.getByRole("button", { name: "Play this part again" })).toBeTruthy();
+  });
+});
+
 describe("PlayClient — the engine loop", () => {
   it("sends a player with no session back to the start", async () => {
     render(<PlayClient unit={UNIT} totalUnits={20} />);

@@ -34,6 +34,10 @@ interface Props {
   onRetrySave: () => void;
 }
 
+/** Half the questions right. Kept here rather than inline so the rule has one
+ *  home — the certificate is the one reward with a bar to clear. */
+const CERTIFICATE_PASS_MARK = 0.5;
+
 interface RankInfo {
   unitPlace: number | null;
   unitTotal: number;
@@ -122,9 +126,21 @@ export default function ResultScreen({
 
   const perfect = scoring.maxScore > 0 && scoring.score === scoring.maxScore;
 
+  // A certificate is for finishing a whole unit, not a single part — one unit
+  // is one certificate, or a class ends up printing five of them each.
+  const playedOnePart = parsePartId(scoreId) !== null;
+  // Counted in answers, not points: "half the questions right" is the rule the
+  // teacher set, and it stays true even if a question is ever worth more or
+  // less than ten.
+  const passed =
+    scoring.totalQuestions > 0 &&
+    scoring.correctCount / scoring.totalQuestions >= CERTIFICATE_PASS_MARK;
+  const earnedCertificate = !playedOnePart && passed;
+  const needed = Math.ceil(scoring.totalQuestions * CERTIFICATE_PASS_MARK);
+
   return (
     // Payoff on the left (seal, headline, what to do next), the numbers on the
-    // right � one column as soon as the glass gets narrow.
+    // right — one column as soon as the glass gets narrow.
     <div className="split split--wide">
       <div className="result-hero">
         <div className="confetti" aria-hidden="true">
@@ -137,7 +153,7 @@ export default function ResultScreen({
           <div className="rank-seal__inner">
             <span className="rank-seal__label">RANK</span>
             <span className="rank-seal__value">
-              {rank?.unitPlace ?? "�"}
+              {rank?.unitPlace ?? "–"}
             </span>
             <span className="rank-seal__of">
               {rank ? `OF ${rank.unitTotal}` : "IN THIS UNIT"}
@@ -153,14 +169,16 @@ export default function ResultScreen({
         </div>
 
         <div className="btn-row">
-          <button
-            className="btn"
-            type="button"
-            onClick={certificate}
-            disabled={pdfBusy}
-          >
-            {pdfBusy ? "Making your certificate⬦" : "Get my certificate"}
-          </button>
+          {earnedCertificate && (
+            <button
+              className="btn"
+              type="button"
+              onClick={certificate}
+              disabled={pdfBusy}
+            >
+              {pdfBusy ? "Making your certificate…" : "Get my certificate"}
+            </button>
+          )}
           <button
             className="btn btn--secondary"
             type="button"
@@ -168,9 +186,19 @@ export default function ResultScreen({
             // to be thrown away so the timer and score start from zero.
             onClick={() => window.location.reload()}
           >
-            Play this unit again
+            {playedOnePart ? "Play this part again" : "Play this unit again"}
           </button>
         </div>
+
+        {/* Say what the certificate needs, so a near miss reads as one more go
+            rather than a missing button. */}
+        {!earnedCertificate && (
+          <p className="muted center">
+            {playedOnePart
+              ? "Certificates come from playing a whole unit — this was one part."
+              : `Answer ${needed} of ${scoring.totalQuestions} right to earn a certificate. You got ${scoring.correctCount}.`}
+          </p>
+        )}
 
         <div className="row row--between">
           <Link href="/">Pick another unit</Link>
@@ -214,7 +242,7 @@ export default function ResultScreen({
           </div>
         </div>
 
-        {saveState === "saving" && <div className="notice">Saving your score⬦</div>}
+        {saveState === "saving" && <div className="notice">Saving your score…</div>}
         {saveState === "error" && (
           <Failure
             failure={
@@ -239,12 +267,12 @@ export default function ResultScreen({
                 Score saved, but the leaderboard could not be loaded right now.
               </div>
             )}
-            {!rankError && !rank && <p className="muted">Loading rankings⬦</p>}
+            {!rankError && !rank && <p className="muted">Loading rankings…</p>}
             {rank && (
               <>
                 <div className="rank-line">
                   <span className="rank-line__place">
-                    {rank.unitPlace ? `#${rank.unitPlace}` : "�"}
+                    {rank.unitPlace ? `#${rank.unitPlace}` : "—"}
                   </span>
                   <span>
                     in {scoreIdLabel(scoreId)}
@@ -254,7 +282,7 @@ export default function ResultScreen({
                 </div>
                 <div className="rank-line">
                   <span className="rank-line__place">
-                    {rank.overallPlace ? `#${rank.overallPlace}` : "�"}
+                    {rank.overallPlace ? `#${rank.overallPlace}` : "—"}
                   </span>
                   <span>
                     overall
@@ -268,7 +296,7 @@ export default function ResultScreen({
                     <strong>({formatPercent(rank.overallAccuracy)})</strong>
                   )}{" "}
                   across {rank.unitsCompleted} of {totalUnits} unit
-                  {totalUnits === 1 ? "" : "s"} played � not a total of raw scores,
+                  {totalUnits === 1 ? "" : "s"} played — not a total of raw scores,
                   so longer units don&apos;t dominate.
                 </p>
               </>
