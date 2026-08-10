@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import Listening from "@/components/games/Listening";
@@ -41,6 +41,17 @@ interface Props {
 // ทำ Part ไหนหรือข้อไหน Unit ไหน แต่ให้เริ่มที่ข้อแรกไปเลย".
 export default function PlayClient({ games, gameId }: Props) {
   const router = useRouter();
+  // Scored questions in this run. Derived from the blocks themselves rather
+  // than passed in, so it can never disagree with what is actually played, and
+  // it is what a saved run is checked against before being offered back.
+  const questionCount = useMemo(
+    () =>
+      games.reduce(
+        (n, block) => n + (block.type === "writing" ? 0 : block.items.length),
+        0
+      ),
+    [games]
+  );
   const [player, setPlayer] = useState<Player | null>(null);
   const [checkedSession, setCheckedSession] = useState(false);
   /** null until we know whether there is a run to offer. */
@@ -72,8 +83,8 @@ export default function PlayClient({ games, gameId }: Props) {
     // Half a run left on this device? Offer it rather than resuming silently —
     // a child who wanted a fresh go would otherwise be dropped into the middle
     // of an old one with no way back to question one.
-    if (loadProgress(saved.id, games.length)) setAskingToResume(true);
-  }, [router, games.length]);
+    if (loadProgress(saved.id, games.length, questionCount)) setAskingToResume(true);
+  }, [router, games.length, questionCount]);
 
   const finished = finalSeconds !== null;
 
@@ -120,7 +131,7 @@ export default function PlayClient({ games, gameId }: Props) {
 
   function resume() {
     if (!player) return;
-    const saved = loadProgress(player.id, games.length);
+    const saved = loadProgress(player.id, games.length, questionCount);
     setAskingToResume(false);
     if (!saved) return;
 
@@ -141,7 +152,7 @@ export default function PlayClient({ games, gameId }: Props) {
   /** Stop early and bank what has been answered so far.
    *
    *  A run is every question there is, but a class only reaches them a part at
-   *  a time — a child taught up to Part 1 would otherwise face 69 questions
+   *  a time — a child taught up to Part 1 would otherwise face 35 questions
    *  from lessons they have not had, and lose the lot by closing the tab. This
    *  is the way out, and it keeps the score.
    *
@@ -174,6 +185,7 @@ export default function PlayClient({ games, gameId }: Props) {
           scoring,
           playedSeconds: played,
           blockCount: games.length,
+          questionCount,
         });
       }
       return;

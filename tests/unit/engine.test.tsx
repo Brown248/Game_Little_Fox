@@ -437,6 +437,32 @@ describe("carrying a half-finished run", () => {
     expect(screen.queryByText("Carry on where you stopped?")).toBeNull();
   });
 
+  // The trap this actually walked into: Part C2 went from 25 sentences to 10
+  // and the game still had the same six blocks, so a run saved that morning
+  // would have been offered back — carrying 25 answers to questions that no
+  // longer exist, and finishing with more answers than the game contains. That
+  // run can never earn a certificate and its row cannot be compared with
+  // anyone else's, and nothing would have said why.
+  it("does not offer a run saved against different questions", async () => {
+    savePlayer(PLAYER);
+    const user = userEvent.setup();
+    const first = play();
+    await screen.findByRole("heading", { name: "Make the word" });
+    await playFirstBlock(user);
+    first.unmount();
+
+    // same five blocks, one of them a question shorter
+    const trimmed = GAMES.map((block, i) =>
+      i === 1 && block.type === "quiz-choice"
+        ? { ...block, items: block.items.slice(0, -1) }
+        : block
+    );
+    render(<PlayClient games={trimmed} gameId={GAME_ID} />);
+
+    expect(await screen.findByText(/part 1 of 5/i)).toBeTruthy();
+    expect(screen.queryByText("Carry on where you stopped?")).toBeNull();
+  });
+
   it("throws the saved run away once the score is banked", async () => {
     savePlayer(PLAYER);
     const user = userEvent.setup();

@@ -133,13 +133,23 @@ describe("certificate", () => {
     expect(printed()).toContain("Mint Suwan");
   });
 
-  it("says which unit was completed", async () => {
+  it("says what was finished, by name", async () => {
     await downloadCertificate(data);
     expect(
-      printed().some((t) =>
-        t.includes("unit 02") && t.includes("Wild Life and Wonderful Creatures")
-      )
+      printed().some((t) => t.includes("Wild Life and Wonderful Creatures"))
     ).toBe(true);
+  });
+
+  // The id is internal: it gets bumped whenever the question count moves, and
+  // a parent reading "game 02" on their child's certificate learns nothing.
+  it("keeps the internal id off the page", async () => {
+    await downloadCertificate({ ...data, unitId: "game-02" });
+    expect(printed().some((t) => /game[- ]0?2/i.test(t))).toBe(false);
+  });
+
+  it("still uses the id in the filename", async () => {
+    await downloadCertificate({ ...data, unitId: "game-02" });
+    expect(calls.save[0]).toBe("little-fox-game-02-mint-suwan.pdf");
   });
 
   it("prints score, time and how many were right as separate columns", async () => {

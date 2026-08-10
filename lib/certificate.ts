@@ -140,12 +140,14 @@ export async function downloadCertificate(data: CertificateData): Promise<void> 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(...INK);
-  doc.text(
-    `for finishing ${data.unitId.replace("-", " ")} · ${data.unitTitle}`,
-    mid,
-    92,
-    { align: "center", maxWidth: w - 80 }
-  );
+  // The title, not the id. This line used to read "for finishing game 01 ·
+  // Little Fox Game": the id is internal bookkeeping — it is bumped whenever
+  // the question count moves — and two children would end up holding
+  // certificates for "game 01" and "game 02" of the same course.
+  doc.text(`for finishing ${data.unitTitle}`, mid, 92, {
+    align: "center",
+    maxWidth: w - 80,
+  });
   doc.setTextColor(...INK_SOFT);
   doc.setFontSize(9);
   doc.text("with very good English.", mid, 99, { align: "center" });

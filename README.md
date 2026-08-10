@@ -1,8 +1,10 @@
 # Little Fox Game
 
-Ranked English-learning game platform for Little Fox Language School. Students
-scan a QR code, type their name, play through a unit of mini-games, see their
-rank instantly, and can download a PDF certificate.
+Ranked English-learning game for Little Fox Language School. Students scan a QR
+code, type their name, and play — one run of every question there is, first to
+last, with no unit or part to choose. At the end they see the board and, if they
+finished the whole thing and got at least half of it right, download a PDF
+certificate. The teacher can print anyone's from `/admin/certificates`.
 
 Branding lives in one place: `brand/little-fox-logo-master.png` is the master
 artwork and everything else is cut from it by `npm run brand` —
@@ -31,8 +33,8 @@ strips the movement while keeping the meaning. All tokens live in `:root` in
 ## Tests
 
 ```bash
-npm test         # 149 unit + component tests (jsdom, nothing to set up)
-npm run test:db  # 62 integration tests against real Postgres + PostgREST
+npm test         # 219 unit + component tests (jsdom, nothing to set up)
+npm run test:db  # 64 integration tests against real Postgres + PostgREST
 ```
 
 See `tests/README.md` — the database suite mounts `supabase/schema.sql` into a
@@ -42,12 +44,12 @@ verified for real.
 ## Structure
 ```
 app/                    routes (pages)
-  globals.css            the entire design system (cream/green/gold theme)
-  play/[unitId]/         resolves the unit, then hands off to PlayClient
-  leaderboard/[unitId]/  ranking for a single unit
-  leaderboard/overall/   accuracy-weighted ranking across all units
-  admin/                 password-gated: overview, students, units, QR
-components/              StartForm, PlayClient (engine loop), ResultScreen, boards
+  globals.css            the entire design system (cream/marigold theme)
+  play/                  the one game — every block of every unit, in order
+  rank/                  the one board, and where a finished run lands
+  me/                    a student's own history + certificate re-download
+  admin/                 password-gated: overview, students, certificates, content, QR
+components/              StartForm, PlayClient (engine loop), RankBoard, MyScores
 components/games/        one component per game type (quiz, unscramble, etc.)
 components/admin/        admin login, tables, merge tool
 content/units/           one JSON file per unit — content only, no logic (see its README)
@@ -59,11 +61,13 @@ supabase/schema.sql      tables, ranking views, and RLS — run once in the SQL 
 
 ## Admin (`/admin`)
 
-One password (`ADMIN_PASSWORD`), no user accounts. Four pages:
+One password (`ADMIN_PASSWORD`), no user accounts. Five pages:
 
-- **Overview** — students, attempts, units played, and which skill the whole
-  class is weakest at; the 25 most recent attempts.
-- **Students** — fix a mistyped name or class, **merge duplicate records**
+- **Overview** — students, certificates earned, runs played, and which skill the
+  whole class is weakest at; the 25 most recent attempts.
+- **Certificates** — who has earned one (with a button to print theirs) and, for
+  everyone else, exactly what they still need to do.
+- **Students** — fix a mistyped name, **merge duplicate records**
   (moves the attempts across, deletes the duplicate — nothing is lost), open one
   student to see their per-skill totals and which units they haven't started.
 - **Units** — content health: which JSON files failed to load, how many
@@ -78,18 +82,23 @@ itself.
 
 | Unit | What's in it | Questions / points |
 |---|---|---|
-| `unit-01` **Shadow Animal Challenge** | 30 word scrambles, each behind a black animal silhouette that lights up on answering | 30 / 300 |
-| `unit-02` **Wild Life and Wonderful Creatures** | 9 clue/animal-sound questions, 5 sentence builders, 5 listening clues, 7 writing prompts | 19 / 190 |
+| `unit-01` **Animal Words** | 27 word scrambles, each with its animal shown as an emoji | 27 / 270 |
+| `unit-02` **Wild Life and Wonderful Creatures** | 10 clue questions, 5 animal sounds, 10 sentence builders, 10 listening clues, 17 unscored writing prompts | 35 / 350 |
+
+The two files play as **one game of 62 questions / 620 points**. Units are still
+how content is written — they match the teacher's paper worksheet — but they are
+no longer something a student picks.
 
 ## Design decisions already made (see project chat for full reasoning)
 - No login and no class — identity is the typed name alone, deduplicated
   case- and whitespace-insensitively in the players table. Two students who
   type the same name share one record, so give one of them a surname.
-- Unlimited replays; leaderboard always shows each player's *best* attempt per unit.
-- Overall ranking uses accuracy (score/max_score), not a raw score sum, so units
-  with more questions don't dominate.
+- Unlimited replays; the board always shows each player's *best* run.
+- One board, keyed on `GAME_ID` in `lib/game.ts`. Change the content enough to
+  move the question count and that id is bumped, so the board starts clean
+  rather than ranking runs that answered different questions against each other.
 - Listening audio is pre-generated mp3, not live browser text-to-speech.
-- Engine and content are fully separate — adding unit 21 means adding a JSON
+- Engine and content are fully separate — adding a unit means adding a JSON
   file, not touching any component.
 
 ## Setup

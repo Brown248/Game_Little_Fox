@@ -445,7 +445,7 @@ SentenceBuilderBlock | ListeningBlock | WritingBlock`) — `switch (block.type)`
 - ตัวเลือกข้อ Fairy ต้นฉบับพิมพ์ `A / B / D` (ข้าม C) → แก้เป็น A/B/C
 - `I am mini human with wings` → เติม article เป็น `I am a mini human with wings`
 
-**เหลืองานเนื้อหา:** mp3 ของ Part D ข้อ 8–10 · เนื้อหาชุดใหม่ของ Part C2 ที่ครูจะส่งมา · ยูนิตอื่นๆ เพิ่มเติม
+**เหลืองานเนื้อหา:** mp3 ของ Part D ข้อ 8–10 (Phoenix · Fairy · Mermaid) · ให้ครูฟังยืนยันคำใบ้ข้อ 7 (Yeti) · ยูนิตอื่นๆ เพิ่มเติม
 
 <!-- BEGIN:nextjs-agent-rules -->
 
