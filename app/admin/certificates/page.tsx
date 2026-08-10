@@ -81,6 +81,7 @@ export default async function AdminCertificatesPage() {
                   score={row.earnedWith!.score}
                   maxScore={row.earnedWith!.max_score}
                   timeSeconds={row.earnedWith!.time_seconds}
+                  completedAt={row.earnedWith!.completed_at}
                 />
               </li>
             ))}

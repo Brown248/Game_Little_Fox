@@ -84,14 +84,14 @@ function longSentences(): string[] {
 
 describe("the English on screen", () => {
   const screens: [string, () => void][] = [
-    ["the door", () => render(<StartForm questionCount={50} />)],
+    ["the door", () => render(<StartForm questionCount={47} />)],
     ["the app bar", () => render(<SiteHeader active="start" />)],
     ["the footer", () => render(<SiteFooter />)],
     [
       "my scores",
       () =>
         render(
-          <MyScores unitTitles={{}} gameId="game-02" fullQuestionCount={50} />
+          <MyScores unitTitles={{}} gameId="game-03" fullQuestionCount={47} />
         ),
     ],
     [
@@ -99,9 +99,9 @@ describe("the English on screen", () => {
       () =>
         render(
           <RankBoard
-            gameId="game-02"
+            gameId="game-03"
             gameTitle="Little Fox Game"
-            fullQuestionCount={50}
+            fullQuestionCount={47}
           />
         ),
     ],

@@ -24,6 +24,12 @@ export interface CertificateData {
   accuracy: number; // 0..1
   /** e.g. "3 / 24" — omitted when the leaderboard could not be read. */
   rankLabel?: string;
+  /** ISO timestamp of the run that earned this — when the child actually did it.
+   *
+   *  The page used to stamp `new Date()`, which is the moment the PDF was made.
+   *  A teacher printing a stack of these a week later would put next week's date
+   *  on every child's certificate. Falls back to today only if it is missing. */
+  completedAt?: string;
 }
 
 const MARIGOLD: [number, number, number] = [242, 140, 40];
@@ -183,19 +189,30 @@ export async function downloadCertificate(data: CertificateData): Promise<void> 
     x += columnWidth;
   }
 
-  // signature lines
+  // When they did it, centred, and nothing else down here.
+  //
+  // There were two signature lines and a "TEACHER" label before this: nobody
+  // ever signed them, so the page carried two empty rules and a job that was
+  // never going to be done ("ใบเซอร์เอาตรงครูออก เพราะไม่มีใครเซน"). The date
+  // moved into their place, and it is the date of the RUN, not of the print.
   doc.setDrawColor(...KRAFT);
   doc.setLineWidth(0.5);
-  doc.line(24, h - 22, 78, h - 22);
-  doc.line(w - 78, h - 22, w - 24, h - 22);
+  doc.line(mid - 27, h - 24, mid + 27, h - 24);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(6.5);
   doc.setTextColor(...INK_SOFT);
-  doc.text(spaced("TEACHER"), 24, h - 18);
-  doc.text(spaced(formatDate(new Date().toISOString()).toUpperCase()), w - 24, h - 18, {
-    align: "right",
-  });
+  doc.text(spaced("FINISHED"), mid, h - 18, { align: "center" });
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(...INK);
+  doc.text(
+    formatDate(data.completedAt ?? new Date().toISOString()),
+    mid,
+    h - 11,
+    { align: "center" }
+  );
 
   deliver(doc, `little-fox-${data.unitId}-${slug(data.name)}.pdf`);
 }

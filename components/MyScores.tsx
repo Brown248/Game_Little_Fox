@@ -89,6 +89,7 @@ export default function MyScores({
         maxScore: row.max_score,
         timeSeconds: row.time_seconds,
         accuracy: row.max_score > 0 ? row.score / row.max_score : 0,
+        completedAt: row.completed_at,
       });
     } catch (err) {
       console.error("[little-fox] certificate failed:", err);

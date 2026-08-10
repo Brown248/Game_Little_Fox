@@ -20,18 +20,18 @@ vi.mock("@/lib/certificate", () => ({
   warmCertificate: () => {},
 }));
 
-const GAME_ID = "game-02";
+const GAME_ID = "game-03";
 const ME = { id: "p2", name: "Mint" };
 /** A complete run is every scored question in the game. */
-const FULL = 50;
+const FULL = 47;
 
 function row(over: Partial<UnitRankingRow> = {}): UnitRankingRow {
   return {
     player_id: "p1",
     name: "Fai",
     unit_id: GAME_ID,
-    score: 470,
-    max_score: 500,
+    score: 440,
+    max_score: 470,
     time_seconds: 1104,
     completed_at: "",
     ...over,
@@ -43,9 +43,9 @@ function attempt(over: Partial<AttemptRow> = {}): AttemptRow {
     id: "a1",
     player_id: ME.id,
     unit_id: GAME_ID,
-    score: 400,
-    max_score: 500,
-    correct_count: 40,
+    score: 380,
+    max_score: 470,
+    correct_count: 38,
     total_questions: FULL,
     time_seconds: 1500,
     completed_at: "2026-08-10T09:00:00.000Z",
@@ -74,8 +74,8 @@ describe("the ranking", () => {
   // คะแนนที่ทำได้ เวลาที่ใช้ไป".
   it("shows place, name, score and time", async () => {
     getUnitRanking.mockResolvedValue([
-      row({ player_id: "p1", name: "Fai", score: 470, time_seconds: 1104 }),
-      row({ player_id: ME.id, name: "Mint", score: 400, time_seconds: 1500 }),
+      row({ player_id: "p1", name: "Fai", score: 440, time_seconds: 1104 }),
+      row({ player_id: ME.id, name: "Mint", score: 380, time_seconds: 1500 }),
     ]);
     mount();
 
@@ -85,7 +85,7 @@ describe("the ranking", () => {
     const first = within(rows[0]);
     expect(first.getByLabelText("Place 1")).toBeTruthy();
     expect(first.getByText("Fai")).toBeTruthy();
-    expect(first.getByText("470")).toBeTruthy();
+    expect(first.getByText("440")).toBeTruthy();
     expect(first.getByText("18:24")).toBeTruthy();
 
     expect(getUnitRanking).toHaveBeenCalledWith(GAME_ID);
@@ -95,7 +95,7 @@ describe("the ranking", () => {
     // Mint is faster but scored less: a client-side re-sort would move her up
     // and quietly break the ranking rule.
     getUnitRanking.mockResolvedValue([
-      row({ player_id: "p1", name: "Fai", score: 470, time_seconds: 3000 }),
+      row({ player_id: "p1", name: "Fai", score: 440, time_seconds: 3000 }),
       row({ player_id: ME.id, name: "Mint", score: 800, time_seconds: 60 }),
     ]);
     mount();
@@ -188,7 +188,7 @@ describe("the certificate", () => {
 
   it("is offered when at least half the answers were right", async () => {
     getUnitRanking.mockResolvedValue([row({ player_id: ME.id, name: "Mint" })]);
-    getPlayerAttempts.mockResolvedValue([attempt({ correct_count: 25 })]);
+    getPlayerAttempts.mockResolvedValue([attempt({ correct_count: 24 })]);
     mount();
 
     expect(await screen.findByRole("button", CERT)).toBeTruthy();
@@ -196,10 +196,10 @@ describe("the certificate", () => {
 
   it("is withheld below half, and says how many are needed", async () => {
     getUnitRanking.mockResolvedValue([row({ player_id: ME.id, name: "Mint" })]);
-    getPlayerAttempts.mockResolvedValue([attempt({ correct_count: 24 })]);
+    getPlayerAttempts.mockResolvedValue([attempt({ correct_count: 23 })]);
     mount();
 
-    expect(await screen.findByText(/Get 25 right/)).toBeTruthy();
+    expect(await screen.findByText(/Get 24 right/)).toBeTruthy();
     expect(screen.queryByRole("button", CERT)).toBeNull();
   });
 
@@ -219,7 +219,7 @@ describe("the certificate", () => {
   it("ignores runs saved under an older game id", async () => {
     getUnitRanking.mockResolvedValue([row({ player_id: ME.id, name: "Mint" })]);
     getPlayerAttempts.mockResolvedValue([
-      attempt({ unit_id: "unit-01", correct_count: 50 }),
+      attempt({ unit_id: "unit-01", correct_count: 47 }),
     ]);
     mount();
 
@@ -231,9 +231,9 @@ describe("the certificate", () => {
   it("hands the run's real numbers to the PDF", async () => {
     const user = userEvent.setup();
     getUnitRanking.mockResolvedValue([
-      row({ player_id: ME.id, name: "Mint", score: 400, time_seconds: 1500 }),
+      row({ player_id: ME.id, name: "Mint", score: 380, time_seconds: 1500 }),
     ]);
-    getPlayerAttempts.mockResolvedValue([attempt({ correct_count: 40 })]);
+    getPlayerAttempts.mockResolvedValue([attempt({ correct_count: 38 })]);
     mount();
 
     await user.click(await screen.findByRole("button", CERT));
@@ -243,8 +243,8 @@ describe("the certificate", () => {
         expect.objectContaining({
           name: "Mint",
           unitId: GAME_ID,
-          score: 400,
-          maxScore: 500,
+          score: 380,
+          maxScore: 470,
           timeSeconds: 1500,
           rankLabel: "1 / 1",
         })
@@ -257,7 +257,7 @@ describe("the certificate", () => {
   it("shows the reason on screen when the PDF will not build", async () => {
     const user = userEvent.setup();
     getUnitRanking.mockResolvedValue([row({ player_id: ME.id, name: "Mint" })]);
-    getPlayerAttempts.mockResolvedValue([attempt({ correct_count: 40 })]);
+    getPlayerAttempts.mockResolvedValue([attempt({ correct_count: 38 })]);
     downloadCertificate.mockRejectedValue(new Error("Incomplete or corrupt PNG"));
     mount();
 

@@ -30,7 +30,7 @@ describe("StartForm", () => {
   // used to sit here too ("เข้าใจยากมาก"), and the instruction itself was
   // repeated four times over — heading, label, placeholder and a hint below.
   it("asks for a name and nothing else", () => {
-    render(<StartForm questionCount={50} />);
+    render(<StartForm questionCount={47} />);
 
     expect(screen.getByLabelText(NAME_LABEL)).toBeTruthy();
     expect(screen.queryByRole("combobox")).toBeNull();
@@ -41,7 +41,7 @@ describe("StartForm", () => {
 
   it("will not start until a name is typed", async () => {
     const user = userEvent.setup();
-    render(<StartForm questionCount={50} />);
+    render(<StartForm questionCount={47} />);
 
     expect(screen.getByRole("button", START)).toHaveProperty("disabled", true);
 
@@ -51,7 +51,7 @@ describe("StartForm", () => {
 
   it("resolves the player, stores the session and starts the game", async () => {
     const user = userEvent.setup();
-    render(<StartForm questionCount={50} />);
+    render(<StartForm questionCount={47} />);
 
     await user.type(screen.getByLabelText(NAME_LABEL), "  Mint  ");
     await user.click(screen.getByRole("button", START));
@@ -64,7 +64,7 @@ describe("StartForm", () => {
 
   it("starts from the keyboard when Enter is pressed in the name field", async () => {
     const user = userEvent.setup();
-    render(<StartForm questionCount={50} />);
+    render(<StartForm questionCount={47} />);
 
     await user.type(screen.getByLabelText(NAME_LABEL), "Mint{Enter}");
 
@@ -74,7 +74,7 @@ describe("StartForm", () => {
   it("blames the connection only when the connection is the problem", async () => {
     findOrCreatePlayer.mockRejectedValue(new TypeError("Failed to fetch"));
     const user = userEvent.setup();
-    render(<StartForm questionCount={50} />);
+    render(<StartForm questionCount={47} />);
 
     await user.type(screen.getByLabelText(NAME_LABEL), "Mint");
     await user.click(screen.getByRole("button", START));
@@ -92,7 +92,7 @@ describe("StartForm", () => {
       code: "42P01",
     });
     const user = userEvent.setup();
-    render(<StartForm questionCount={50} />);
+    render(<StartForm questionCount={47} />);
 
     await user.type(screen.getByLabelText(NAME_LABEL), "Mint");
     await user.click(screen.getByRole("button", START));
@@ -105,7 +105,7 @@ describe("StartForm", () => {
 
   it("prefills a returning player's name", async () => {
     savePlayer({ id: "p", name: "Ploy" });
-    render(<StartForm questionCount={50} />);
+    render(<StartForm questionCount={47} />);
 
     await waitFor(() =>
       expect(screen.getByLabelText(NAME_LABEL)).toHaveProperty("value", "Ploy")

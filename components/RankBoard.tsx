@@ -129,6 +129,8 @@ export default function RankBoard({
         timeSeconds: mine.time_seconds,
         accuracy: mine.max_score > 0 ? mine.score / mine.max_score : 0,
         rankLabel: `${myIndex + 1} / ${rows?.length ?? 0}`,
+        // the run that earned it, not the moment this button was pressed
+        completedAt: best?.completed_at,
       });
     } catch (err) {
       // Never swallow this: a button that does nothing when pressed is the
@@ -315,7 +317,7 @@ function bestRun(runs: AttemptRow[]): AttemptRow | null {
 /** The run the certificate is judged on: the best COMPLETE one if there is any,
  *  otherwise simply the best.
  *
- *  A certificate, once earned, must not be taken away. Playing all 50 questions
+ *  A certificate, once earned, must not be taken away. Playing all 47 questions
  *  and getting 30 right earns one; coming back, answering 40 and pressing
  *  Finish scores higher, so it becomes the "best" run — and being a partial run
  *  it fails the completeness rule, which withdrew a certificate the child had

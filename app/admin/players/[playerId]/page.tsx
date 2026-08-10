@@ -112,6 +112,7 @@ export default async function AdminPlayerPage({
               score={won.score}
               maxScore={won.max_score}
               timeSeconds={won.time_seconds}
+              completedAt={won.completed_at}
             />
           </div>
         ) : (

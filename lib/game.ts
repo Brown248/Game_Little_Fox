@@ -19,17 +19,21 @@ import type { GameBlock } from "./types";
  *  bump the number and the board starts clean instead of ranking a short run
  *  against a long one.
  *
- *  Bumped once already: `game-01` was the 77-question game. Part C2 then came
- *  down from 25 sentences to 10 and Part 1 from 27 words to 15, both on the
- *  teacher's own screenshots, leaving 50. Those older runs are still in the
- *  database and still listed on /admin — they are simply not ranked against
- *  runs that answered a different set of questions.
+ *  Bumped twice already. `game-01` was the 77-question game. `game-02` was 50:
+ *  Part C2 came down from 25 sentences to 10 and Part 1 from 27 words to 15,
+ *  both on the teacher's own screenshots. `game-03` is 47 — the last three
+ *  listening clues had no recording, so they were read by the device's own
+ *  voice, and the teacher heard the robot ("ทำไมครูบอกมีเสียงบอทอยู่") and had
+ *  them taken out until the mp3s exist.
+ *
+ *  Every older run is still in the database and still listed on /admin. They are
+ *  simply not ranked against runs that answered a different set of questions.
  *
  *  It deliberately does NOT look like `unit-NN`: v_overall_ranking in
  *  supabase/schema.sql filters on `^unit-[0-9]{2}$`, which is what keeps the
  *  old per-unit attempts — Fai's 390/400 and the rest — on their own boards and
  *  out of this one. No SQL had to change for that; the shape does the work. */
-export const GAME_ID = "game-02";
+export const GAME_ID = "game-03";
 
 /** Every block from every unit, in the order they are played.
  *

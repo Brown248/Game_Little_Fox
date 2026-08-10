@@ -83,9 +83,9 @@ itself.
 | Unit | What's in it | Questions / points |
 |---|---|---|
 | `unit-01` **Animal Words** | 15 word scrambles, each with its animal shown as an emoji | 15 / 150 |
-| `unit-02` **Wild Life and Wonderful Creatures** | 10 clue questions, 5 animal sounds, 10 sentence builders, 10 listening clues, 17 unscored writing prompts | 35 / 350 |
+| `unit-02` **Wild Life and Wonderful Creatures** | 10 clue questions, 5 animal sounds, 10 sentence builders, 7 listening clues, 5 unscored writing prompts | 32 / 320 |
 
-The two files play as **one game of 50 questions / 500 points**. Units are still
+The two files play as **one game of 47 questions / 470 points**. Units are still
 how content is written — they match the teacher's paper worksheet — but they are
 no longer something a student picks.
 
@@ -97,7 +97,9 @@ no longer something a student picks.
 - One board, keyed on `GAME_ID` in `lib/game.ts`. Change the content enough to
   move the question count and that id is bumped, so the board starts clean
   rather than ranking runs that answered different questions against each other.
-- Listening audio is pre-generated mp3, not live browser text-to-speech.
+- Listening audio is pre-generated mp3, not live browser text-to-speech. A clue
+  with no recording falls back to the device's own voice, which sounds like a
+  robot — so clues ship only once their mp3 exists, and a test enforces it.
 - Engine and content are fully separate — adding a unit means adding a JSON
   file, not touching any component.
 

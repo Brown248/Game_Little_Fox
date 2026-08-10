@@ -497,8 +497,8 @@ describe("the real game", () => {
       (n, b) => n + (b.type === "writing" ? 0 : b.items.length),
       0
     );
-    expect(questions).toBe(50);
-    expect(questions * 10).toBe(500);
+    expect(questions).toBe(47);
+    expect(questions * 10).toBe(470);
   });
 
   it("opens on the very first animal", async () => {

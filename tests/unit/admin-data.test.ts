@@ -39,7 +39,7 @@ function player(id: string, name = "Mint"): PlayerRow {
 // itself is never re-implemented here — only the grouping around it.
 describe("certificateRoster", () => {
   const GAME = "game-01";
-  const FULL = 50; // scored questions in a complete run
+  const FULL = 47; // scored questions in a complete run
 
   const complete = (over: Partial<AttemptWithPlayer> & { player_id: string }) =>
     attempt({
@@ -47,7 +47,7 @@ describe("certificateRoster", () => {
       total_questions: FULL,
       correct_count: 60,
       score: 600,
-      max_score: 500,
+      max_score: 470,
       ...over,
     });
 
@@ -162,8 +162,8 @@ describe("certificateRoster", () => {
   // another about the same run.
   it("agrees with earnsCertificate on every row", () => {
     const runs = [
-      complete({ player_id: "p1", correct_count: 25 }), // exactly half of 50 -> 25
-      complete({ player_id: "p2", correct_count: 24 }),
+      complete({ player_id: "p1", correct_count: 24 }), // half of 47 rounds up -> 24
+      complete({ player_id: "p2", correct_count: 23 }),
       attempt({
         player_id: "p3",
         unit_id: GAME,

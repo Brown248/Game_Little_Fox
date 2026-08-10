@@ -121,7 +121,7 @@ describe("unit loader", () => {
     const counts = unit!.games.map((g) =>
       g.type === "writing" ? g.prompt.questions.length : g.items.length
     );
-    expect(counts).toEqual([10, 5, 10, 10, 17]);
+    expect(counts).toEqual([10, 5, 10, 7, 5]);
   });
 
   // Two rules the teacher set for Part C2 after watching a class use it.
@@ -319,11 +319,11 @@ describe("unit loader", () => {
   describe("audit", () => {
     it("computes questions and max score, excluding writing", () => {
       const audit = auditUnits().find((a) => a.id === "unit-02")!;
-      // 10 quiz + 5 sounds + 10 sentences + 10 creatures = 35 scored questions.
-      // Part B and Part C2 were both cut down to the questions the teacher
-      // screenshotted and asked to keep.
-      expect(audit.questionCount).toBe(35);
-      expect(audit.maxScore).toBe(350);
+      // 10 quiz + 5 sounds + 10 sentences + 7 creatures = 32 scored questions.
+      // Part B and Part C2 were cut to the questions the teacher screenshotted;
+      // Part D lost the three clues that had no recording.
+      expect(audit.questionCount).toBe(32);
+      expect(audit.maxScore).toBe(320);
       expect(audit.gameCount).toBe(5);
       expect(audit.hasWriting).toBe(true);
       expect(audit.writingIsLast).toBe(true);
@@ -332,9 +332,10 @@ describe("unit loader", () => {
     it("counts writing questions in the block list but not in the score", () => {
       const audit = auditUnits().find((a) => a.id === "unit-02")!;
       const writing = audit.blocks.find((b) => b.type === "writing")!;
-      // 7 spirit-animal frames + 10 speaking prompts
-      expect(writing.count).toBe(17);
-      expect(audit.blocks.reduce((n, b) => n + b.count, 0)).toBe(52);
+      // The teacher replaced 17 sentence frames with 5 open questions:
+      // "Part เขียนปรับให้เหลือแค่นี้พอ".
+      expect(writing.count).toBe(5);
+      expect(audit.blocks.reduce((n, b) => n + b.count, 0)).toBe(37);
     });
 
     // The teacher's "what still needs recording" list. A clue with no audioUrl
@@ -349,9 +350,12 @@ describe("unit loader", () => {
       const withoutAudio = block.items.length - withAudio;
 
       expect(audit.audio).toHaveLength(withoutAudio);
-      expect(audit.audio.every((clip) => clip.fileExists === false)).toBe(true);
-      expect(audit.audio.every((clip) => clip.audioUrl === "")).toBe(true);
-      expect(audit.audio.map((clip) => clip.position)).toEqual([8, 9, 10]);
+      // Every shipped clue has its mp3 now: the three that did not were read by
+      // the device voice, the teacher heard the robot, and they were taken out
+      // rather than left on it. Should any clue lose its recording, this list is
+      // what surfaces it.
+      expect(withoutAudio).toBe(0);
+      expect(audit.audio).toEqual([]);
     });
 
     it("reports a unit with no listening block as having no clips", () => {

@@ -228,10 +228,28 @@ describe("certificate", () => {
     expect(calls.save[0]).toBe("little-fox-unit-02-mint-suwan.pdf");
   });
 
-  it("prints teacher and date lines", async () => {
+  // Nobody ever signed it, so the line and the label went. Keeping them meant
+  // handing a child a page with a blank waiting to be filled in by someone who
+  // was never going to fill it in.
+  it("has no signature line for a teacher", async () => {
     await downloadCertificate(data);
-    expect(printed()).toContain(spaced("TEACHER"));
-    expect(printed().some((t) => /\d/.test(t) && t.includes(" "))).toBe(true);
+    expect(printed().join(" ")).not.toMatch(/T\s?E\s?A\s?C\s?H\s?E\s?R/);
+    expect(printed().join(" ").toLowerCase()).not.toContain("sign");
+  });
+
+  // The date of the RUN. It used to stamp new Date(), so a teacher printing a
+  // stack of these a week later put next week's date on every one of them.
+  it("stamps the day the run was finished, not the day it was printed", async () => {
+    await downloadCertificate({ ...data, completedAt: "2026-03-09T04:05:00.000Z" });
+    expect(printed()).toContain(spaced("FINISHED"));
+    expect(printed().some((t) => t.includes("9 March 2026"))).toBe(true);
+  });
+
+  it("falls back to today when the run has no timestamp", async () => {
+    await downloadCertificate(data);
+    expect(printed()).toContain(spaced("FINISHED"));
+    // a real date got printed rather than an em dash placeholder
+    expect(printed().some((t) => /\d{4}/.test(t))).toBe(true);
   });
 
   it("names the file after the unit and student", async () => {

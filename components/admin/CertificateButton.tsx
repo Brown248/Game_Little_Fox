@@ -10,6 +10,9 @@ interface Props {
   score: number;
   maxScore: number;
   timeSeconds: number;
+  /** When the run happened. A teacher printing a stack of these weeks later
+   *  must not stamp today's date on every child's certificate. */
+  completedAt: string;
 }
 
 // Prints one student's certificate from the teacher's own device.
@@ -27,6 +30,7 @@ export default function CertificateButton({
   score,
   maxScore,
   timeSeconds,
+  completedAt,
 }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +53,7 @@ export default function CertificateButton({
         maxScore,
         timeSeconds,
         accuracy: maxScore > 0 ? score / maxScore : 0,
+        completedAt,
       });
     } catch (err) {
       console.error("[little-fox] admin certificate failed:", err);

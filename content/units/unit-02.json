@@ -378,33 +378,6 @@
             "Yeti"
           ],
           "answerIndex": 2
-        },
-        {
-          "clueText": "I am a giant bird. When I die, I become ashes. Then I am born again.",
-          "options": [
-            "Griffin",
-            "Phoenix",
-            "Dragon"
-          ],
-          "answerIndex": 1
-        },
-        {
-          "clueText": "I am a mini human with wings. I live deep in the forest. I protect the living things.",
-          "options": [
-            "Mermaid",
-            "Fairy",
-            "Naga"
-          ],
-          "answerIndex": 1
-        },
-        {
-          "clueText": "I am half woman and half fish. I live deep in the ocean. I sing beautiful songs.",
-          "options": [
-            "Mermaid",
-            "Elf",
-            "Naga"
-          ],
-          "answerIndex": 0
         }
       ]
     },
@@ -413,23 +386,11 @@
       "title": "Part E · Speaking and Writing",
       "prompt": {
         "questions": [
-          "My spirit animal is…",
-          "It is…",
-          "It can…",
-          "It lives…",
-          "It eats…",
-          "I like it because…",
-          "My spirit animal helps me…",
-          "Speaking Time — ask your partner, then write the answer: What is your favorite animal? Why?",
-          "Speaking Time: Which animal is the cutest?",
-          "Speaking Time: Which animal can fly?",
-          "Speaking Time: Which animal lives in the ocean?",
-          "Speaking Time: Which animal has claws?",
-          "Speaking Time: What animal would you like as a pet?",
-          "Speaking Time: What is the biggest animal in the world?",
-          "Speaking Time: Which animal is the fastest?",
-          "Speaking Time: Do you believe dragons are real? Why or why not?",
-          "Speaking Time: If you could have one mythological creature as a friend, which one would you choose?"
+          "Give me 3 animals that are friendly to humans.",
+          "Give me 3 animals that are dangerous.",
+          "What's your favorite animal? Tell me about it.",
+          "What does your spirit animal look like?",
+          "Which Aesop's fable do you like, and why?"
         ]
       }
     }
