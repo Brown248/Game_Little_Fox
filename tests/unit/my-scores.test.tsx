@@ -21,7 +21,7 @@ vi.mock("@/lib/certificate", () => ({
 
 const GAME_ID = "game-01";
 /** A complete run of the current game. */
-const FULL = 77;
+const FULL = 62;
 
 const TITLES = {
   "unit-01": "Shadow Animal Challenge",

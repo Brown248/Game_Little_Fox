@@ -5,7 +5,7 @@
     {
       "type": "unscramble",
       "items": [
-        { "shadow": "🐘", "scrambled": "PHETNALE", "answer": "ELEPHANT" },
+        { "emoji": "🐘", "scrambled": "PHETNALE", "answer": "ELEPHANT" },
         { "scrambled": "NOIL", "answer": "LION" }
       ]
     },

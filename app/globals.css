@@ -1107,16 +1107,13 @@ html {
   font-weight: 800;
 }
 
-/* ---------- shadow animal ---------- */
+/* ---------- the animal above the letters ---------- */
 
-/* The emoji is rendered as a pure silhouette (brightness(0) keeps the alpha
-   shape and blacks out every pixel), then lights up in colour when answered.
-   This is the whole question: whose shadow is this?
-
-   The drawn-artwork frame that used to sit above this (.art, aspect-ratio 16/9,
-   holding a real picture that crossfaded out of its own silhouette) is gone —
-   the teacher had every animal picture removed and asked for the emoji alone. */
-.shadow-stage {
+/* One emoji, in colour. Two things used to live here and both were removed on
+   the teacher's instruction: a drawn-artwork frame (.art, aspect-ratio 16/9)
+   holding a real picture, and the brightness(0) silhouette that hid the emoji
+   until the child answered. Do not bring either back. */
+.animal-stage {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1124,22 +1121,13 @@ html {
   padding: 10px 0 6px;
 }
 
-.shadow-animal {
+/* The part asks how the word is spelled, so the animal is never the puzzle. */
+.animal-emoji {
   font-size: clamp(76px, 18vw, 140px);
   line-height: 1;
-  filter: brightness(0) drop-shadow(0 8px 10px rgba(46, 42, 38, 0.18));
-  transition: filter 0.45s ease, transform 0.45s var(--spring);
-  animation: weFloat 4s ease-in-out infinite;
-  will-change: filter, transform;
-}
-
-.shadow-animal--lit {
   filter: drop-shadow(0 10px 14px rgba(46, 42, 38, 0.16));
-  animation: weReveal 0.6s var(--spring);
-}
-
-.shadow-stage__hint {
-  animation: weTick 0.4s var(--spring);
+  animation: weFloat 4s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* the scrambled letters */
@@ -2338,19 +2326,6 @@ html {
   }
 }
 
-/* the shadow stepping into the light */
-@keyframes weReveal {
-  0% {
-    transform: scale(0.9) rotate(-4deg);
-  }
-  55% {
-    transform: scale(1.12) rotate(3deg);
-  }
-  100% {
-    transform: scale(1) rotate(0deg);
-  }
-}
-
 
 
 /* ============================ accessibility ============================== */
@@ -2371,7 +2346,7 @@ html {
 
   /* the endless loops go entirely — a 0.01ms infinite animation still runs */
   .logo,
-  .shadow-animal,
+  .animal-emoji,
   .board-title span,
   .board__crown,
   .door__fox,

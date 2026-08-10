@@ -37,7 +37,7 @@ describe("unit loader", () => {
   it("reports each unit's scored question count and points", () => {
     const units = listUnits();
     const first = units.find((u) => u.id === "unit-01")!;
-    // 27 emoji silhouettes. Three animals came out on the teacher's list after
+    // 27 emoji. Three animals came out on the teacher's list after
     // the first lesson — giraffe, flamingo and parrot — and the eight that had
     // been drawn as real pictures went when she asked for every animal picture
     // to be removed and the emoji kept.
@@ -56,18 +56,18 @@ describe("unit loader", () => {
     expect(listBrokenUnitFiles()).toEqual([]);
   });
 
-  // Unit 1 is one block of emoji silhouettes.
-  it("loads the shadow challenge as one block of emoji", () => {
+  // Unit 1 is one block of emoji.
+  it("loads the animal words as one block of emoji", () => {
     const unit = getUnit("unit-01");
     expect(unit).not.toBeNull();
-    expect(unit!.title).toBe("Shadow Animal Challenge");
+    expect(unit!.title).toBe("Animal Words");
     expect(unit!.games.map((g) => g.type)).toEqual(["unscramble"]);
 
     const [block] = unit!.games;
     if (block.type !== "unscramble") throw new Error("wrong block type");
 
     expect(block.items).toHaveLength(27);
-    expect(block.items.every((item) => item.shadow)).toBe(true);
+    expect(block.items.every((item) => item.emoji)).toBe(true);
   });
 
   // The teacher had every animal picture removed: the files, the build script
@@ -122,7 +122,7 @@ describe("unit loader", () => {
     const counts = unit!.games.map((g) =>
       g.type === "writing" ? g.prompt.questions.length : g.items.length
     );
-    expect(counts).toEqual([10, 5, 25, 10, 17]);
+    expect(counts).toEqual([10, 5, 10, 10, 17]);
   });
 
   // Two rules the teacher set for Part C2 after watching a class use it.
@@ -320,11 +320,11 @@ describe("unit loader", () => {
   describe("audit", () => {
     it("computes questions and max score, excluding writing", () => {
       const audit = auditUnits().find((a) => a.id === "unit-02")!;
-      // 10 quiz + 5 sounds + 25 sentences + 10 creatures = 50 scored questions.
-      // Part B kept only the ten questions the teacher screenshotted, and Part
-      // C2 lost its five "loudly" sentences earlier.
-      expect(audit.questionCount).toBe(50);
-      expect(audit.maxScore).toBe(500);
+      // 10 quiz + 5 sounds + 10 sentences + 10 creatures = 35 scored questions.
+      // Part B and Part C2 were both cut down to the questions the teacher
+      // screenshotted and asked to keep.
+      expect(audit.questionCount).toBe(35);
+      expect(audit.maxScore).toBe(350);
       expect(audit.gameCount).toBe(5);
       expect(audit.hasWriting).toBe(true);
       expect(audit.writingIsLast).toBe(true);
@@ -335,7 +335,7 @@ describe("unit loader", () => {
       const writing = audit.blocks.find((b) => b.type === "writing")!;
       // 7 spirit-animal frames + 10 speaking prompts
       expect(writing.count).toBe(17);
-      expect(audit.blocks.reduce((n, b) => n + b.count, 0)).toBe(67);
+      expect(audit.blocks.reduce((n, b) => n + b.count, 0)).toBe(52);
     });
 
     // The teacher's "what still needs recording" list. A clue with no audioUrl

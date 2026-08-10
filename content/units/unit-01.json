@@ -1,143 +1,143 @@
 {
   "id": "unit-01",
-  "title": "Shadow Animal Challenge",
+  "title": "Animal Words",
   "games": [
     {
       "type": "unscramble",
-      "title": "Part 1 · Shadow Animals",
+      "title": "Part 1 · Animal Words",
       "items": [
         {
-          "shadow": "🐘",
+          "emoji": "🐘",
           "scrambled": "PHETNALE",
           "answer": "ELEPHANT"
         },
         {
-          "shadow": "🦁",
+          "emoji": "🦁",
           "scrambled": "NOIL",
           "answer": "LION"
         },
         {
-          "shadow": "🐯",
+          "emoji": "🐯",
           "scrambled": "GREIT",
           "answer": "TIGER"
         },
         {
-          "shadow": "🦓",
+          "emoji": "🦓",
           "scrambled": "BREAZ",
           "answer": "ZEBRA"
         },
         {
-          "shadow": "🐒",
+          "emoji": "🐒",
           "scrambled": "EKYMNO",
           "answer": "MONKEY"
         },
         {
-          "shadow": "🦍",
+          "emoji": "🦍",
           "scrambled": "LIGROLA",
           "answer": "GORILLA"
         },
         {
-          "shadow": "🐼",
+          "emoji": "🐼",
           "scrambled": "ANDPA",
           "answer": "PANDA"
         },
         {
-          "shadow": "🦊",
+          "emoji": "🦊",
           "scrambled": "XOF",
           "answer": "FOX"
         },
         {
-          "shadow": "🐺",
+          "emoji": "🐺",
           "scrambled": "FLWO",
           "answer": "WOLF"
         },
         {
-          "shadow": "🦌",
+          "emoji": "🦌",
           "scrambled": "REDE",
           "answer": "DEER"
         },
         {
-          "shadow": "🐰",
+          "emoji": "🐰",
           "scrambled": "BITRAB",
           "answer": "RABBIT"
         },
         {
-          "shadow": "🐻",
+          "emoji": "🐻",
           "scrambled": "REAB",
           "answer": "BEAR"
         },
         {
-          "shadow": "🐫",
+          "emoji": "🐫",
           "scrambled": "EMLCA",
           "answer": "CAMEL"
         },
         {
-          "shadow": "🦘",
+          "emoji": "🦘",
           "scrambled": "RAOKAGNO",
           "answer": "KANGAROO"
         },
         {
-          "shadow": "🐨",
+          "emoji": "🐨",
           "scrambled": "AKAOL",
           "answer": "KOALA"
         },
         {
-          "shadow": "🐊",
+          "emoji": "🐊",
           "scrambled": "DOLICRECO",
           "answer": "CROCODILE"
         },
         {
-          "shadow": "🐍",
+          "emoji": "🐍",
           "scrambled": "AKENS",
           "answer": "SNAKE"
         },
         {
-          "shadow": "🐢",
+          "emoji": "🐢",
           "scrambled": "TTELUR",
           "answer": "TURTLE"
         },
         {
-          "shadow": "🐸",
+          "emoji": "🐸",
           "scrambled": "GORF",
           "answer": "FROG"
         },
         {
-          "shadow": "🦅",
+          "emoji": "🦅",
           "scrambled": "ELGAE",
           "answer": "EAGLE"
         },
         {
-          "shadow": "🦉",
+          "emoji": "🦉",
           "scrambled": "LOW",
           "answer": "OWL"
         },
         {
-          "shadow": "🐧",
+          "emoji": "🐧",
           "scrambled": "NPUNEGI",
           "answer": "PENGUIN"
         },
         {
-          "shadow": "🦋",
+          "emoji": "🦋",
           "scrambled": "RUBYTLTEF",
           "answer": "BUTTERFLY"
         },
         {
-          "shadow": "🐬",
+          "emoji": "🐬",
           "scrambled": "HODPNIL",
           "answer": "DOLPHIN"
         },
         {
-          "shadow": "🐳",
+          "emoji": "🐳",
           "scrambled": "LWAEH",
           "answer": "WHALE"
         },
         {
-          "shadow": "🦈",
+          "emoji": "🦈",
           "scrambled": "AKRSH",
           "answer": "SHARK"
         },
         {
-          "shadow": "🐙",
+          "emoji": "🐙",
           "scrambled": "TOCPSOU",
           "answer": "OCTOPUS"
         }

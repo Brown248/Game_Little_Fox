@@ -91,7 +91,7 @@ describe("the English on screen", () => {
       "my scores",
       () =>
         render(
-          <MyScores unitTitles={{}} gameId="game-01" fullQuestionCount={77} />
+          <MyScores unitTitles={{}} gameId="game-01" fullQuestionCount={62} />
         ),
     ],
     [

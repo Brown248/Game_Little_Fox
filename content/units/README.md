@@ -37,9 +37,12 @@ The `writing` block is never scored and the text is never stored. Keep it last.
 case-insensitively after trimming. Write both in CAPITALS for consistency.
 `scrambled` must be a real anagram of `answer` — same letters, same counts — or
 the puzzle is impossible; `npm test` checks every shipped unit for this.
-Optional `shadow`: one emoji, shown as a **black silhouette** above the letters
-and revealed in colour once the student answers. That is the Shadow Animal
-Challenge; leave it out and the block is a plain word scramble.
+Optional `emoji`: one emoji, shown in full colour above the letters. Leave it
+out and the block is a plain word scramble.
+
+> It used to be blacked out into a silhouette until the child answered. The
+> teacher had that removed — the job in this part is spelling the word, not
+> working out which animal it is. Do not put the silhouette back.
 
 > There was also an `art` field for eight animals that had been drawn as real
 > pictures, with a build script and a folder of WebP files behind it. The

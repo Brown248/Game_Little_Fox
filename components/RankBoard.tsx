@@ -315,8 +315,8 @@ function bestRun(runs: AttemptRow[]): AttemptRow | null {
 /** The run the certificate is judged on: the best COMPLETE one if there is any,
  *  otherwise simply the best.
  *
- *  A certificate, once earned, must not be taken away. Playing all 77 questions
- *  and getting 40 right earns one; coming back, answering 50 and pressing
+ *  A certificate, once earned, must not be taken away. Playing all 62 questions
+ *  and getting 35 right earns one; coming back, answering 50 and pressing
  *  Finish scores higher, so it becomes the "best" run — and being a partial run
  *  it fails the completeness rule, which withdrew a certificate the child had
  *  already been given. Nothing they did was wrong, and nothing told them why. */

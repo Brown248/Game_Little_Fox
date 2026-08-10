@@ -30,7 +30,7 @@ const UNIT: UnitConfig = {
     {
       type: "unscramble",
       items: [
-        { shadow: "🐘", scrambled: "PHETNALE", answer: "ELEPHANT" },
+        { emoji: "🐘", scrambled: "PHETNALE", answer: "ELEPHANT" },
         { scrambled: "NOIL", answer: "LION" },
       ],
     },
@@ -471,11 +471,11 @@ describe("the real game", () => {
       (n, b) => n + (b.type === "writing" ? 0 : b.items.length),
       0
     );
-    expect(questions).toBe(77);
-    expect(questions * 10).toBe(770);
+    expect(questions).toBe(62);
+    expect(questions * 10).toBe(620);
   });
 
-  it("opens on the very first shadow", async () => {
+  it("opens on the very first animal", async () => {
     savePlayer(PLAYER);
     render(<PlayClient games={buildGame()} gameId={GAME_ID} />);
 
@@ -483,7 +483,7 @@ describe("the real game", () => {
       await screen.findByRole("heading", { name: "Make the word" })
     ).toBeTruthy();
     expect(screen.getByText("PHETNALE")).toBeTruthy();
-    expect(screen.getByLabelText("shadow of an animal")).toBeTruthy();
+    expect(screen.getByLabelText("elephant")).toBeTruthy();
     expect(screen.getByText("1 / 27")).toBeTruthy();
     expect(screen.getByText(/part 1 of 6/i)).toBeTruthy();
   });

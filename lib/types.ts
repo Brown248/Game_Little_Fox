@@ -14,14 +14,15 @@ export interface QuizChoiceItem {
 export interface UnscrambleItem {
   scrambled: string;
   answer: string;
-  /** One emoji, drawn as a black silhouette above the letters and revealed in
-   *  colour once the student answers — the Shadow Animal Challenge. Leave it
-   *  out and the block is a plain word scramble.
+  /** One emoji, shown in full colour above the letters. Leave it out and the
+   *  block is a plain word scramble.
    *
-   *  There was an `art` field beside this one for eight animals that had been
-   *  drawn properly, shown as a picture instead. The teacher had all of it
-   *  removed; do not add it back. */
-  shadow?: string;
+   *  It used to be blacked out into a silhouette until the child answered —
+   *  "whose shadow is this?" — and the teacher asked for that to go: the job
+   *  here is spelling the word, not identifying the animal. Do not put the
+   *  silhouette back, and do not add a picture field beside this one either;
+   *  drawn artwork was removed for the same reason. */
+  emoji?: string;
 }
 
 export interface SentenceBuilderItem {

@@ -130,7 +130,7 @@
           "answerIndex": 2
         },
         {
-          "clue": "Which animal says \"Bark!\"?",
+          "clue": "Which animal says \"Woof!\"?",
           "options": [
             "Cat",
             "Cow",
@@ -259,21 +259,6 @@
           ]
         },
         {
-          "prompt": "🦉",
-          "words": [
-            "softly",
-            "owl",
-            "hoots",
-            "the"
-          ],
-          "answer": [
-            "the",
-            "owl",
-            "hoots",
-            "softly"
-          ]
-        },
-        {
           "prompt": "🐸",
           "words": [
             "frog",
@@ -289,81 +274,6 @@
           ]
         },
         {
-          "prompt": "🐴",
-          "words": [
-            "runs",
-            "the",
-            "fast",
-            "horse"
-          ],
-          "answer": [
-            "the",
-            "horse",
-            "runs",
-            "fast"
-          ]
-        },
-        {
-          "prompt": "🐟",
-          "words": [
-            "quietly",
-            "fish",
-            "swims",
-            "the"
-          ],
-          "answer": [
-            "the",
-            "fish",
-            "swims",
-            "quietly"
-          ]
-        },
-        {
-          "prompt": "🦅",
-          "words": [
-            "flies",
-            "eagle",
-            "high",
-            "the"
-          ],
-          "answer": [
-            "the",
-            "eagle",
-            "flies",
-            "high"
-          ]
-        },
-        {
-          "prompt": "🐢",
-          "words": [
-            "slowly",
-            "the",
-            "walks",
-            "turtle"
-          ],
-          "answer": [
-            "the",
-            "turtle",
-            "walks",
-            "slowly"
-          ]
-        },
-        {
-          "prompt": "🐒",
-          "words": [
-            "monkey",
-            "climbs",
-            "quickly",
-            "the"
-          ],
-          "answer": [
-            "the",
-            "monkey",
-            "climbs",
-            "quickly"
-          ]
-        },
-        {
           "prompt": "🐝",
           "words": [
             "honey",
@@ -376,141 +286,6 @@
             "bee",
             "makes",
             "honey"
-          ]
-        },
-        {
-          "prompt": "🕷️",
-          "words": [
-            "spins",
-            "spider",
-            "webs",
-            "the"
-          ],
-          "answer": [
-            "the",
-            "spider",
-            "spins",
-            "webs"
-          ]
-        },
-        {
-          "prompt": "🐰",
-          "words": [
-            "fast",
-            "hops",
-            "the",
-            "rabbit"
-          ],
-          "answer": [
-            "the",
-            "rabbit",
-            "hops",
-            "fast"
-          ]
-        },
-        {
-          "prompt": "🐘",
-          "words": [
-            "leaves",
-            "elephant",
-            "the",
-            "eats"
-          ],
-          "answer": [
-            "the",
-            "elephant",
-            "eats",
-            "leaves"
-          ]
-        },
-        {
-          "prompt": "🐼",
-          "words": [
-            "bamboo",
-            "the",
-            "panda",
-            "eats"
-          ],
-          "answer": [
-            "the",
-            "panda",
-            "eats",
-            "bamboo"
-          ]
-        },
-        {
-          "prompt": "🐫",
-          "words": [
-            "walks",
-            "camel",
-            "the",
-            "far"
-          ],
-          "answer": [
-            "the",
-            "camel",
-            "walks",
-            "far"
-          ]
-        },
-        {
-          "prompt": "🐧",
-          "words": [
-            "well",
-            "penguin",
-            "swims",
-            "the"
-          ],
-          "answer": [
-            "the",
-            "penguin",
-            "swims",
-            "well"
-          ]
-        },
-        {
-          "prompt": "🐯",
-          "words": [
-            "quietly",
-            "hunts",
-            "tiger",
-            "the"
-          ],
-          "answer": [
-            "the",
-            "tiger",
-            "hunts",
-            "quietly"
-          ]
-        },
-        {
-          "prompt": "🦌",
-          "words": [
-            "deer",
-            "quickly",
-            "the",
-            "runs"
-          ],
-          "answer": [
-            "the",
-            "deer",
-            "runs",
-            "quickly"
-          ]
-        },
-        {
-          "prompt": "🐬",
-          "words": [
-            "swims",
-            "dolphin",
-            "fast",
-            "the"
-          ],
-          "answer": [
-            "the",
-            "dolphin",
-            "swims",
-            "fast"
           ]
         },
         {

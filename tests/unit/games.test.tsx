@@ -76,46 +76,46 @@ describe("Unscramble", () => {
     expect(screen.queryByRole("button", { name: "Check" })).toBeNull();
   });
 
-  // The Shadow Animal Challenge: the emoji is a black silhouette until the
-  // student answers, then it lights up in colour.
-  it("shows a shadow silhouette when the item has one, and lights it up", async () => {
+  // The emoji is in colour from the start. It used to be blacked out until the
+  // child answered — "whose shadow is this?" — and the teacher had that taken
+  // out: this part asks how the word is spelled, not which animal it is.
+  it("shows the animal in colour straight away, before any answer", async () => {
     const user = userEvent.setup();
     render(
       <Unscramble
-        items={[{ shadow: "🐘", scrambled: "PHETNALE", answer: "ELEPHANT" }]}
+        items={[{ emoji: "🐘", scrambled: "PHETNALE", answer: "ELEPHANT" }]}
         {...handlers()}
       />
     );
 
-    const shadow = screen.getByLabelText("shadow of an animal");
-    expect(shadow.className).toContain("shadow-animal");
-    expect(shadow.className).not.toContain("shadow-animal--lit");
-    expect(screen.getByText(/whose shadow is this/)).toBeTruthy();
+    const animal = screen.getByLabelText("elephant");
+    expect(animal.textContent).toBe("🐘");
+    expect(animal.className).toContain("animal-emoji");
+    // nothing left that hides it or asks the child to guess it
+    expect(animal.className).not.toMatch(/shadow/);
+    expect(screen.queryByText(/shadow/i)).toBeNull();
 
     await user.type(screen.getByLabelText("Your answer"), "ELEPHANT{Enter}");
 
-    const lit = screen.getByLabelText("ELEPHANT");
-    expect(lit.className).toContain("shadow-animal--lit");
-    expect(screen.queryByText(/whose shadow is this/)).toBeNull();
+    // answering changes the word, not the picture
+    expect(screen.getByLabelText("elephant").className).toContain("animal-emoji");
   });
 
-  it("lights the shadow up even when the answer was wrong", async () => {
-    const user = userEvent.setup();
+  it("names the animal for a screen reader, in lower case", () => {
     render(
       <Unscramble
-        items={[{ shadow: "🦁", scrambled: "NOIL", answer: "LION" }]}
+        items={[{ emoji: "🦁", scrambled: "NOIL", answer: "LION" }]}
         {...handlers()}
       />
     );
-
-    await user.type(screen.getByLabelText("Your answer"), "TIGER{Enter}");
-    expect(screen.getByLabelText("LION").className).toContain("shadow-animal--lit");
+    // a screen reader spells ALL CAPS out letter by letter
+    expect(screen.getByLabelText("lion")).toBeTruthy();
+    expect(screen.queryByLabelText("LION")).toBeNull();
   });
 
-  it("renders nothing extra when an item has no shadow", () => {
+  it("renders nothing extra when an item has no emoji", () => {
     render(<Unscramble items={items} {...handlers()} />);
-    expect(screen.queryByLabelText("shadow of an animal")).toBeNull();
-    expect(screen.queryByText(/whose shadow is this/)).toBeNull();
+    expect(screen.queryByRole("img")).toBeNull();
   });
 
   it("advances through items and finishes the block", async () => {

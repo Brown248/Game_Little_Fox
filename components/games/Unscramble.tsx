@@ -11,15 +11,16 @@ interface Props {
   onDone: () => void;
 }
 
-// Whose shadow is this? The emoji shows as a black silhouette, the child spells
-// the animal's name out of the jumbled letters, and the shadow lights up in
-// colour once they answer.
+// The animal, then its name spelled out of the jumbled letters.
 //
-// There was a second kind of question here for a while: eight animals that had
-// been drawn properly, shown as a picture instead of an emoji. The teacher had
-// them taken out — "เอาพวกภาพที่ฉัน add เข้าไปอะพวกภาพสัตว์เอาออกให้หมด เอาแค่
-// อิโมจิมาใน Part เเรก" — so the artwork, the build script and the files all
-// went with them. One kind of question, one silhouette.
+// The emoji used to be blacked out into a silhouette until the child answered —
+// "whose shadow is this?" — and the teacher had that taken out. The question in
+// this part is how the word is spelled, and a child who cannot make out the
+// silhouette is stuck on something this part was never asking.
+//
+// Drawn animal pictures went the same way earlier — "เอาพวกภาพที่ฉัน add เข้าไป
+// อะพวกภาพสัตว์เอาออกให้หมด เอาแค่อิโมจิมาใน Part เเรก" — artwork, build script
+// and files. One emoji, in colour, and nothing else.
 export default function Unscramble({ items, onAnswer, onDone }: Props) {
   const [index, setIndex] = useState(0);
   const [guess, setGuess] = useState("");
@@ -56,26 +57,22 @@ export default function Unscramble({ items, onAnswer, onDone }: Props) {
         answered={answered}
       />
 
-      {/* the shadow and the jumbled letters on one side, the answer box on the
+      {/* the animal and the jumbled letters on one side, the answer box on the
           other — a single column once the glass gets narrow */}
       <div className="q split" key={index}>
         <div className="card card--soft">
-          {item.shadow && (
-            <div className="shadow-stage">
+          {item.emoji && (
+            <div className="animal-stage">
+              {/* Named for a screen reader, because the emoji is named for
+                  everyone else. Lower case: a reader spells out ALL CAPS. */}
               <span
-                className={`shadow-animal${answered ? " shadow-animal--lit" : ""}`}
+                className="animal-emoji"
                 role="img"
-                aria-label={answered ? item.answer : "shadow of an animal"}
+                aria-label={item.answer.toLowerCase()}
               >
-                {item.shadow}
+                {item.emoji}
               </span>
             </div>
-          )}
-
-          {!answered && item.shadow && (
-            <p className="shadow-stage__hint kicker kicker--faint center">
-              whose shadow is this?
-            </p>
           )}
 
           <p className="scrambled">{item.scrambled}</p>
