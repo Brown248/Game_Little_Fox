@@ -32,11 +32,6 @@
           "answer": "MONKEY"
         },
         {
-          "emoji": "🦍",
-          "scrambled": "LIGROLA",
-          "answer": "GORILLA"
-        },
-        {
           "emoji": "🐼",
           "scrambled": "ANDPA",
           "answer": "PANDA"
@@ -52,34 +47,14 @@
           "answer": "WOLF"
         },
         {
-          "emoji": "🦌",
-          "scrambled": "REDE",
-          "answer": "DEER"
-        },
-        {
           "emoji": "🐰",
           "scrambled": "BITRAB",
           "answer": "RABBIT"
         },
         {
-          "emoji": "🐻",
-          "scrambled": "REAB",
-          "answer": "BEAR"
-        },
-        {
-          "emoji": "🐫",
-          "scrambled": "EMLCA",
-          "answer": "CAMEL"
-        },
-        {
           "emoji": "🦘",
           "scrambled": "RAOKAGNO",
           "answer": "KANGAROO"
-        },
-        {
-          "emoji": "🐨",
-          "scrambled": "AKAOL",
-          "answer": "KOALA"
         },
         {
           "emoji": "🐊",
@@ -92,31 +67,6 @@
           "answer": "SNAKE"
         },
         {
-          "emoji": "🐢",
-          "scrambled": "TTELUR",
-          "answer": "TURTLE"
-        },
-        {
-          "emoji": "🐸",
-          "scrambled": "GORF",
-          "answer": "FROG"
-        },
-        {
-          "emoji": "🦅",
-          "scrambled": "ELGAE",
-          "answer": "EAGLE"
-        },
-        {
-          "emoji": "🦉",
-          "scrambled": "LOW",
-          "answer": "OWL"
-        },
-        {
-          "emoji": "🐧",
-          "scrambled": "NPUNEGI",
-          "answer": "PENGUIN"
-        },
-        {
           "emoji": "🦋",
           "scrambled": "RUBYTLTEF",
           "answer": "BUTTERFLY"
@@ -125,16 +75,6 @@
           "emoji": "🐬",
           "scrambled": "HODPNIL",
           "answer": "DOLPHIN"
-        },
-        {
-          "emoji": "🐳",
-          "scrambled": "LWAEH",
-          "answer": "WHALE"
-        },
-        {
-          "emoji": "🦈",
-          "scrambled": "AKRSH",
-          "answer": "SHARK"
         },
         {
           "emoji": "🐙",

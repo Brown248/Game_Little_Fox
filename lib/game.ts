@@ -16,13 +16,14 @@ import type { GameBlock } from "./types";
  *  The trailing number is not decoration. A score only means something next to
  *  another score from the SAME set of questions, so when the content changes
  *  enough to move the total (the teacher has already said more is coming),
- *  bump the number and the board starts clean instead of putting a run of 62
- *  questions next to a run of 77.
+ *  bump the number and the board starts clean instead of ranking a short run
+ *  against a long one.
  *
- *  Bumped once already. `game-01` was the 77-question game; Part C2 then came
- *  down from 25 sentences to the 10 the teacher screenshotted. Those older runs
- *  are still in the database and still listed on /admin — they are simply not
- *  ranked against runs that answered a different set of questions.
+ *  Bumped once already: `game-01` was the 77-question game. Part C2 then came
+ *  down from 25 sentences to 10 and Part 1 from 27 words to 15, both on the
+ *  teacher's own screenshots, leaving 50. Those older runs are still in the
+ *  database and still listed on /admin — they are simply not ranked against
+ *  runs that answered a different set of questions.
  *
  *  It deliberately does NOT look like `unit-NN`: v_overall_ranking in
  *  supabase/schema.sql filters on `^unit-[0-9]{2}$`, which is what keeps the

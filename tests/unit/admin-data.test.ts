@@ -39,7 +39,7 @@ function player(id: string, name = "Mint"): PlayerRow {
 // itself is never re-implemented here — only the grouping around it.
 describe("certificateRoster", () => {
   const GAME = "game-01";
-  const FULL = 62; // scored questions in a complete run
+  const FULL = 50; // scored questions in a complete run
 
   const complete = (over: Partial<AttemptWithPlayer> & { player_id: string }) =>
     attempt({
@@ -47,7 +47,7 @@ describe("certificateRoster", () => {
       total_questions: FULL,
       correct_count: 60,
       score: 600,
-      max_score: 620,
+      max_score: 500,
       ...over,
     });
 
@@ -109,19 +109,19 @@ describe("certificateRoster", () => {
         attempt({
           player_id: "p1",
           unit_id: GAME,
-          total_questions: 50,
-          correct_count: 50,
-          score: 500,
+          total_questions: 40,
+          correct_count: 40,
+          score: 400,
         }),
-        complete({ player_id: "p1", correct_count: 40, score: 400 }),
+        complete({ player_id: "p1", correct_count: 30, score: 300 }),
       ],
       GAME,
       FULL
     );
 
     expect(rows[0].state).toBe("earned");
-    expect(rows[0].earnedWith?.score).toBe(400);
-    expect(rows[0].correctCount).toBe(40);
+    expect(rows[0].earnedWith?.score).toBe(300);
+    expect(rows[0].correctCount).toBe(30);
   });
 
   it("picks the best of several finished runs", () => {
@@ -162,8 +162,8 @@ describe("certificateRoster", () => {
   // another about the same run.
   it("agrees with earnsCertificate on every row", () => {
     const runs = [
-      complete({ player_id: "p1", correct_count: 31 }), // exactly half of 62 -> 31
-      complete({ player_id: "p2", correct_count: 30 }),
+      complete({ player_id: "p1", correct_count: 25 }), // exactly half of 50 -> 25
+      complete({ player_id: "p2", correct_count: 24 }),
       attempt({
         player_id: "p3",
         unit_id: GAME,

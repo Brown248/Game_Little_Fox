@@ -485,7 +485,7 @@ describe("the real game", () => {
     const blocks = buildGame();
 
     expect(blocks.map((b) => b.type)).toEqual([
-      "unscramble", // unit-01 — the 27 emoji silhouettes
+      "unscramble", // unit-01 — the 15 animal words
       "quiz-choice", // unit-02 Part B
       "quiz-choice", // unit-02 Part C1
       "sentence-builder", // unit-02 Part C2
@@ -497,8 +497,8 @@ describe("the real game", () => {
       (n, b) => n + (b.type === "writing" ? 0 : b.items.length),
       0
     );
-    expect(questions).toBe(62);
-    expect(questions * 10).toBe(620);
+    expect(questions).toBe(50);
+    expect(questions * 10).toBe(500);
   });
 
   it("opens on the very first animal", async () => {
@@ -510,7 +510,7 @@ describe("the real game", () => {
     ).toBeTruthy();
     expect(screen.getByText("PHETNALE")).toBeTruthy();
     expect(screen.getByLabelText("elephant")).toBeTruthy();
-    expect(screen.getByText("1 / 27")).toBeTruthy();
+    expect(screen.getByText("1 / 15")).toBeTruthy();
     expect(screen.getByText(/part 1 of 6/i)).toBeTruthy();
   });
 });

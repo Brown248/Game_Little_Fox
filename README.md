@@ -82,10 +82,10 @@ itself.
 
 | Unit | What's in it | Questions / points |
 |---|---|---|
-| `unit-01` **Animal Words** | 27 word scrambles, each with its animal shown as an emoji | 27 / 270 |
+| `unit-01` **Animal Words** | 15 word scrambles, each with its animal shown as an emoji | 15 / 150 |
 | `unit-02` **Wild Life and Wonderful Creatures** | 10 clue questions, 5 animal sounds, 10 sentence builders, 10 listening clues, 17 unscored writing prompts | 35 / 350 |
 
-The two files play as **one game of 62 questions / 620 points**. Units are still
+The two files play as **one game of 50 questions / 500 points**. Units are still
 how content is written — they match the teacher's paper worksheet — but they are
 no longer something a student picks.
 

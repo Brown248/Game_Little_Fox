@@ -24,7 +24,7 @@ vi.mock("@/lib/supabase-admin", () => ({
   serviceConfigured: () => true,
 }));
 
-// 12 questions is easier to reason about than the real 104, and the page takes
+// 12 questions is easier to reason about than the real 50, and the page takes
 // the number from here rather than hard-coding it anywhere.
 vi.mock("@/lib/game", () => ({
   GAME_ID: "game-01",

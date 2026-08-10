@@ -21,7 +21,7 @@ vi.mock("@/lib/certificate", () => ({
 
 const GAME_ID = "game-01";
 /** A complete run of the current game. */
-const FULL = 62;
+const FULL = 50;
 
 const TITLES = {
   "unit-01": "Shadow Animal Challenge",
@@ -140,7 +140,7 @@ describe("MyScores", () => {
 
   // /rank and /me both hand out certificates, and they must never disagree.
   // This screen was still asking the old question — "was half of what you
-  // played right?" — so a child who answered 20 of 77 and pressed Finish was
+  // played right?" — so a child who answered 20 of 50 and pressed Finish was
   // refused on the ranking and offered one here.
   it("refuses a run of this game that stopped early", async () => {
     getPlayerAttempts.mockResolvedValue([

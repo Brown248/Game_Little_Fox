@@ -37,12 +37,11 @@ describe("unit loader", () => {
   it("reports each unit's scored question count and points", () => {
     const units = listUnits();
     const first = units.find((u) => u.id === "unit-01")!;
-    // 27 emoji. Three animals came out on the teacher's list after
-    // the first lesson — giraffe, flamingo and parrot — and the eight that had
-    // been drawn as real pictures went when she asked for every animal picture
-    // to be removed and the emoji kept.
-    expect(first.questionCount).toBe(27);
-    expect(first.maxScore).toBe(270);
+    // 15 emoji — the ones the teacher screenshotted and asked to keep
+    // ("Part แรกเอาแค่นี้พอตามภาพในโฟลเดอร์ที่เหลือเอาออกเพราะเยอะเกิน").
+    // It was 30 on the worksheet, then 27, and is now 15.
+    expect(first.questionCount).toBe(15);
+    expect(first.maxScore).toBe(150);
 
     for (const unit of units) {
       expect(unit.maxScore).toBe(unit.questionCount * 10);
@@ -66,7 +65,7 @@ describe("unit loader", () => {
     const [block] = unit!.games;
     if (block.type !== "unscramble") throw new Error("wrong block type");
 
-    expect(block.items).toHaveLength(27);
+    expect(block.items).toHaveLength(15);
     expect(block.items.every((item) => item.emoji)).toBe(true);
   });
 
