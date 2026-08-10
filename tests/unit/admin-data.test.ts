@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   bestAttemptPerUnit,
+  certificateRoster,
   summarisePlayer,
   summarisePlayers,
   summariseUnits,
   tallySkills,
 } from "@/lib/admin-data";
+import { earnsCertificate } from "@/lib/format";
 import type { AttemptWithPlayer, PlayerRow } from "@/lib/types";
 
 let sequence = 0;
@@ -31,6 +33,160 @@ function attempt(
 function player(id: string, name = "Mint"): PlayerRow {
   return { id, name, created_at: "2026-01-01T00:00:00.000Z" };
 }
+
+// The teacher's roster: who has a certificate, who has not, and why not.
+// Its whole job is to agree with what the child is told on /rank, so the rule
+// itself is never re-implemented here — only the grouping around it.
+describe("certificateRoster", () => {
+  const GAME = "game-01";
+  const FULL = 77; // scored questions in a complete run
+
+  const complete = (over: Partial<AttemptWithPlayer> & { player_id: string }) =>
+    attempt({
+      unit_id: GAME,
+      total_questions: FULL,
+      correct_count: 60,
+      score: 600,
+      max_score: 770,
+      ...over,
+    });
+
+  it("sorts the ones needing help first and the finished last", () => {
+    const players = [player("p1", "Earned"), player("p2", "Never"), player("p3", "Short")];
+    const rows = certificateRoster(
+      players,
+      [
+        complete({ player_id: "p1" }),
+        attempt({
+          player_id: "p3",
+          unit_id: GAME,
+          total_questions: 27,
+          correct_count: 27,
+        }),
+      ],
+      GAME,
+      FULL
+    );
+
+    expect(rows.map((r) => r.state)).toEqual([
+      "never-played",
+      "stopped-early",
+      "earned",
+    ]);
+    expect(rows.map((r) => r.player.name)).toEqual(["Never", "Short", "Earned"]);
+  });
+
+  // A short run can score full marks on the questions it covered. That is the
+  // trap the "Finish" button opens, and the teacher's list must not fall into
+  // it any more than the child's screen does.
+  it("does not count a perfect but unfinished run", () => {
+    const rows = certificateRoster(
+      [player("p1", "Fai")],
+      [
+        attempt({
+          player_id: "p1",
+          unit_id: GAME,
+          total_questions: 27,
+          correct_count: 27,
+          score: 270,
+        }),
+      ],
+      GAME,
+      FULL
+    );
+
+    expect(rows[0].state).toBe("stopped-early");
+    expect(rows[0].earnedWith).toBeNull();
+    // still shows the teacher how far they actually got
+    expect(rows[0].bestAny?.score).toBe(270);
+  });
+
+  it("names the run the certificate is for, not merely the best one", () => {
+    const rows = certificateRoster(
+      [player("p1", "Fai")],
+      [
+        // higher score, but stopped early — cannot be the certificate
+        attempt({
+          player_id: "p1",
+          unit_id: GAME,
+          total_questions: 50,
+          correct_count: 50,
+          score: 500,
+        }),
+        complete({ player_id: "p1", correct_count: 40, score: 400 }),
+      ],
+      GAME,
+      FULL
+    );
+
+    expect(rows[0].state).toBe("earned");
+    expect(rows[0].earnedWith?.score).toBe(400);
+    expect(rows[0].correctCount).toBe(40);
+  });
+
+  it("picks the best of several finished runs", () => {
+    const rows = certificateRoster(
+      [player("p1", "Fai")],
+      [
+        complete({ player_id: "p1", correct_count: 40, score: 400 }),
+        complete({ player_id: "p1", correct_count: 70, score: 700 }),
+        complete({ player_id: "p1", correct_count: 55, score: 550 }),
+      ],
+      GAME,
+      FULL
+    );
+
+    expect(rows[0].earnedWith?.score).toBe(700);
+  });
+
+  it("ignores runs saved under any other id", () => {
+    const rows = certificateRoster(
+      [player("p1", "Fai")],
+      [
+        attempt({
+          player_id: "p1",
+          unit_id: "unit-01",
+          total_questions: FULL,
+          correct_count: FULL,
+        }),
+      ],
+      GAME,
+      FULL
+    );
+
+    expect(rows[0].state).toBe("never-played");
+    expect(rows[0].bestAny).toBeNull();
+  });
+
+  // If these two ever disagree, a child is told one thing and the teacher
+  // another about the same run.
+  it("agrees with earnsCertificate on every row", () => {
+    const runs = [
+      complete({ player_id: "p1", correct_count: 39 }), // exactly half of 77 -> 39
+      complete({ player_id: "p2", correct_count: 38 }),
+      attempt({
+        player_id: "p3",
+        unit_id: GAME,
+        total_questions: 40,
+        correct_count: 40,
+      }),
+    ];
+    const rows = certificateRoster(
+      [player("p1", "A"), player("p2", "B"), player("p3", "C")],
+      runs,
+      GAME,
+      FULL
+    );
+
+    for (const row of rows) {
+      const run = row.earnedWith ?? row.bestAny;
+      const expected = run
+        ? earnsCertificate(GAME, run.correct_count, run.total_questions, FULL)
+        : false;
+      expect(row.state === "earned", row.player.name).toBe(expected);
+    }
+  });
+});
 
 describe("bestAttemptPerUnit", () => {
   it("keeps the highest score per player per unit", () => {

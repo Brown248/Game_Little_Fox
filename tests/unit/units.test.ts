@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
-import { animalArt } from "@/lib/format";
 import {
   auditUnits,
   getUnit,
@@ -38,12 +37,12 @@ describe("unit loader", () => {
   it("reports each unit's scored question count and points", () => {
     const units = listUnits();
     const first = units.find((u) => u.id === "unit-01")!;
-    // Part 1's 27 emoji shadows + Part 2's 8 illustrated ones. Five animals
-    // came out on the teacher's list after the first lesson: giraffe, flamingo
-    // and parrot from Part 1, and from Part 2 the rhinoceros plus the second
-    // polar bear, which was the same word twice.
-    expect(first.questionCount).toBe(35);
-    expect(first.maxScore).toBe(350);
+    // 27 emoji silhouettes. Three animals came out on the teacher's list after
+    // the first lesson — giraffe, flamingo and parrot — and the eight that had
+    // been drawn as real pictures went when she asked for every animal picture
+    // to be removed and the emoji kept.
+    expect(first.questionCount).toBe(27);
+    expect(first.maxScore).toBe(270);
 
     for (const unit of units) {
       expect(unit.maxScore).toBe(unit.questionCount * 10);
@@ -57,23 +56,34 @@ describe("unit loader", () => {
     expect(listBrokenUnitFiles()).toEqual([]);
   });
 
-  // Unit 1 is the worksheet's Part 1 (emoji silhouettes) followed by Part 2,
-  // the animals that have been drawn for real.
-  it("loads the shadow challenge with both of its parts", () => {
+  // Unit 1 is one block of emoji silhouettes.
+  it("loads the shadow challenge as one block of emoji", () => {
     const unit = getUnit("unit-01");
     expect(unit).not.toBeNull();
     expect(unit!.title).toBe("Shadow Animal Challenge");
-    expect(unit!.games.map((g) => g.type)).toEqual(["unscramble", "unscramble"]);
+    expect(unit!.games.map((g) => g.type)).toEqual(["unscramble"]);
 
-    const [part1, part2] = unit!.games;
-    if (part1.type !== "unscramble" || part2.type !== "unscramble")
-      throw new Error("wrong block type");
+    const [block] = unit!.games;
+    if (block.type !== "unscramble") throw new Error("wrong block type");
 
-    expect(part1.items).toHaveLength(27);
-    expect(part1.items.every((item) => item.shadow && !item.art)).toBe(true);
+    expect(block.items).toHaveLength(27);
+    expect(block.items.every((item) => item.shadow)).toBe(true);
+  });
 
-    expect(part2.items).toHaveLength(8);
-    expect(part2.items.every((item) => item.art)).toBe(true);
+  // The teacher had every animal picture removed: the files, the build script
+  // and the field that pointed at them. An emoji is the only picture in the
+  // game now, and this is what stops artwork drifting back in.
+  it("has no animal artwork anywhere", () => {
+    for (const unit of loadAllUnits()) {
+      for (const block of unit.games) {
+        if (block.type !== "unscramble") continue;
+        for (const item of block.items) {
+          expect((item as { art?: string }).art, unit.id).toBeUndefined();
+        }
+      }
+    }
+
+    expect(fs.existsSync(path.join(process.cwd(), "public", "images"))).toBe(false);
   });
 
   // The scramble is the whole puzzle: if the letters are not a true anagram of
@@ -96,26 +106,6 @@ describe("unit loader", () => {
     }
   });
 
-  // The drawn animals are the best content in the game; a typo in a slug would
-  // silently fall back to the emoji, so the files are checked for real.
-  it("every artwork slug has both of its files on disk", () => {
-    const drawn = loadAllUnits()
-      .flatMap((unit) => unit.games)
-      .filter((block) => block.type === "unscramble")
-      .flatMap((block) => (block.type === "unscramble" ? block.items : []))
-      .filter((item) => item.art);
-
-    expect(drawn.length).toBeGreaterThan(0);
-
-    for (const item of drawn) {
-      const { shadow, reveal } = animalArt(item.art!);
-      for (const url of [shadow, reveal]) {
-        const file = path.join(process.cwd(), "public", url.replace(/^\//, ""));
-        expect(fs.existsSync(file), `${item.answer} → ${url}`).toBe(true);
-      }
-    }
-  });
-
   // Unit 2 is the worksheet's Parts B, C, D and E, in that order.
   it("loads unit-02 with all five parts in order", () => {
     const unit = getUnit("unit-02");
@@ -132,7 +122,7 @@ describe("unit loader", () => {
     const counts = unit!.games.map((g) =>
       g.type === "writing" ? g.prompt.questions.length : g.items.length
     );
-    expect(counts).toEqual([30, 5, 25, 9, 17]);
+    expect(counts).toEqual([10, 5, 25, 10, 17]);
   });
 
   // Two rules the teacher set for Part C2 after watching a class use it.
@@ -173,6 +163,39 @@ describe("unit loader", () => {
     for (const url of clips) {
       const file = path.join(process.cwd(), "public", "audio", url);
       expect(fs.existsSync(file), url).toBe(true);
+    }
+  });
+
+  // Part D shipped with question 10 repeating question 2 word for word — the
+  // same unicorn clue twice in one part, with only the wrong answers changed.
+  // Nothing was checking, so nothing said so; a child just heard it again.
+  it("never asks the same listening clue twice", () => {
+    const seen = new Map<string, string>();
+
+    for (const unit of loadAllUnits()) {
+      for (const block of unit.games) {
+        if (block.type !== "listening") continue;
+        for (const item of block.items) {
+          const key = item.clueText.trim().toLowerCase();
+          expect(seen.has(key), `${unit.id}: "${item.clueText}"`).toBe(false);
+          seen.set(key, unit.id);
+        }
+      }
+    }
+  });
+
+  // Three, not four. The teacher went through Part B question by question and
+  // struck out one option on each — "Part นี้มีแค่ 3 choice พอ" — and a fourth
+  // creeping back into one question would make that question quietly harder
+  // than the rest of the game.
+  it("offers exactly three choices on every question that has choices", () => {
+    for (const unit of loadAllUnits()) {
+      for (const block of unit.games) {
+        if (block.type !== "quiz-choice" && block.type !== "listening") continue;
+        for (const item of block.items) {
+          expect(item.options.length, `${unit.id}: ${item.options.join("/")}`).toBe(3);
+        }
+      }
     }
   });
 
@@ -297,10 +320,11 @@ describe("unit loader", () => {
   describe("audit", () => {
     it("computes questions and max score, excluding writing", () => {
       const audit = auditUnits().find((a) => a.id === "unit-02")!;
-      // 30 quiz + 5 sounds + 25 sentences + 9 creatures = 69 scored questions.
-      // Part C2 lost its five "loudly" sentences on the teacher's instruction.
-      expect(audit.questionCount).toBe(69);
-      expect(audit.maxScore).toBe(690);
+      // 10 quiz + 5 sounds + 25 sentences + 10 creatures = 50 scored questions.
+      // Part B kept only the ten questions the teacher screenshotted, and Part
+      // C2 lost its five "loudly" sentences earlier.
+      expect(audit.questionCount).toBe(50);
+      expect(audit.maxScore).toBe(500);
       expect(audit.gameCount).toBe(5);
       expect(audit.hasWriting).toBe(true);
       expect(audit.writingIsLast).toBe(true);
@@ -311,7 +335,7 @@ describe("unit loader", () => {
       const writing = audit.blocks.find((b) => b.type === "writing")!;
       // 7 spirit-animal frames + 10 speaking prompts
       expect(writing.count).toBe(17);
-      expect(audit.blocks.reduce((n, b) => n + b.count, 0)).toBe(86);
+      expect(audit.blocks.reduce((n, b) => n + b.count, 0)).toBe(67);
     });
 
     // The teacher's "what still needs recording" list. A clue with no audioUrl
@@ -328,7 +352,7 @@ describe("unit loader", () => {
       expect(audit.audio).toHaveLength(withoutAudio);
       expect(audit.audio.every((clip) => clip.fileExists === false)).toBe(true);
       expect(audit.audio.every((clip) => clip.audioUrl === "")).toBe(true);
-      expect(audit.audio.map((clip) => clip.position)).toEqual([7, 8, 9]);
+      expect(audit.audio.map((clip) => clip.position)).toEqual([8, 9, 10]);
     });
 
     it("reports a unit with no listening block as having no clips", () => {
@@ -363,7 +387,11 @@ describe("unit loader", () => {
       );
 
       const audit = auditUnits().find((a) => a.id === "unit-98")!;
-      expect(audit.audio[0]).toMatchObject({ remote: true, fileExists: true });
+      // A clue that names a file — local or a full https:// URL — is already
+      // recorded, so it does NOT appear on the "still to record" list. This
+      // assertion used to read audit.audio[0], from back when the audit
+      // returned a row per clip with a fileExists flag on it.
+      expect(audit.audio).toEqual([]);
       expect(audit.writingIsLast).toBe(false);
       expect(audit.questionCount).toBe(1);
     });

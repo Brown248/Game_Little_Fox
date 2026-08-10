@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Failure from "@/components/Failure";
-import { downloadCertificate } from "@/lib/certificate";
+import { downloadCertificate, warmCertificate } from "@/lib/certificate";
 import {
   certificateNeeds,
   earnsCertificate,
@@ -24,6 +24,12 @@ interface Props {
   /** unit id → title, resolved on the server: unit JSON is read with fs and
    *  cannot be touched from a client component. */
   unitTitles: Record<string, string>;
+  /** How many scored questions a complete run of the current game has, and the
+   *  id those runs are saved under. Both are needed because a run can be
+   *  stopped early: without them this screen would hand a certificate to a
+   *  quarter-finished run that /rank had just refused. */
+  gameId: string;
+  fullQuestionCount: number;
 }
 
 // Every run this explorer has finished, and the certificates they have already
@@ -33,7 +39,11 @@ interface Props {
 // to live only on the result screen it was won on, so closing the tab lost the
 // certificate for good. The rows come from Supabase, so a phone that has been
 // closed all week still shows them.
-export default function MyScores({ unitTitles }: Props) {
+export default function MyScores({
+  unitTitles,
+  gameId,
+  fullQuestionCount,
+}: Props) {
   const [player, setPlayer] = useState<Player | null>(null);
   const [checked, setChecked] = useState(false);
   const [rows, setRows] = useState<AttemptRow[] | null>(null);
@@ -88,14 +98,12 @@ export default function MyScores({ unitTitles }: Props) {
     }
   }
 
-  if (!checked) return <p className="muted">Loading…</p>;
+  if (!checked) return <p className="muted">Please wait…</p>;
 
   if (!player) {
     return (
       <div className="card card--dashed stack" style={{ gap: 12 }}>
-        <p className="muted">
-          Type your name first and your scores will be waiting here.
-        </p>
+        <p className="muted">Type your name first.</p>
         <Link className="btn" href="/">
           Go to the start
         </Link>
@@ -104,16 +112,14 @@ export default function MyScores({ unitTitles }: Props) {
   }
 
   if (failure) return <Failure failure={failure} />;
-  if (!rows) return <p className="muted">Looking up your scores…</p>;
+  if (!rows) return <p className="muted">Please wait…</p>;
 
   if (rows.length === 0) {
     return (
       <div className="card card--dashed stack" style={{ gap: 12 }}>
-        <p className="muted">
-          Nothing here yet, {player.name} — finish a unit and it will appear.
-        </p>
-        <Link className="btn" href="/units">
-          Pick a unit
+        <p className="muted">Nothing here yet, {player.name}.</p>
+        <Link className="btn" href="/play">
+          Play
         </Link>
       </div>
     );
@@ -123,23 +129,37 @@ export default function MyScores({ unitTitles }: Props) {
     <div className="stack" style={{ gap: 14 }}>
       {pdfError && (
         <div className="notice notice--error">
-          <strong>The certificate would not open.</strong> Show this to your
-          teacher: <code>{pdfError}</code>
+          <strong>The certificate would not open.</strong>{" "}
+          <details>
+            <summary>For the teacher</summary>
+            <code>{pdfError}</code>
+          </details>
         </div>
       )}
 
       {rows.map((row) => {
+        // Only runs of the CURRENT game can be judged for completeness — an
+        // older row was a different set of questions, so its own length is the
+        // only length it can be measured against.
+        const fullLength = row.unit_id === gameId ? fullQuestionCount : 0;
         const earned = earnsCertificate(
           row.unit_id,
           row.correct_count,
-          row.total_questions
+          row.total_questions,
+          fullLength
         );
+        const stoppedEarly =
+          fullLength > 0 && row.total_questions !== fullLength;
 
         return (
           <div className="card stack" key={row.id} style={{ gap: 12 }}>
             <div className="row row--between">
               <div>
-                <div className="kicker">{scoreIdLabel(row.unit_id)}</div>
+                {/* Only the older per-unit rows need naming which unit they
+                    were: the game has one name and the title below says it. */}
+                {row.unit_id.startsWith("unit-") && (
+                  <div className="kicker">{scoreIdLabel(row.unit_id)}</div>
+                )}
                 <div style={{ fontWeight: 800 }}>
                   {unitTitles[row.unit_id] ?? "This run"}
                 </div>
@@ -165,7 +185,7 @@ export default function MyScores({ unitTitles }: Props) {
                 <div className="stat__value">{formatTime(row.time_seconds)}</div>
               </div>
               <div className="stat">
-                <div className="stat__label">Accuracy</div>
+                <div className="stat__label">Right</div>
                 <div className="stat__value">
                   {formatPercent(
                     row.max_score > 0 ? row.score / row.max_score : 0
@@ -175,7 +195,11 @@ export default function MyScores({ unitTitles }: Props) {
             </div>
 
             <div className="row row--between">
-              <Link href={`/leaderboard/${row.unit_id}`}>See the board</Link>
+              {/* One board now. This used to be /leaderboard/{unit_id}, which
+                  no longer exists — every card on this screen 404'd. */}
+              <Link className="textlink" href="/rank">
+                Top scores
+              </Link>
               {earned ? (
                 <button
                   className="btn btn--sm"
@@ -189,8 +213,8 @@ export default function MyScores({ unitTitles }: Props) {
                 // Say why, rather than leaving a gap where a button is on the
                 // row above it.
                 <span className="muted">
-                  {scoreIdLabel(row.unit_id).includes("part")
-                    ? "Parts don't earn a certificate"
+                  {stoppedEarly
+                    ? "Play every question"
                     : `Needs ${certificateNeeds(row.total_questions)} right`}
                 </span>
               )}

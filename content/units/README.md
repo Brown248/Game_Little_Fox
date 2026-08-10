@@ -41,21 +41,15 @@ Optional `shadow`: one emoji, shown as a **black silhouette** above the letters
 and revealed in colour once the student answers. That is the Shadow Animal
 Challenge; leave it out and the block is a plain word scramble.
 
-Optional `art`: an artwork slug, used **instead of** the emoji when the animal
-has actually been drawn — `"art": "lion"` shows `lion-shadow.webp` before the
-answer and `lion.webp` after, both from `public/images/animals/`. One word
-covers the pair, so the two files must follow that naming exactly. Build them
-from the source PNGs with:
+> There was also an `art` field for eight animals that had been drawn as real
+> pictures, with a build script and a folder of WebP files behind it. The
+> teacher had all of it removed — "เอาพวกภาพที่ฉัน add เข้าไปอะพวกภาพสัตว์เอา
+> ออกให้หมด เอาแค่อิโมจิมาใน Part เเรก". **An emoji is the only picture a
+> question can have. Do not add artwork back.**
 
-```bash
-npm run images -- "C:/path/to/artwork folder"
-```
-
-adding the pair to `PAIRS` in `scripts/build-animal-images.mjs` first. Keep the
-emoji alongside `art` as a fallback. `npm test` fails if a slug has no files, so
-a typo cannot silently downgrade a question back to its emoji.
-
-**quiz-choice** — `answerIndex` is 0-based. 4 options is the norm.
+**quiz-choice** — `answerIndex` is 0-based. **Exactly 3 options**, always: the
+teacher struck a fourth off every question by hand. `npm test` fails if any
+question that has choices offers more or fewer.
 
 **sentence-builder** — `words` is the shuffled pool shown to the student,
 `answer` is the correct order. Both are arrays of single words. Repeated words

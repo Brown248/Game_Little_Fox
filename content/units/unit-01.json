@@ -142,60 +142,6 @@
           "answer": "OCTOPUS"
         }
       ]
-    },
-    {
-      "type": "unscramble",
-      "title": "Part 2 · Shadow Animals with Pictures",
-      "items": [
-        {
-          "art": "hippopotamus",
-          "shadow": "🦛",
-          "scrambled": "POTAMUSHIPPO",
-          "answer": "HIPPOPOTAMUS"
-        },
-        {
-          "art": "lion",
-          "shadow": "🦁",
-          "scrambled": "OLNI",
-          "answer": "LION"
-        },
-        {
-          "art": "elephant",
-          "shadow": "🐘",
-          "scrambled": "PEELHTAN",
-          "answer": "ELEPHANT"
-        },
-        {
-          "art": "polar-bear",
-          "shadow": "🐻‍❄️",
-          "scrambled": "LAROP RABE",
-          "answer": "POLAR BEAR"
-        },
-        {
-          "art": "tiger",
-          "shadow": "🐯",
-          "scrambled": "GRITE",
-          "answer": "TIGER"
-        },
-        {
-          "art": "crocodile",
-          "shadow": "🐊",
-          "scrambled": "ODCORECIL",
-          "answer": "CROCODILE"
-        },
-        {
-          "art": "blue-whale",
-          "shadow": "🐳",
-          "scrambled": "ELUB LAWHE",
-          "answer": "BLUE WHALE"
-        },
-        {
-          "art": "pig",
-          "shadow": "🐷",
-          "scrambled": "GPI",
-          "answer": "PIG"
-        }
-      ]
     }
   ]
 }

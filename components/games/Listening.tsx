@@ -11,8 +11,14 @@ interface Props {
   onDone: () => void;
 }
 
-// Plays item.audioUrl (Supabase Storage file) via <audio>, then A/B/C/D choice.
-// Falls back to browser text-to-speech only if audioUrl is missing.
+// Plays item.audioUrl through <audio>, then the choices. Falls back to the
+// browser's own voice only when there is no recording, or the file will not
+// load.
+//
+// Sound only, deliberately: the clues arrived as video and the teacher asked
+// for just the audio ("เอาเเค่เสียงไม่เอาคลิปมาด้วยได้ไหม"). public/videos and
+// the <video> branch that played it are gone with it — a clip in a lesson is
+// something a child watches instead of listens to, and this part is listening.
 export default function Listening({ items, onAnswer, onDone }: Props) {
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
@@ -27,11 +33,9 @@ export default function Listening({ items, onAnswer, onDone }: Props) {
   const isLast = index === items.length - 1;
   const answered = picked !== null;
   const wasRight = picked === item.answerIndex;
-  const video = resolveMediaSrc(item.videoUrl, "videos");
-  const src = resolveMediaSrc(item.audioUrl, "audio");
-  // No file, or this file is broken: read the clue with the device voice
-  // instead. A video clue never falls back — it carries its own soundtrack.
-  const useTts = !video && (!src || brokenSrc === src);
+  const src = resolveMediaSrc(item.audioUrl);
+  // No file, or this file is broken: read the clue with the device voice.
+  const useTts = !src || brokenSrc === src;
 
   // Never leave speech running when the explorer moves on.
   useEffect(() => {
@@ -76,7 +80,7 @@ export default function Listening({ items, onAnswer, onDone }: Props) {
   return (
     <div className="stack" style={{ gap: 14 }}>
       <Progress
-        title={video ? "Watch and choose" : "Listen and choose"}
+        title="Listen and choose"
         index={index}
         total={items.length}
         answered={answered}
@@ -85,41 +89,27 @@ export default function Listening({ items, onAnswer, onDone }: Props) {
       {/* the player on one side, answers on the other — stacks on a phone */}
       <div className="q split" key={index}>
         <div className="card card--soft stack" style={{ gap: 14 }}>
-          {video ? (
-            // A video clue is its own player: controls on, no autoplay, so a
-            // room full of phones never all start talking at once.
-            <video
-              className="clip"
-              src={video}
-              controls
-              playsInline
-              preload="metadata"
+          {src && (
+            <audio
+              ref={audioRef}
+              src={src}
+              preload="auto"
+              onError={() => setBrokenSrc(src)}
             />
-          ) : (
-            <>
-              {src && (
-                <audio
-                  ref={audioRef}
-                  src={src}
-                  preload="auto"
-                  onError={() => setBrokenSrc(src)}
-                />
-              )}
-
-              <button
-                className="btn btn--block"
-                type="button"
-                onClick={play}
-                style={
-                  playing
-                    ? { transform: "translateY(3px) scaleY(.97)", boxShadow: "0 4px 0 var(--marigold-press)" }
-                    : undefined
-                }
-              >
-                <span aria-hidden="true">🔊</span> Play the clue
-              </button>
-            </>
           )}
+
+          <button
+            className="btn btn--block"
+            type="button"
+            onClick={play}
+            style={
+              playing
+                ? { transform: "translateY(3px) scaleY(.97)", boxShadow: "0 4px 0 var(--marigold-press)" }
+                : undefined
+            }
+          >
+            <span aria-hidden="true">🔊</span> Play the clue
+          </button>
 
           <div className="row row--between">
             <button
@@ -129,16 +119,12 @@ export default function Listening({ items, onAnswer, onDone }: Props) {
             >
               {showText ? "Hide text" : "Show text"}
             </button>
+            {/* One mark, not two: this chip and a sentence underneath used to
+                say the same thing on the same card. */}
             {useTts && (
-              <span className="kicker--faint kicker">device voice</span>
+              <span className="kicker--faint kicker">no recording yet</span>
             )}
           </div>
-
-          {useTts && (
-            <p className="muted">
-              No recording for this clue yet — using your device&apos;s voice.
-            </p>
-          )}
 
           {showText && (
             <p className="clue">
@@ -179,17 +165,14 @@ export default function Listening({ items, onAnswer, onDone }: Props) {
   );
 }
 
-// unit JSON stores a relative path ("unit-05/clue-1.mp4"), which is resolved
-// under public/<folder>/. Absolute URLs (e.g. a Supabase Storage public URL)
-// are passed through untouched.
-function resolveMediaSrc(
-  url: string | undefined,
-  folder: "audio" | "videos"
-): string | null {
+// unit JSON stores a relative path ("unit-02/clue-1.mp3"), resolved under
+// public/audio/. Absolute URLs (e.g. a Supabase Storage public URL) are passed
+// through untouched.
+function resolveMediaSrc(url: string | undefined): string | null {
   const path = url?.trim();
   if (!path) return null;
   if (/^https?:\/\//.test(path)) return path;
-  return `/${folder}/${path.replace(/^\/+/, "")}`;
+  return `/audio/${path.replace(/^\/+/, "")}`;
 }
 
 function speak(text: string) {

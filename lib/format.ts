@@ -7,7 +7,7 @@ import type { GameType } from "./types";
 /** Human labels for the game types. Add a row when adding a game type. */
 export const GAME_LABELS: Record<GameType | string, string> = {
   "quiz-choice": "Guess the animal",
-  unscramble: "Unscramble",
+  unscramble: "Make the word",
   "sentence-builder": "Sentence builder",
   listening: "Listening",
   writing: "Writing",
@@ -19,24 +19,14 @@ export function gameLabel(gameType: string): string {
 
 /* --------------------------- parts and scoreboards ------------------------ */
 
-// A unit can be played whole, or one part at a time. Each is timed, scored and
-// ranked on its own, so each needs its own scoreboard id — that id is just the
-// `unit_id` column, so no schema change was needed to add the second mode.
+// Nothing is played a part at a time any more — there is one game. What is
+// left here reads the ids of runs that were saved BEFORE that change, which
+// still sit in the database and still show up on /me and in /admin.
 
 const PART_ID = /^(unit-\d{2})-part-(\d+)$/;
 
-/** The id a part's attempts are saved under.
- *
- *  Deliberately NOT shaped like `unit-NN`: the overall "Top explorers" ranking
- *  counts whole units only and tells the two apart by that shape, so a student
- *  who plays both a part and its unit is never counted twice. Changing this
- *  format means changing v_overall_ranking in supabase/schema.sql to match. */
-export function partScoreId(unitId: string, partIndex: number): string {
-  return `${unitId}-part-${partIndex + 1}`;
-}
-
-/** Splits a scoreboard id back into its unit and 0-based part index. Returns
- *  null for a whole-unit id, which is how callers tell the two modes apart. */
+/** Splits an old part id back into its unit and 0-based part index, or null.
+ *  Only ever matches historic rows now; the game id never looks like this. */
 export function parsePartId(
   scoreId: string
 ): { unitId: string; partIndex: number } | null {
@@ -61,40 +51,46 @@ export const CERTIFICATE_PASS_MARK = 0.5;
 /** Does this run earn a certificate?
  *
  *  Two conditions, both the teacher's:
- *   · a WHOLE unit, never a single part — one unit is one certificate, or a
- *     class ends up printing five each;
+ *   · the WHOLE game was played, not a part of it;
  *   · at least half the QUESTIONS right, counted in answers rather than points
  *     so the rule holds even if a question is ever worth other than ten.
  *
- *  Lives here, not on a screen, because two screens ask it now: the result at
- *  the end of a run, and /me when re-issuing an old certificate. They must not
- *  be able to disagree. */
+ *  `fullQuestionCount` is what makes the first condition real. A run can now be
+ *  stopped early and still banked — a child taught only the first part needs
+ *  that — and without this check one who answered 20 of 27 and stopped would
+ *  score 74% and take a certificate for a quarter of the game.
+ *
+ *  Pass 0 for `fullQuestionCount` when the full length is unknown (an old row
+ *  saved under a retired id): the length check is then skipped rather than
+ *  failing every historic run.
+ *
+ *  Lives here, not on a screen, because two screens ask it: the ranking at the
+ *  end of a run, and /me when re-issuing an old certificate. They must not be
+ *  able to disagree. */
 export function earnsCertificate(
   scoreId: string,
   correctCount: number,
-  totalQuestions: number
+  totalQuestions: number,
+  fullQuestionCount = 0
 ): boolean {
   if (parsePartId(scoreId) !== null) return false;
   if (totalQuestions <= 0) return false;
+  if (fullQuestionCount > 0 && totalQuestions !== fullQuestionCount) return false;
   return correctCount / totalQuestions >= CERTIFICATE_PASS_MARK;
+}
+
+/** Was the whole game played? Kept beside the rule it belongs to so a screen
+ *  can tell "stopped early" apart from "did not get enough right". */
+export function playedItAll(
+  totalQuestions: number,
+  fullQuestionCount: number
+): boolean {
+  return fullQuestionCount > 0 && totalQuestions === fullQuestionCount;
 }
 
 /** How many right answers a run of this length needs. */
 export function certificateNeeds(totalQuestions: number): number {
   return Math.ceil(totalQuestions * CERTIFICATE_PASS_MARK);
-}
-
-/** Where `npm run images` writes the Shadow Animal artwork. */
-export const ANIMAL_ART_DIR = "/images/animals";
-
-/** The two halves of one animal's reveal, from a single slug in the unit JSON.
- *  Both the game and the admin content check resolve paths through here, so
- *  the naming convention lives in exactly one place. */
-export function animalArt(slug: string): { shadow: string; reveal: string } {
-  return {
-    shadow: `${ANIMAL_ART_DIR}/${slug}-shadow.webp`,
-    reveal: `${ANIMAL_ART_DIR}/${slug}.webp`,
-  };
 }
 
 export function formatTime(totalSeconds: number): string {

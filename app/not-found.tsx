@@ -15,11 +15,10 @@ export default function NotFound() {
             height={208}
           />
           <h1>Off the map</h1>
-          <p className="muted">
-            This page or unit doesn&apos;t exist. A unit only appears once its
-            JSON file is in <code>content/units/</code>.
-          </p>
-          <Link href="/">← Back to the start</Link>
+          <p className="muted">This page is not here.</p>
+          <Link className="textlink" href="/">
+            Back to the start
+          </Link>
         </div>
       </main>
     </Shell>

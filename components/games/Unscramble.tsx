@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
-import { animalArt } from "@/lib/format";
 import type { UnscrambleItem } from "@/lib/types";
 import Feedback from "./Feedback";
 import Progress from "./Progress";
@@ -13,9 +11,15 @@ interface Props {
   onDone: () => void;
 }
 
-// Text input, checks against item.answer (case-insensitive).
-// When the item carries a `shadow` emoji it is shown as a black silhouette
-// first — the Shadow Animal Challenge — and lights up in colour on answering.
+// Whose shadow is this? The emoji shows as a black silhouette, the child spells
+// the animal's name out of the jumbled letters, and the shadow lights up in
+// colour once they answer.
+//
+// There was a second kind of question here for a while: eight animals that had
+// been drawn properly, shown as a picture instead of an emoji. The teacher had
+// them taken out — "เอาพวกภาพที่ฉัน add เข้าไปอะพวกภาพสัตว์เอาออกให้หมด เอาแค่
+// อิโมจิมาใน Part เเรก" — so the artwork, the build script and the files all
+// went with them. One kind of question, one silhouette.
 export default function Unscramble({ items, onAnswer, onDone }: Props) {
   const [index, setIndex] = useState(0);
   const [guess, setGuess] = useState("");
@@ -24,7 +28,6 @@ export default function Unscramble({ items, onAnswer, onDone }: Props) {
   const item = items[index];
   const isLast = index === items.length - 1;
   const answered = result !== null;
-  const art = item.art ? animalArt(item.art) : null;
 
   function submit() {
     if (answered || !guess.trim()) return;
@@ -47,7 +50,7 @@ export default function Unscramble({ items, onAnswer, onDone }: Props) {
   return (
     <div className="stack" style={{ gap: 14 }}>
       <Progress
-        title="Unscramble the word"
+        title="Make the word"
         index={index}
         total={items.length}
         answered={answered}
@@ -57,46 +60,19 @@ export default function Unscramble({ items, onAnswer, onDone }: Props) {
           other — a single column once the glass gets narrow */}
       <div className="q split" key={index}>
         <div className="card card--soft">
-          {/* Drawn artwork when the animal has it, the emoji silhouette
-              otherwise. Both play the same beat: a black shape first, the
-              animal in colour the moment the word is right. */}
-          {art ? (
-            <div className={`art${answered ? " art--lit" : ""}`}>
-              <Image
-                className="art__shadow"
-                src={art.shadow}
-                alt=""
-                fill
-                sizes="(max-width: 820px) 100vw, 560px"
-                priority
-              />
-              {/* Also priority. It sits under an opacity:0 layer, so without
-                  this Next marks it lazy and a phone never fetches it at all —
-                  the reveal then had nothing to show and stayed black. */}
-              <Image
-                className="art__reveal"
-                src={art.reveal}
-                alt={answered ? item.answer : ""}
-                fill
-                sizes="(max-width: 820px) 100vw, 560px"
-                priority
-              />
+          {item.shadow && (
+            <div className="shadow-stage">
+              <span
+                className={`shadow-animal${answered ? " shadow-animal--lit" : ""}`}
+                role="img"
+                aria-label={answered ? item.answer : "shadow of an animal"}
+              >
+                {item.shadow}
+              </span>
             </div>
-          ) : (
-            item.shadow && (
-              <div className="shadow-stage">
-                <span
-                  className={`shadow-animal${answered ? " shadow-animal--lit" : ""}`}
-                  role="img"
-                  aria-label={answered ? item.answer : "shadow of an animal"}
-                >
-                  {item.shadow}
-                </span>
-              </div>
-            )
           )}
 
-          {!answered && (item.shadow || art) && (
+          {!answered && item.shadow && (
             <p className="shadow-stage__hint kicker kicker--faint center">
               whose shadow is this?
             </p>

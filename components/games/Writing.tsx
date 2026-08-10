@@ -31,9 +31,7 @@ export default function Writing({ prompt, onDone }: Props) {
 
       <div className="card card--dashed">
         <p className="muted">
-          This part is <strong>not scored</strong> — it&apos;s for you to practise.
-          Your writing is <strong>not saved</strong>, so copy it down if you want
-          to keep it.
+          <strong>Not scored.</strong> Copy it down to keep it.
         </p>
       </div>
 

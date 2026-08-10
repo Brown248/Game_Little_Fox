@@ -77,7 +77,7 @@ describe("Unscramble", () => {
   });
 
   // The Shadow Animal Challenge: the emoji is a black silhouette until the
-  // explorer answers, then it lights up in colour.
+  // student answers, then it lights up in colour.
   it("shows a shadow silhouette when the item has one, and lights it up", async () => {
     const user = userEvent.setup();
     render(
@@ -116,36 +116,6 @@ describe("Unscramble", () => {
     render(<Unscramble items={items} {...handlers()} />);
     expect(screen.queryByLabelText("shadow of an animal")).toBeNull();
     expect(screen.queryByText(/whose shadow is this/)).toBeNull();
-  });
-
-  // An animal that has been drawn uses its artwork instead of the emoji: the
-  // silhouette first, the coloured picture the moment the word is answered.
-  it("prefers drawn artwork over the emoji, and keeps the answer hidden until it is earned", async () => {
-    const user = userEvent.setup();
-    const { container } = render(
-      <Unscramble
-        items={[{ art: "lion", shadow: "🦁", scrambled: "NOIL", answer: "LION" }]}
-        {...handlers()}
-      />
-    );
-
-    // the emoji silhouette must not also be on screen
-    expect(screen.queryByLabelText("shadow of an animal")).toBeNull();
-
-    const frame = container.querySelector(".art")!;
-    expect(frame.className).not.toContain("art--lit");
-    const sources = [...frame.querySelectorAll("img")].map((img) =>
-      decodeURIComponent(img.getAttribute("src") ?? "")
-    );
-    expect(sources.some((s) => s.includes("/images/animals/lion-shadow.webp"))).toBe(true);
-    expect(sources.some((s) => s.includes("/images/animals/lion.webp"))).toBe(true);
-    // the reveal is preloaded but unnamed, so it gives nothing away
-    expect(screen.queryByAltText("LION")).toBeNull();
-
-    await user.type(screen.getByLabelText("Your answer"), "LION{Enter}");
-
-    expect(container.querySelector(".art")!.className).toContain("art--lit");
-    expect(screen.getByAltText("LION")).toBeTruthy();
   });
 
   it("advances through items and finishes the block", async () => {
@@ -395,7 +365,7 @@ describe("Listening", () => {
     const user = userEvent.setup();
     render(<Listening items={withAudio} {...handlers()} />);
 
-    expect(screen.queryByText(/device's voice/)).toBeNull();
+    expect(screen.queryByText(/no recording yet/)).toBeNull();
     await user.click(screen.getByRole("button", { name: /Play the clue/ }));
 
     expect(audioPlayMock).toHaveBeenCalled();
@@ -425,7 +395,7 @@ describe("Listening", () => {
     const { container } = render(<Listening items={withoutAudio} {...handlers()} />);
 
     expect(container.querySelector("audio")).toBeNull();
-    expect(screen.getByText(/device's voice/)).toBeTruthy();
+    expect(screen.getByText(/no recording yet/)).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: /Play the clue/ }));
     expect(speechMock.speak).toHaveBeenCalledOnce();
@@ -439,7 +409,7 @@ describe("Listening", () => {
     const audio = container.querySelector("audio")!;
     audio.dispatchEvent(new Event("error"));
 
-    expect(await screen.findByText(/device's voice/)).toBeTruthy();
+    expect(await screen.findByText(/no recording yet/)).toBeTruthy();
     await user.click(screen.getByRole("button", { name: /Play the clue/ }));
     expect(speechMock.speak).toHaveBeenCalledOnce();
   });
@@ -470,8 +440,8 @@ describe("Writing", () => {
     for (const question of prompt.questions) {
       expect(screen.getByLabelText(new RegExp(escape(question)))).toBeTruthy();
     }
-    expect(screen.getByText(/not scored/)).toBeTruthy();
-    expect(screen.getByText(/not saved/)).toBeTruthy();
+    expect(screen.getByText(/Not scored/)).toBeTruthy();
+    expect(screen.getByText(/Copy it down/)).toBeTruthy();
   });
 
   it("keeps each answer in its own box and counts what has been written", async () => {

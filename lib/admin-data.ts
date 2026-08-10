@@ -1,7 +1,9 @@
 import "server-only";
 import { supabaseAdmin } from "./supabase-admin";
+import { earnsCertificate } from "./format";
 import type {
   AttemptWithPlayer,
+  CertificateRow,
   PlayerRow,
   PlayerSummary,
   SkillTally,
@@ -125,6 +127,79 @@ export function summarisePlayer(
     skills,
     weakestSkill: weakest(skills),
   };
+}
+
+/** Who has earned a certificate, who has not, and why not.
+ *
+ *  The teacher asked to see this at a glance and to be able to print anyone's
+ *  certificate for them — a child who plays at home and cannot work the
+ *  download, or who has changed phones, otherwise has no way to get it.
+ *
+ *  The rule is `earnsCertificate` from lib/format.ts, the same function both
+ *  student screens use. It is not re-implemented here: two answers to "did I
+ *  pass?" is exactly the bug this project already had once.
+ *
+ *  Sorted so the teacher's eye lands on the work: not started, then close, then
+ *  earned — the ones needing help first. */
+export function certificateRoster(
+  players: PlayerRow[],
+  attempts: AttemptWithPlayer[],
+  gameId: string,
+  fullQuestionCount: number
+): CertificateRow[] {
+  const byPlayer = new Map<string, AttemptWithPlayer[]>();
+  for (const attempt of attempts) {
+    if (attempt.unit_id !== gameId) continue;
+    const list = byPlayer.get(attempt.player_id);
+    if (list) list.push(attempt);
+    else byPlayer.set(attempt.player_id, [attempt]);
+  }
+
+  const rows = players.map((player): CertificateRow => {
+    const runs = byPlayer.get(player.id) ?? [];
+    const earning = runs.filter((run) =>
+      earnsCertificate(gameId, run.correct_count, run.total_questions, fullQuestionCount)
+    );
+    // best of whichever set matters, by the board's rule: score, then time
+    const pick = (list: AttemptWithPlayer[]) =>
+      list.reduce<AttemptWithPlayer | null>((best, run) => {
+        if (!best) return run;
+        if (run.score !== best.score) return run.score > best.score ? run : best;
+        return run.time_seconds < best.time_seconds ? run : best;
+      }, null);
+
+    const earnedWith = pick(earning);
+    const bestAny = pick(runs);
+
+    const state = earnedWith
+      ? "earned"
+      : runs.length === 0
+        ? "never-played"
+        : bestAny && bestAny.total_questions < fullQuestionCount
+          ? "stopped-early"
+          : "not-enough";
+
+    return {
+      player,
+      state,
+      earnedWith,
+      bestAny,
+      correctCount: (earnedWith ?? bestAny)?.correct_count ?? 0,
+      totalQuestions: (earnedWith ?? bestAny)?.total_questions ?? 0,
+    };
+  });
+
+  const order: Record<CertificateRow["state"], number> = {
+    "never-played": 0,
+    "stopped-early": 1,
+    "not-enough": 2,
+    earned: 3,
+  };
+  return rows.sort(
+    (a, b) =>
+      order[a.state] - order[b.state] ||
+      a.player.name.localeCompare(b.player.name)
+  );
 }
 
 export function summariseUnits(attempts: AttemptWithPlayer[]): UnitStats[] {

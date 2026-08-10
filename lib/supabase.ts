@@ -47,7 +47,7 @@ export function describeFailure(err: unknown): ScoreboardFailure {
   if (!supabaseConfigured) {
     return {
       kind: "unconfigured",
-      message: "This app isn't connected to its scoreboard yet.",
+      message: "Not set up yet. Please tell your teacher.",
       detail:
         "Copy .env.example to .env.local, fill in the Supabase URL and anon key, and run supabase/schema.sql.",
     };
@@ -72,14 +72,14 @@ export function describeFailure(err: unknown): ScoreboardFailure {
   if (/failed to fetch|networkerror|load failed|fetch failed|timeout/i.test(text)) {
     return {
       kind: "offline",
-      message: "Could not reach the scoreboard. Check your connection and try again.",
+      message: "No internet. Try again.",
       detail,
     };
   }
 
   return {
     kind: "database",
-    message: "The scoreboard would not accept that. Please tell your teacher.",
+    message: "Something went wrong. Tell your teacher.",
     detail,
   };
 }

@@ -16,7 +16,12 @@ vi.mock("@/lib/supabase", async (importOriginal) => ({
 
 vi.mock("@/lib/certificate", () => ({
   downloadCertificate: (data: unknown) => downloadCertificate(data),
+  warmCertificate: () => {},
 }));
+
+const GAME_ID = "game-01";
+/** A complete run of the current game. */
+const FULL = 77;
 
 const TITLES = {
   "unit-01": "Shadow Animal Challenge",
@@ -72,14 +77,14 @@ describe("who earns a certificate", () => {
 describe("MyScores", () => {
   it("asks for a name first when nobody is signed in", async () => {
     window.localStorage.clear();
-    render(<MyScores unitTitles={TITLES} />);
+    render(<MyScores unitTitles={TITLES} gameId={GAME_ID} fullQuestionCount={FULL} />);
 
     expect(await screen.findByText(/Type your name first/)).toBeTruthy();
     expect(getPlayerAttempts).not.toHaveBeenCalled();
   });
 
   it("says so plainly before anything has been played", async () => {
-    render(<MyScores unitTitles={TITLES} />);
+    render(<MyScores unitTitles={TITLES} gameId={GAME_ID} fullQuestionCount={FULL} />);
     expect(await screen.findByText(/Nothing here yet, Mint/)).toBeTruthy();
   });
 
@@ -88,7 +93,7 @@ describe("MyScores", () => {
       attempt({ id: "a1" }),
       attempt({ id: "a2", unit_id: "unit-02", score: 100, max_score: 740 }),
     ]);
-    render(<MyScores unitTitles={TITLES} />);
+    render(<MyScores unitTitles={TITLES} gameId={GAME_ID} fullQuestionCount={FULL} />);
 
     await waitFor(() => expect(screen.getByText("300/350")).toBeTruthy());
     expect(screen.getByText("Shadow Animal Challenge")).toBeTruthy();
@@ -102,7 +107,7 @@ describe("MyScores", () => {
   it("re-issues an earned certificate without replaying the unit", async () => {
     const user = userEvent.setup();
     getPlayerAttempts.mockResolvedValue([attempt()]);
-    render(<MyScores unitTitles={TITLES} />);
+    render(<MyScores unitTitles={TITLES} gameId={GAME_ID} fullQuestionCount={FULL} />);
 
     await user.click(await screen.findByRole("button", { name: "Certificate" }));
 
@@ -120,21 +125,51 @@ describe("MyScores", () => {
     );
   });
 
-  it("offers no certificate for a part, and says why", async () => {
+  // Historic rows from when the game was played one part at a time. The id
+  // shape is still what rules them out, so old part runs never hand out a
+  // certificate years after the fact.
+  it("offers no certificate for an old single-part run", async () => {
     getPlayerAttempts.mockResolvedValue([
       attempt({ unit_id: "unit-01-part-1", correct_count: 27, total_questions: 27 }),
     ]);
-    render(<MyScores unitTitles={TITLES} />);
+    render(<MyScores unitTitles={TITLES} gameId={GAME_ID} fullQuestionCount={FULL} />);
 
-    expect(await screen.findByText(/Parts don't earn a certificate/)).toBeTruthy();
+    expect(await screen.findByText(/Needs 14 right/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Certificate" })).toBeNull();
+  });
+
+  // /rank and /me both hand out certificates, and they must never disagree.
+  // This screen was still asking the old question — "was half of what you
+  // played right?" — so a child who answered 20 of 77 and pressed Finish was
+  // refused on the ranking and offered one here.
+  it("refuses a run of this game that stopped early", async () => {
+    getPlayerAttempts.mockResolvedValue([
+      attempt({ unit_id: GAME_ID, correct_count: 20, total_questions: 27 }),
+    ]);
+    render(
+      <MyScores unitTitles={TITLES} gameId={GAME_ID} fullQuestionCount={FULL} />
+    );
+
+    expect(await screen.findByText(/Play every question/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Certificate" })).toBeNull();
+  });
+
+  it("still issues one for a run of this game played all the way", async () => {
+    getPlayerAttempts.mockResolvedValue([
+      attempt({ unit_id: GAME_ID, correct_count: 39, total_questions: FULL }),
+    ]);
+    render(
+      <MyScores unitTitles={TITLES} gameId={GAME_ID} fullQuestionCount={FULL} />
+    );
+
+    expect(await screen.findByRole("button", { name: "Certificate" })).toBeTruthy();
   });
 
   it("says how many were needed when the run fell short", async () => {
     getPlayerAttempts.mockResolvedValue([
       attempt({ correct_count: 10, total_questions: 35 }),
     ]);
-    render(<MyScores unitTitles={TITLES} />);
+    render(<MyScores unitTitles={TITLES} gameId={GAME_ID} fullQuestionCount={FULL} />);
 
     expect(await screen.findByText(/Needs 18 right/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Certificate" })).toBeNull();
@@ -146,7 +181,7 @@ describe("MyScores", () => {
     const user = userEvent.setup();
     getPlayerAttempts.mockResolvedValue([attempt()]);
     downloadCertificate.mockRejectedValue(new Error("Incomplete or corrupt PNG file"));
-    render(<MyScores unitTitles={TITLES} />);
+    render(<MyScores unitTitles={TITLES} gameId={GAME_ID} fullQuestionCount={FULL} />);
 
     await user.click(await screen.findByRole("button", { name: "Certificate" }));
 
@@ -157,8 +192,8 @@ describe("MyScores", () => {
 
   it("surfaces a scoreboard failure instead of an empty page", async () => {
     getPlayerAttempts.mockRejectedValue(new TypeError("Failed to fetch"));
-    render(<MyScores unitTitles={TITLES} />);
+    render(<MyScores unitTitles={TITLES} gameId={GAME_ID} fullQuestionCount={FULL} />);
 
-    expect(await screen.findByText(/Could not reach the scoreboard/)).toBeTruthy();
+    expect(await screen.findByText(/No internet/)).toBeTruthy();
   });
 });

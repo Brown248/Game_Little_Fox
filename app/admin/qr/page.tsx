@@ -5,7 +5,6 @@ import Image from "next/image";
 import { headers } from "next/headers";
 import QRCode from "qrcode";
 import PrintButton from "@/components/admin/PrintButton";
-import { listUnits } from "@/lib/units";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +23,6 @@ export default async function AdminQrPage({
     errorCorrectionLevel: "M",
   });
 
-  const units = listUnits();
 
   return (
     <div className="stack">
@@ -69,21 +67,20 @@ export default async function AdminQrPage({
         </div>
       )}
 
+      {/* One QR per unit used to live here. There are no units to send anyone
+          to any more — the poster's root QR is the whole story, since typing a
+          name is the only thing between scanning it and question one. */}
       <div className="card no-print">
-        <h2>Direct links</h2>
-        <p className="muted">
-          A QR for a single unit if you ever want one — students normally start at
-          the root and pick their unit there.
-        </p>
+        <h2>Other links</h2>
         <div className="breakdown">
-          {units.map((unit) => (
-            <div className="breakdown__row" key={unit.id}>
-              <span>{unit.title}</span>
-              <a href={`/admin/qr?target=/play/${unit.id}`}>
-                QR for /play/{unit.id}
-              </a>
-            </div>
-          ))}
+          <div className="breakdown__row">
+            <span>Straight into the game</span>
+            <a href="/admin/qr?target=/play">QR for /play</a>
+          </div>
+          <div className="breakdown__row">
+            <span>The board, for the wall</span>
+            <a href="/admin/qr?target=/rank">QR for /rank</a>
+          </div>
         </div>
       </div>
     </div>

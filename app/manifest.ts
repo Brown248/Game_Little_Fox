@@ -1,13 +1,13 @@
 import type { MetadataRoute } from "next";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_SHORT_NAME } from "@/lib/site";
 
 // Students reach the game by scanning a QR code, so a fair few will "add to
 // home screen". This is what that icon and its name come from.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Little Fox Game",
-    short_name: "Little Fox",
-    description:
-      "A ranked English word game from Little Fox Language School — play a unit, climb the class leaderboard.",
+    name: SITE_NAME,
+    short_name: SITE_SHORT_NAME,
+    description: SITE_DESCRIPTION,
     start_url: "/",
     display: "standalone",
     background_color: "#FDF3E3",

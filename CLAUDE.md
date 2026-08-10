@@ -32,10 +32,9 @@ npm run dev      # next dev — เซิร์ฟเวอร์ dev
 npm run build    # next build — ต้องผ่านก่อนบอกว่าเสร็จ
 npm run start    # next start — รัน production build
 npm run lint     # eslint . — ESLint CLI ตรงๆ (`next lint` ถูกถอดใน Next 16)
-npm test         # vitest — 165 เทส (logic + คอมโพเนนต์ ใน jsdom) ไม่ต้องมีอะไรรันอยู่
+npm test         # vitest — 203 เทส (logic + คอมโพเนนต์ ใน jsdom) ไม่ต้องมีอะไรรันอยู่
 npm run test:db  # vitest — 64 เทส ยิง Postgres + PostgREST จริงใน docker (ดู tests/README.md)
 npm run brand    # สร้างไฟล์โลโก้ทุกขนาดใหม่จาก brand/little-fox-logo-master.png
-npm run images -- "C:/path/to/ภาพประกอบ"   # แปลงภาพวาดสัตว์ PNG → WebP โปร่งใส ลง public/images/animals (คู่เงา/เฉลย ดู PAIRS ในสคริปต์)
 npm run check:db # เช็ก Supabase "ตัวจริง" ที่อยู่ใน .env.local — key ใช้ได้ไหม · รัน schema.sql แล้วยัง · RLS เปิดอยู่ไหม (อ่านอย่างเดียว ไม่เขียนข้อมูล)
 ```
 
@@ -65,14 +64,12 @@ app/                  Next.js App Router (route + layout) · globals.css = ธ�
   error.tsx · not-found.tsx   error boundary + 404 ทั้งแอป
   icon.png · apple-icon.png · opengraph-image.png · manifest.ts   ไอคอนแท็บ/โฮมสกรีน/ลิงก์พรีวิว (Next ต่อสายให้เอง ห้ามเปลี่ยนชื่อไฟล์)
   admin/actions.ts     server actions ทั้งหมดของหลังบ้าน
-components/            Shell (SiteHeader + main + SiteFooter) · StartForm (ชื่ออย่างเดียว) · ExplorerGreeting · PlayClient (engine loop) · ResultScreen · MyScores (ประวัติ + ออกใบซ้ำ) · UnitLeaderboard · OverallLeaderboard · ConfirmDialog
+components/            Shell (SiteHeader + main + SiteFooter) · StartForm (ชื่ออย่างเดียว) · PlayClient (engine loop) · RankBoard (บอร์ด + ใบเซอร์) · MyScores (ประวัติ + ออกใบซ้ำ) · ConfirmDialog · Failure
 components/games/      คอมโพเนนต์มินิเกม 5 แบบ + ตัวช่วยที่ใช้ร่วม: ChoiceList (A/B/C/D + seal/burst) · Progress (หัวข้อ+แทร็ก) · Feedback
 components/admin/      AdminLogin · AdminNav · PlayersTable · MergePlayers · AttemptsTable · SetupNotice · PrintButton
 lib/                   ดูตารางข้างล่าง
 content/units/         นิยามยูนิตเป็นไฟล์ JSON + `_template.json` + `README.md` (กติกาการเขียนยูนิต)
 public/audio/          ไฟล์เสียง — path ใน JSON เป็น relative แล้วต่อ prefix `/audio/` ให้ (URL เต็มก็ใส่ได้)
-public/images/animals/ ภาพวาดสัตว์ คู่ `<slug>-shadow.webp` + `<slug>.webp` — สร้างด้วย `npm run images` **อย่าแก้ด้วยมือ**
-                       (ไฟล์ต้นฉบับพื้นม่วง + มีคำเฉลยพิมพ์อยู่ · สคริปต์ครอบตัดคำทิ้งแล้วคีย์พื้นออกให้โปร่งใส)
 brand/                 ต้นฉบับโลโก้ (`little-fox-logo-master.png`) — ไฟล์เดียวที่เป็น "ของจริง"
 scripts/               `build-brand-assets.mjs` = ตัดโลโก้ทุกขนาดจาก master (`npm run brand`)
 supabase/schema.sql    DDL + RLS ของ Postgres (รันครั้งเดียวตอนตั้ง · re-run ได้)
@@ -84,7 +81,10 @@ tests/                 unit + component (jsdom) · tests/db = integration กั
 | ไฟล์ | ฝั่ง | หน้าที่ |
 |------|-----|---------|
 | `types.ts` | ทั้งสอง | type ทั้งโปรเจกต์ **นิยามที่นี่ก่อนเสมอ** (รวม shape ของ admin summary เพื่อให้ client import ได้) |
-| `format.ts` | ทั้งสอง | `formatTime` `formatPercent` `formatDateTime` `formatDate` `gameLabel`/`GAME_LABELS` · `partScoreId`/`parsePartId`/`scoreIdLabel` · `earnsCertificate`/`certificateNeeds`/`CERTIFICATE_PASS_MARK` · `animalArt` — **ต้อง client-safe** |
+| `game.ts` | **server-only** | `GAME_ID` + `buildGame()` = ต่อ `games` ของทุกยูนิตเป็นเกมเดียว |
+| `progress.ts` | client | เซฟ/อ่าน/ล้างรอบที่เล่นค้างไว้ใน `localStorage["we.progress"]` |
+| `site.ts` | ทั้งสอง | ชื่อเว็บ + คำอธิบาย 1 บรรทัด — `layout.tsx` กับ `manifest.ts` อ่านที่เดียวกัน (เคยพิมพ์ซ้ำคำต่อคำ) |
+| `format.ts` | ทั้งสอง | `formatTime` `formatPercent` `formatDateTime` `formatDate` `gameLabel`/`GAME_LABELS` · `parsePartId`/`scoreIdLabel` (อ่านเฉพาะ id เก่า) · `earnsCertificate`/`certificateNeeds`/`CERTIFICATE_PASS_MARK` — **ต้อง client-safe** |
 | `supabase.ts` | client | anon client + query ของนักเรียน (`findOrCreatePlayer` `saveAttempt` `getPlayerAttempts` `getUnitRanking` `getOverallRanking`) |
 | `scoring.ts` | client | state คะแนน/เวลา |
 | `session.ts` | client | player ที่ล็อกอินไว้ใน `localStorage["we.player"]` (ไม่ใช่ sessionStorage) |
@@ -101,13 +101,11 @@ tests/                 unit + component (jsdom) · tests/db = integration กั
 
 | เส้นทาง | ไฟล์ | หน้าที่ |
 |---------|------|---------|
-| `/` | `app/page.tsx` | **กรอกชื่ออย่างเดียว** แล้วเด้งไป `/units` — หน้าแรกถามคำถามเดียว |
-| `/units` | `app/units/page.tsx` | เลือกยูนิต — ลิสต์มาจาก `listUnits()` |
-| `/unit/[unitId]` | `app/unit/[unitId]/page.tsx` | เล่นทั้งยูนิต หรือเลือก Part เดียว |
+| `/` | `app/page.tsx` | **กรอกชื่ออย่างเดียว** แล้ว `push` ไป `/play` ทันที |
+| `/play` | `app/play/page.tsx` | **เกมเดียว ไม่มี segment ไม่มี query** — ส่ง `buildGame()` ให้ `PlayClient` |
+| `/rank` | `app/rank/page.tsx` | บอร์ดเดียว (อันดับ · ชื่อ · คะแนน · เวลา) + ใบเซอร์ · **เป็นปลายทางของเกมที่เล่นจบด้วย** |
 | `/me` | `app/me/page.tsx` | ประวัติของนักเรียนเอง + **โหลด certificate ซ้ำ** (query ฝั่ง client เพราะ id อยู่ใน localStorage) |
-| `/play/[unitId]` | `app/play/[unitId]/page.tsx` | server: resolve unit → `components/PlayClient.tsx` คือ engine จริง |
-| `/leaderboard/[unitId]` | `app/leaderboard/[unitId]/page.tsx` | อันดับรายยูนิต |
-| `/leaderboard/overall` | `app/leaderboard/overall/page.tsx` | อันดับรวมทุกยูนิต |
+| `/leaderboard/overall` | `app/leaderboard/overall/page.tsx` | `redirect("/rank")` เฉยๆ — กันลิงก์เก่าพัง |
 | `/admin` | `app/admin/page.tsx` | ภาพรวม: จำนวนนักเรียน/ครั้งที่เล่น · ทักษะที่ห้องอ่อนสุด · attempt ล่าสุด 25 รายการ |
 | `/admin/players` | `.../players/page.tsx` | รายชื่อนักเรียน · แก้ชื่อ/ห้อง · ลบ · **merge คนซ้ำ** |
 | `/admin/players/[playerId]` | `.../players/[playerId]/page.tsx` | รายคน: accuracy · ทักษะ · ยูนิตที่ยังไม่เล่น · attempt ทุกครั้ง |
@@ -121,6 +119,50 @@ tests/                 unit + component (jsdom) · tests/db = integration กั
 **Path alias:** `@/*` → `./` (เช่น `import { supabase } from '@/lib/supabase'`)
 
 ---
+
+## เกมเดียว — โครงที่สำคัญที่สุดในโปรเจกต์ตอนนี้
+
+ครูสั่งตัดการ "เลือก" ออกทั้งหมด: **ใส่ชื่อ → เริ่มข้อแรก → จบแล้วโชว์อันดับ**
+ไม่มีหน้าเลือกยูนิต ไม่มีเลือก Part ไม่มี `/units` ไม่มี `/play/[unitId]` ไม่มี `?part=` อีกแล้ว
+
+- **`buildGame()` ใน `lib/game.ts`** = `loadAllUnits().flatMap(u => u.games)` — เรียงตาม id ของยูนิต
+  แล้วตามลำดับใน `games` ของแต่ละไฟล์ · **เพิ่ม `unit-03.json` = ต่อท้ายเกมเองอัตโนมัติ ไม่ต้องแตะโค้ด**
+- **ยูนิตยังเป็นวิธีเขียนเนื้อหาเหมือนเดิม** (ตรงกับใบงานกระดาษของครู) แค่ไม่ใช่สิ่งที่เด็กต้องเลือกแล้ว
+
+### `GAME_ID = "game-01"` — อ่านให้จบก่อนแก้
+- **ทุก attempt ใหม่บันทึกลง `unit_id` ด้วยค่านี้** และบอร์ดคือ `getUnitRanking(GAME_ID)` อันเดียว
+- **ตั้งใจให้ไม่ตรงรูป `unit-NN`** เพราะ `v_overall_ranking` ใน `supabase/schema.sql:66` กรอง
+  `where r.unit_id ~ '^unit-[0-9]{2}$'` — คะแนนเก่า (`unit-01` · `unit-02` · `unit-NN-part-N`)
+  จึงอยู่บนบอร์ดเดิมของมัน **ไม่ปนกับบอร์ดใหม่** ตามที่ครูสั่ง
+- ⚠️ **ห้ามเปลี่ยน `GAME_ID` ให้เป็นรูป `unit-NN`** ไม่งั้นคะแนนคนละชุดเนื้อหาจะมาแข่งกัน
+- **แก้เนื้อหาจนจำนวนข้อเปลี่ยน = bump เป็น `game-02`** เพื่อเปิดบอร์ดใหม่
+  (คะแนนเทียบกันได้เฉพาะเมื่อมาจากชุดคำถามเดียวกัน)
+- **ไม่ได้แก้ `schema.sql` เลยแม้แต่บรรทัดเดียว** — `npm run test:db` 64 เทสยังผ่านโดยไม่ต้องแตะ
+  และไม่มีการ `UPDATE` แถวเก่า ข้อมูลจริงของเด็กจึงปลอดภัย
+
+### ปุ่มย้อนกลับ — `router.replace` ไม่ใช่ `push`
+จบเกม → บันทึก → **`router.replace("/rank")`** ⇒ `/play` หลุดออกจากประวัติ
+กด back จากหน้าอันดับจึงไปโผล่ที่ `/` ตามที่ครูสั่ง ("พอกดย้อนกลับควรไปหน้าเริ่มต้นเลยคือหน้าใส่ชื่อ")
+**ถ้าเปลี่ยนเป็น `push` เมื่อไหร่ บั๊กเดิมกลับมาทันที** — เด็กกด back แล้วเดินเข้าเกมที่เล่นจบไปแล้วและเริ่มใหม่
+· เทสใน `engine.test.tsx` ล็อกไว้แล้ว
+
+### ปุ่ม "Finish" — ออกจากเกมแล้วเก็บคะแนน ไม่ใช่ทิ้ง
+เกมเป็นรอบเดียว 77 ข้อ แต่ห้องเรียนไปถึงทีละ Part — **เด็กที่เรียนถึงแค่ Part แรกจะเจออีก 50 ข้อ
+ที่ยังไม่ได้เรียน** ถ้าปิดแท็บหนีก็ไม่ได้คะแนนเลย ปุ่ม `Exit` เดิมที่ทิ้งทั้งรอบจึงกลายเป็น **`Finish`**
+- กด → ถาม `Finish here?` → **บันทึกเท่าที่ตอบไปแล้ว** → `/rank` (เส้นทางเดียวกับเล่นจบ)
+- **ยังไม่ตอบสักข้อ = ไม่บันทึก** กลับหน้าแรกเฉยๆ (กันแถว 0/0 บนบอร์ด)
+- บันทึกรอบสั้นไม่มีข้อเสีย เพราะบอร์ดเอา **ผลดีที่สุด** รอบที่แย่กว่าไม่เคยไปแทนที่รอบที่ดีกว่า
+- ⚠️ **บอร์ดเรียงด้วยคะแนนดิบ** คนที่หยุดที่ 27 ข้อ (เต็ม 270) จึงไม่มีทางขึ้นเหนือคนที่ทำครบ 77 ข้อ
+  (เต็ม 770) — **ยอมรับข้อนี้แล้ว** เพราะเล่นซ้ำได้ พอเรียนเพิ่มแล้วกลับมาเล่นใหม่คะแนนก็ขยับเอง
+- ปุ่มบนหัวชื่อ `Finish` · ปุ่มยืนยันในกล่องชื่อ **`Finish now`** — ตั้งใจให้ชื่อไม่ซ้ำกัน
+
+### เล่นค้างไว้ได้ (`lib/progress.ts`)
+เกมเดียว 104 ข้อ ~20–30 นาที และคะแนนบันทึกตอนจบ **ครั้งเดียว** — ปิดแท็บตอนข้อ 90 คือเสียทั้งหมด
+ครูอยากให้เด็กเล่นที่บ้านด้วย จึง **เซฟทุกครั้งที่จบ 1 ช่วง** ลง `localStorage` แล้วถามว่า "เล่นต่อ / เริ่มใหม่"
+- **เซฟรายช่วง ไม่ใช่รายข้อ** — เลขข้ออยู่ใน state ภายในของเกมทั้ง 5 ตัว ดึงออกมาไม่คุ้ม
+- **`ScoringState.accumulatedSeconds`** ทำให้นาฬิกานับเฉพาะเวลาที่เล่นจริง
+  ไม่งั้นเด็กที่ปิดแท็บไปนอนจะได้เวลา 8 ชั่วโมง · `resumeScoringState()` เป็นตัวต่อเวลาให้
+- ทิ้ง progress ทันทีที่ `saveAttempt` สำเร็จ และตอนกด Exit
 
 ## สถาปัตยกรรมข้อมูล — จุดสำคัญ
 
@@ -143,7 +185,7 @@ SentenceBuilderBlock | ListeningBlock | WritingBlock`) — `switch (block.type)`
 | ชนิด (`type`) | คอมโพเนนต์ | ทำอะไร |
 |--------------|-----------|--------|
 | `quiz-choice` | `QuizChoice.tsx` | เลือกตอบพร้อม clue |
-| `unscramble` | `Unscramble.tsx` | เรียงตัวอักษรเป็นคำ · ถ้า item มี `art` (ภาพวาดจริง) จะโชว์**ภาพเงา**ในกรอบก่อน แล้ว crossfade เป็นภาพสีตอนเฉลย · ถ้าไม่มี `art` แต่มี `shadow` (emoji) จะโชว์เป็น**เงาดำ**แล้วสว่างเป็นสี |
+| `unscramble` | `Unscramble.tsx` | เรียงตัวอักษรเป็นคำ · โชว์อิโมจิเป็น**เงาดำ**ก่อน ตอบแล้วสว่างเป็นสี |
 | `sentence-builder` | `SentenceBuilder.tsx` | แตะคำเรียงเป็นประโยค |
 | `listening` | `Listening.tsx` | ฟังเสียงแล้วเลือกตอบ |
 | `writing` | `Writing.tsx` | เขียนอิสระ (ไม่คิดคะแนน · อยู่ท้ายสุดเสมอ) |
@@ -167,9 +209,11 @@ SentenceBuilderBlock | ListeningBlock | WritingBlock`) — `switch (block.type)`
 **2 ตาราง** (`supabase/schema.sql`): `players` · `attempts` (มี `game_type_breakdown` เป็น jsonb)
 
 **กติกาการจัดอันดับ — อย่าทำพัง:**
-- ลีดเดอร์บอร์ดรายยูนิต = **เอาผลดีที่สุดต่อ player ต่อยูนิต** (คะแนนสูงสุด · เสมอตัดด้วยเวลาที่เร็วกว่า)
-- อันดับรวม = **ถ่วงด้วยความแม่น** `sum(score) / sum(max_score)` ไม่ใช่คะแนนดิบรวม
-  (กันไม่ให้ยูนิตที่มีคำถามเยอะครองอันดับ) — **ห้ามเปลี่ยนเป็นผลรวมคะแนนดิบ**
+- **บอร์ดเดียว** = `v_unit_ranking` กรองด้วย `GAME_ID` → **ผลดีที่สุดต่อคน** (คะแนนสูงสุด · เสมอตัดด้วยเวลาที่เร็วกว่า)
+  เล่นซ้ำได้ เก็บทุกรอบ แต่ขึ้นบอร์ดแค่รอบที่ดีที่สุด (คำสั่งครู)
+- **ห้าม re-sort ฝั่ง client** — ลำดับที่ view ให้มา *คือ* กติกา
+- `v_overall_ranking` **ยังอยู่ในฐานข้อมูลแต่ฝั่งนักเรียนเลิกใช้แล้ว** (มันนับ "กี่ยูนิต" ซึ่งไม่มีความหมายอีก)
+  **อย่าลบ view หรือ index ทิ้ง** — `tests/db/schema.test.ts` เช็คว่ามีจริง และ `npm run check:db` ก็เช็ค
 
 ### คะแนน — ใช้ helper ใน `lib/scoring.ts`
 
@@ -212,15 +256,18 @@ SentenceBuilderBlock | ListeningBlock | WritingBlock`) — `switch (block.type)`
 
 ## เกร็ด / กับดัก
 
-- **Listening:** ถ้าไม่มี `audioUrl` (หรือโหลดไฟล์ไม่ได้) จะ fallback ไป browser TTS · path relative ใน JSON จะถูกต่อ prefix `/audio/` · ใส่ URL เต็มของ Supabase Storage ก็ได้ · **ตอนนี้ยังไม่มี mp3 จริง → ได้ TTS ทุกครั้ง**
+- **Listening:** ถ้าไม่มี `audioUrl` (หรือโหลดไฟล์ไม่ได้) จะ fallback ไป browser TTS · path relative ใน JSON จะถูกต่อ prefix `/audio/` · ใส่ URL เต็มของ Supabase Storage ก็ได้ · **Part D ข้อ 1–7 มี mp3 จริงแล้ว · ข้อ 8–10 ยังใช้เสียงเครื่อง** (และข้อ 10 ซ้ำกับข้อ 2 — รอครูตัดสิน)
 - **Writing:** เก็บแค่ "ทำเสร็จ" ไม่เก็บข้อความที่พิมพ์ (ตั้งใจ) และไม่คิดคะแนน
-- **ภาพสัตว์ (`scripts/build-animal-images.mjs`) — 4 จุดที่วัดมาแล้ว อย่าแก้กลับ:**
-  - ครอบตัดที่ **81% ของความสูง** เพื่อตัดคำเฉลยที่พิมพ์อยู่ (คำอยู่แถว 896–1016 · สัตว์ต่ำสุดแถว 856) — เปลี่ยนไฟล์ต้นฉบับต้องวัดใหม่
-  - พื้นหลังเป็นไล่เฉดแนวตั้ง → อ่านสีอ้างอิง **ต่อแถว** ไม่ใช่คีย์สีเดียวทั้งภาพ ไม่งั้นกินหมีขาว/วาฬฟ้า
-  - อ้างอิงต้องเอา **median จาก 6 คอลัมน์ทั้งขอบซ้ายและขวา** — ภาพหมูมีแถบเข้มที่ขอบซ้าย ถ้าเชื่อ x=2 อย่างเดียวค่าจะเพี้ยน 45 พอดี แล้วเหลือแถบม่วงคาดกลางภาพ
-  - เก็บเฉพาะ **ก้อนที่ต่อกันใหญ่ที่สุด** (ทุกภาพมีสัตว์ตัวเดียว) — ทุกเฟรมมีรอยม่วงเข้มมุมซ้ายบนที่หลุดออกมาเป็นเศษลอย
-  - `blend: "dest-in"` อ่าน **alpha ของ overlay ไม่ใช่ความสว่าง** → ต้องยัด mask ลง alpha channel เอง · `.art img` ใช้ `object-fit: contain` เพราะภาพถูก trim ชิดตัวสัตว์แล้ว (จระเข้กว้างกว่าสูง 3.5 เท่า cover จะกินหาย)
-- **ใครได้ certificate:** ต้อง **เล่นทั้ง Unit** (เล่นทีละ Part ไม่ได้ ไม่งั้นใบเยอะเกิน) **และตอบถูก ≥ ครึ่งหนึ่งของจำนวนข้อ** — นับจาก `correctCount / totalQuestions` **ไม่ใช่คะแนนดิบ** (วันนี้ค่าเท่ากันเพราะข้อละ 10 แต่ถ้าคะแนนต่อข้อเปลี่ยน กติกาต้องยังอิงข้อถูก) · กติกาอยู่ที่ `earnsCertificate()` / `CERTIFICATE_PASS_MARK` ใน **`lib/format.ts`** ที่เดียว (ย้ายออกจาก `ResultScreen.tsx` ตอนเพิ่มหน้า `/me` เพราะสองหน้าออกใบแล้ว ห้ามให้เกณฑ์ต่างกัน) · ไม่ผ่านให้บอกว่าต้องถูกกี่ข้อ อย่าซ่อนปุ่มเฉยๆ
+- **ใบเซอร์ตัดสินจาก "รอบที่เล่นจบที่ดีที่สุด" ไม่ใช่ "รอบที่คะแนนสูงสุด"** (`certificateRun` ใน `RankBoard.tsx`)
+  เล่นครบ 77 ข้อถูก 40 = ได้ใบ · กลับมาเล่นใหม่ตอบ 50 ข้อแล้วกด Finish = คะแนนสูงกว่าแต่เล่นไม่จบ
+  ถ้าเลือก "คะแนนสูงสุด" ใบเซอร์ที่ได้ไปแล้วจะถูกริบคืน **ห้ามเปลี่ยนกลับ**
+- **`warmCertificate()` ต้องถูกเรียกตอนปุ่มโผล่ ไม่ใช่ตอนกด** — iOS Safari ไม่ยอมเริ่มดาวน์โหลด
+  จาก handler ที่ไปรอ network ก่อน (นี่คือสาเหตุที่เป็นไปได้ของ "โหลดไม่ได้ ต้องเเคปเอา")
+- **ใครได้ certificate:** ต้อง **เล่นครบทั้งเกม** (กด Finish กลางคันไม่ได้) **และตอบถูก ≥ ครึ่งหนึ่งของจำนวนข้อ**
+  ⚠️ เงื่อนไข "ครบ" คือพารามิเตอร์ `fullQuestionCount` ของ `earnsCertificate()` — **ห้ามลืมส่ง**
+  ไม่งั้นเด็กที่ทำ 20 จาก 27 ข้อแล้วกด Finish จะได้ 74% แล้วคว้าใบเซอร์ไปทั้งที่เล่นแค่ 1 ใน 3 ของเกม
+  (`app/rank/page.tsx` นับจาก `buildGame()` แล้วส่งลงมาให้ `RankBoard`) · `playedItAll()` ใช้แยกข้อความ
+  ระหว่าง "ยังเล่นไม่ครบ" กับ "ถูกไม่ถึงครึ่ง" — นับจาก `correctCount / totalQuestions` **ไม่ใช่คะแนนดิบ** (วันนี้ค่าเท่ากันเพราะข้อละ 10 แต่ถ้าคะแนนต่อข้อเปลี่ยน กติกาต้องยังอิงข้อถูก) · กติกาอยู่ที่ `earnsCertificate()` / `CERTIFICATE_PASS_MARK` ใน **`lib/format.ts`** ที่เดียว (ย้ายออกจาก `ResultScreen.tsx` ตอนเพิ่มหน้า `/me` เพราะสองหน้าออกใบแล้ว ห้ามให้เกณฑ์ต่างกัน) · ไม่ผ่านให้บอกว่าต้องถูกกี่ข้อ อย่าซ่อนปุ่มเฉยๆ
 - **ในใบ certificate มี "ตรา" ได้อย่างเดียวคือโลโก้โรงเรียน** — เคยมี seal เข็มทิศทางขวา (ของเก่าจากตอนแบรนด์ยังเป็นเข็มทิศ) เอาออกแล้ว **ห้ามใส่ badge/seal/ภาพประกอบอะไรกลับเข้าไปอีก** เทส "draws no second emblem" กันไว้ (นับ addImage=1 · circle=0 · triangle=0)
 - **Certificate:** A5 นอน · โลโก้บนหัว + กรอบส้ม + กรอบ dashed · `jspdf` ใช้ฟอนต์ built-in (Latin-1) → **ชื่อไทยจะออกมาเป็นสี่เหลี่ยม** ถ้าต้องรองรับต้อง embed ฟอนต์ไทย · หัวใบใช้ชื่อ **โรงเรียน** (`LITTLE FOX LANGUAGE SCHOOL`) ไม่ใช่ชื่อเกม เพราะคนออกใบคือโรงเรียน
 - **โลโก้ใน PDF — 2 กับดักที่วัดมาแล้ว อย่าแก้กลับ:**
@@ -257,11 +304,25 @@ SentenceBuilderBlock | ListeningBlock | WritingBlock`) — `switch (block.type)`
 - **เลขที่เปลี่ยน** (คะแนน/เวลา/streak) ใส่ `key` แล้วให้คลาส `.tick` เล่น `weTick` 300ms
 - **หน้าจอ/ข้อถัดไป** เลื่อนเข้า `weSlide` 260ms · ผลลัพธ์เข้าด้วย `.wipe-up` · ไม่ตัดภาพแข็งๆ
 - **idle หายใจได้:** badge ลอย `weFloat` 7px รอบ 3–4.5s ห้ามเร็วกว่านี้
+- **จอที่ต้องรองรับจริง: มือถือ 360–430 · iPad 768 (แนวตั้ง) / 1024 (แนวนอน) · คอม 1440** — ค่าที่วัดมาแล้ว อย่าแก้กลับ:
+  - `.brand` ต้อง **ย่อได้** (`min-width: 0`) + `.brand__meta` ต้อง `text-overflow: ellipsis` —
+    เคยเป็น `flex: none` แล้ว kicker ยาว 43 ตัวอักษรดันทั้งหน้าเลื่อนออกข้างบนมือถือ 360px ·
+    kicker ของหน้า play จึงเหลือ `unit 02` เฉยๆ ไม่ต่อชื่อยูนิต
+  - `.split` ใช้ track **330px** (ไม่ใช่ 380) เพื่อให้ **iPad แนวตั้ง 768px ได้ 2 คอลัมน์** —
+    ที่ 380 มันแตกที่ ~854px คือ iPad ได้เลย์เอาต์เดียวกับมือถือทั้งที่มีที่ว่าง 707px
+  - `.podium` ใช้ track **210px** ให้ 3 ใบเรียงแถวเดียวที่ 768px (ที่ 230 ใบที่ 3 ตกแถว)
+  - `.tab` ต้องมี `min-height: 44px` · ลิงก์ข้อความใช้คลาส **`.textlink`** (44px) ห้ามใช้ `<a>` เปล่าในแถวปุ่ม
+  - `viewportFit: "cover"` ใน `app/layout.tsx` คือตัวที่ทำให้ `env(safe-area-inset-*)` มีค่าจริงบน iOS **อย่าลบ**
 - **ลื่นไหลไม่มี breakpoint (360 → 1440px):** `.page` กว้างสุด 1240px (`--shell`) · เว้นขอบ `--gutter` = `clamp(16px,4vw,40px)` · ตัวหนังสือใช้ `clamp()` · แบ่งสองคอลัมน์ด้วย `.split` (`repeat(auto-fit, minmax(min(100%,380px),1fr))`) ซึ่งยุบเป็นคอลัมน์เดียวเองบนมือถือ — **ห้ามเพิ่ม `@media (min-width:…)` เพื่อจัดเลย์เอาต์** (media query ที่เหลือมีแค่ hover · reduced-motion · print)
   - `.page--narrow` 620px (404 · error · หน้า login แอดมิน) · `.page--admin` 1080px
   - tap target ปุ่มหลัก ≥66px · เผื่อ `env(safe-area-inset-bottom)`
 - **โครงทุกหน้าของนักเรียน:** `components/Shell.tsx` = `SiteHeader` (แถบ sticky + โลโก้เข็มทิศ + tab pill) → `<main className="page">` → `SiteFooter` · หน้า play ส่ง `nav={false}` เพื่อไม่ให้กดออกกลางเกม (มีปุ่ม Exit ที่ถามก่อนอยู่แล้ว) · `/admin` ไม่ใช้ Shell (มี `AdminNav` ของตัวเอง)
-- **แถบบนมีแค่ 2 tab: `Play` กับ `Ranking` — ห้ามเพิ่ม** (เทส `tests/unit/chrome.test.tsx` ล็อกไว้)
+- **หน้าแรก (`.door` ใน globals.css)** — จอเดียวที่เด็กใช้ตัดสินว่าเกมนี้น่าเล่นไหม
+  จิ้งจอกตัวใหญ่ตกลงมา (`weDrop`) แล้วลอย (`weFloat`) · มีแสงหลังตัวหายใจ (`weBreathe`) ·
+  ฟองส้ม 4 ลูกลอยขึ้น (`weRiseSlow`) · **พอพิมพ์ชื่อ จิ้งจอกกระโดด 1 ที** (`weHop` — re-key ด้วย
+  `key={String(ready)}` ใน React ไม่งั้น browser ไม่เล่นซ้ำ) · ปุ่ม Play เต้นเบาๆ (`weReady`)
+  **ทุกลูปต้องอยู่ในลิสต์ `prefers-reduced-motion` ท้ายไฟล์** ไม่งั้นเด็กที่ตั้งค่าลดการเคลื่อนไหวจะโดนหมด
+- **แถบบนมีแค่ 2 tab: `Play` กับ `Top scores` — ห้ามเพิ่ม** (เทส `tests/unit/chrome.test.tsx` ล็อกไว้)
   เคยมี Play · This unit · Top explorers แล้วหน้าลีดเดอร์บอร์ดยังมีแถวชิปให้เลือกซ้ำอีก ครูบอก "มีแถบไว้เล่น กับ ranking ก็พอแล้ว...เหมือนกันเกินไป"
   → **เลือกว่าจะดูบอร์ดไหน เป็นหน้าที่ของหน้าบอร์ดเอง** (แถวชิป `All units` / `unit NN` / `This part`) ไม่ใช่ของแถบบน · หน้า `/me` ไม่มี tab ของตัวเอง เข้าจากหน้าเลือกยูนิต · หน้าผลคะแนน · footer
 - **พื้นหลังทุกหน้า** = ครีม + จุด `radial-gradient(var(--dot) 1.5px, transparent 1.6px)` ขนาด 26px อยู่ที่ `body` **อย่าเอาออก**
@@ -279,9 +340,41 @@ SentenceBuilderBlock | ListeningBlock | WritingBlock`) — `switch (block.type)`
 - doc นับเวลาถอยหลัง ("LEFT") · **ของเรานับขึ้น** เพราะเวลาใช้เป็นตัวตัดสินเสมอในลีดเดอร์บอร์ด
 - `streak` ใน HUD เป็น **แค่การแสดงผล** ไม่เก็บลง DB ไม่คิดอันดับ
 - กรอบรูปในคำถาม (mock มี "PHOTO · …") **ทำแล้วเฉพาะ `unscramble`** ผ่านฟิลด์ `art` — เกมชนิดอื่นยังไม่มีช่องรูป · ระบบ badge ก็ยังไม่มี
-- mock มี **ปุ่มเลือกห้อง P4/1 · P4/2** และตัวเลข "24 explorers played today" · **ของเราไม่มีห้อง** และไม่โชว์สถิติปลอม — ช่อง fact บนหน้าแรกใช้เลขจริงจาก `listUnits()` แทน
+- mock มี **ปุ่มเลือกห้อง P4/1 · P4/2** และตัวเลข "24 explorers played today" · **ของเราไม่มีห้อง** และไม่โชว์สถิติปลอม
+  หน้าแรกตอนนี้เหลือแค่ช่องชื่อ + ปุ่ม + บรรทัดตัวเลขจริงจาก `listUnits()` (`2 units · 109 questions`)
 - mock มี **หน้า Certificate เต็มหน้าจอ** (พรีวิว + Download PNG + Print) · ของเรายังเป็นปุ่มโหลด PDF ผ่าน `lib/certificate.ts` เหมือนเดิม (ถ้าจะทำหน้านี้คืองานฟีเจอร์ ไม่ใช่งานดีไซน์)
 - **podium 3 อันดับแรก** บนลีดเดอร์บอร์ดตั้ง `aria-hidden` ไว้ เพราะข้อมูลซ้ำกับ `<ol className="board">` ข้างล่างที่เป็นตัวจริงของ screen reader (เทสจึงต้องใช้ `findAllByText` กับชื่อ 3 อันดับแรก)
+
+## ภาษาบนหน้าจอ — กฎที่ครูสั่ง (มีเทสล็อกไว้)
+
+**เด็ก ป.4 ไทย เป็นคนอ่าน** ครูสั่งหลังดูบนมือถือว่า "ตัวหนักสือเยอะเกินไปเด็กคงไม่อ่าน...
+คำศัพท์ที่ใช้อธิบายต้องเป็นคำเบสิคเท่านั้น ไม่ใช้คำที่ยากไปเด็ดขาด"
+
+**2 กฎ · `tests/unit/copy.test.tsx` เช็คทุกจอ:**
+1. **ห้ามมีคำต้องห้าม** — `explorer` `expedition` `leaderboard` `scoreboard` `accuracy` `attempt`
+   `dominate` `averaging` `streak` `unscramble` `responsive` `breakpoint` `credentials` `curiosity`
+2. **ห้ามมีประโยคเกิน 12 คำ** — ย่อหน้าอธิบายถือว่าไม่มีใครอ่าน
+
+| คำที่เลิกใช้ | ใช้แทน |
+|---|---|
+| explorer(s) | player(s) · หัวคอลัมน์ = `Name` |
+| Top explorers | **Top scores** |
+| expedition | game (หรือตัดทิ้ง) |
+| leaderboard · scoreboard | scores |
+| accuracy | **Right** (คู่กับ %) |
+| ranking · overall | place · All units |
+| streak | In a row |
+| Unscramble | Make the word |
+
+> **ยกเว้นข้อความที่มาจาก `content/units/*.json`** — ชื่อ Part (`Part D · Mythological Creatures`)
+> กับคำใบ้เป็น**เนื้อหาบทเรียน** ต้องตรงกับใบงานกระดาษของครู **ห้ามแก้** · เทสไม่กวาดส่วนนี้
+> **`certificate` เก็บคำไว้** เป็นชื่อของสิ่งที่เด็กได้จริง แต่ห้ามอยู่ในประโยคยาว
+
+- **ข้อความ error ของนักเรียนเหลือประโยคเดียวที่ทำตามได้** (`No internet. Try again.` ฯลฯ) ·
+  เหตุผลจริง (รหัส Postgres · ชื่อไฟล์ `.env`) **ต้องพับไว้ใน `<details>` หัวข้อ `For the teacher`**
+  — ห้ามเอาออก มันคือตัวที่จับได้ว่า key ถูกวางผิดช่องคราวก่อน
+- **กติกาการจัดอันดับอยู่ที่ `/admin` เท่านั้น** ห้ามเขียนกลับลงหน้าของนักเรียน (เคยเขียนซ้ำ 3 รอบในจอเดียว)
+- ข้อความ "กำลังโหลด" ใช้ **`Please wait…`** อย่างเดียว (เคยมี 6 แบบ)
 
 ## สไตล์โค้ด / naming
 
@@ -298,26 +391,40 @@ SentenceBuilderBlock | ListeningBlock | WritingBlock`) — `switch (block.type)`
 
 ## หมายเหตุสถานะ
 
-**ระบบเสร็จครบทุกหน้า + ลงดีไซน์ + ต่อ Supabase จริง + ผ่านการใช้จริงในห้องเรียนแล้ว** (เทส 249 ตัว: 185 unit + 64 DB)
+**ระบบเสร็จครบทุกหน้า + ลงดีไซน์ + ต่อ Supabase จริง + ผ่านการใช้จริงในห้องเรียนแล้ว** (เทส 281 ตัว: 217 unit + 64 DB)
 
 **มี 2 ยูนิต ตามที่ครูยืนยัน** (เท่ากับ Unit 1 / Unit 2 ของใบงาน) — ยูนิตหนึ่งมีหลาย Part:
 
 | ยูนิต | Part | ข้อ / คะแนนเต็ม |
 |-------|------|-----------------|
-| `unit-01` **Shadow Animal Challenge** | 1 unscramble เงา **emoji** 27 ข้อ · 2 unscramble **ภาพวาดจริง** 8 ข้อ | **35 / 350** |
-| `unit-02` **Wild Life and Wonderful Creatures** | B quiz 30 · C1 เสียงสัตว์ 5 · C2 เรียงประโยค 25 · D listening 9 (**วิดีโอ 6** + อ่าน 3) · E writing 17 (ไม่คิดคะแนน) | **69 / 690** |
+| `unit-01` **Shadow Animal Challenge** | unscramble เงา **อิโมจิ** 27 ข้อ | **27 / 270** |
+| `unit-02` **Wild Life and Wonderful Creatures** | B quiz 10 · C1 เสียงสัตว์ 5 · C2 เรียงประโยค 25 · D listening 10 (**mp3 7 ไฟล์** + อีก 3 ข้อใช้เสียงเครื่อง) · E writing 17 (ไม่คิดคะแนน) | **50 / 500** |
 
-> **เล่นได้ 2 แบบ** — ทั้งยูนิต หรือทีละ Part · จับเวลา/คิดคะแนน/มีอันดับเหมือนกัน แต่**แยกลีดเดอร์บอร์ด**
-> id ของ Part คือ `unit-NN-part-N` (ดู `partScoreId` ใน `lib/format.ts`) และ `v_overall_ranking` กรอง
-> `^unit-[0-9]{2}$` ทิ้ง Part ออก **คนที่เล่นทั้ง Part และทั้งยูนิตจึงไม่ถูกนับซ้ำ** — แก้ format นี้ต้องแก้ SQL ด้วย
+> ⚠️ **ยูนิตไม่ใช่สิ่งที่เด็กเลือกอีกแล้ว** — ทั้งสองไฟล์ต่อกันเป็น **เกมเดียว 104 ข้อ / 1040 คะแนน**
+> (ดูหัวข้อ "เกมเดียว" ข้างบน) · ยูนิตยังเป็นวิธีจัดระเบียบเนื้อหาให้ตรงกับใบงานของครูเหมือนเดิม
 
 **สิ่งที่แก้ตามฟีดแบ็กครูหลังใช้จริง (ตั้งใจ · อย่าแก้กลับ):**
-- **ตัดสัตว์ออก 5 ตัว** จาก unit-01 ตามรายชื่อที่ครูให้ — Part 1 ตัด giraffe · flamingo · parrot · Part 2 ตัด rhinoceros + POLAR BEAR ตัวที่ซ้ำ → เหลือ 27 + 8 (เดิม 30 + 10)
+- **⚠️ ไม่มี "ภาพวาดสัตว์" เหลือในโปรเจกต์แล้ว — ห้ามเอากลับ** ครูสั่ง
+  "เอาพวกภาพที่ฉัน add เข้าไปอะพวกภาพสัตว์เอาออกให้หมด เอาแค่อิโมจิมาใน Part เเรก"
+  - **ลบทิ้งหมด:** โฟลเดอร์ `public/images/` · `scripts/build-animal-images.mjs` · คำสั่ง `npm run images`
+    · `animalArt()`/`ANIMAL_ART_DIR` ใน `lib/format.ts` · ฟิลด์ `art` ใน `UnscrambleItem` · CSS `.art`
+  - **`sharp` ยังต้องอยู่** เพราะ `npm run brand` ใช้
+  - **รูปเดียวที่คำถามมีได้คืออิโมจิใน `shadow`** · เทส "has no animal artwork anywhere" ใน `units.test.ts` กันไว้
+  - เกมรวม **77 ข้อ / 770 คะแนน** (unit-01 27 + unit-02 50)
+- **ทุกข้อที่มีตัวเลือกต้องมี 3 ตัวเลือกเป๊ะ — ห้ามเป็น 4** ครูไล่กากบาททิ้งทีละข้อเอง
+  ("Part นี้มีแค่ 3 choice พอ") · เทส "offers exactly three choices" ใน `units.test.ts` ล็อกไว้
+- **Part B เหลือ 10 ข้อจาก 30** — ครูเล่นจริงแล้วแคปมา 10 ข้อพร้อมไฮไลท์ตัวเลือกที่ไม่เอา
+  แล้วสั่งว่า "เอาแค่ข้อที่มีในภาพพอ" · ที่ตัดออก 20 ข้อ: giraffe · tiger · duck · lion · monkey ·
+  koala · camel · snake · owl · eagle · parrot · flamingo · blue whale · shark · crocodile ·
+  wolf · rabbit · gorilla · bee · polar bear
+  - (ก่อนหน้านี้เคยตัดสัตว์ออก 3 ตัวจาก Part 1 ตามรายชื่อครู — giraffe · flamingo · parrot)
 - **ถูกเขียว ผิดแดง** (ดูหัวข้อดีไซน์)
-- **หน้าแรกพิมพ์ชื่ออย่างเดียว** — เดิมมีชื่อ + ลิสต์ยูนิตในจอเดียว ครูว่า "เข้าใจยากมาก"
-- **นาฬิกาติดจอตลอด** — `.hud` เป็น sticky แถบเดียว (คะแนน · streak · เวลา) `top: 74px` = ความสูงของ `.appbar` พอดี **แก้ค่าหนึ่งต้องแก้อีกค่า**
+- **เข้าเกมใน 1 แตะ** — `/` พิมพ์ชื่อ → `/play` ข้อแรกทันที · **ไม่มีจอเลือกอะไรเลย**
+  (เคยมี `/unit/[unitId]` แล้วเหลือ `/units` แล้วตัดทิ้งทั้งคู่ตามคำสั่งครูรอบล่าสุด)
+- **นาฬิกาติดจอตลอด** — `.hud` เป็น sticky แถบเดียว (คะแนน · In a row · เวลา) เกาะจาก **`--appbar-h`**
+  ตัวแปรเดียวที่ `.appbar__in` (`min-height`) กับ `.hud` (`top`) ใช้ร่วมกัน — `.hud` เป็น `z-index 20` ส่วน `.appbar` เป็น `30`
+  ถ้าแถบสูงเกินค่านี้เมื่อไหร่ **นาฬิกาจะมุดหายใต้แถบเงียบๆ** ห้ามแยกสองค่าออกจากกัน
 - **หน้า `/me`** — ดูคะแนนย้อนหลังและโหลด certificate ซ้ำได้โดยไม่ต้องเล่นใหม่
-- **ภาพประกอบลบพื้นม่วง + ตัดคำศัพท์ทิ้ง** (ดู `scripts/build-animal-images.mjs`)
 - **แถบบนเหลือ 2 tab** (ดูหัวข้อดีไซน์)
 - **Part C2 (เรียงประโยค): หัวข้อเหลือ "อิโมจิอย่างเดียว"** — เดิมเขียน `🐍 Hiss! Hiss!` ซึ่งบอกกริยาให้ฟรี = ครึ่งประโยคที่เด็กต้องแต่งเอง · คอมโพเนนต์เช็คว่า prompt ไม่มีตัวอักษร/ตัวเลขแล้วเรนเดอร์ใหญ่ด้วยคลาส `.q__emoji`
 - **ตัดประโยคที่ใช้ `loudly` ออกทั้งหมด 5 ข้อ** (dog · lion · wolf · whale · parrot) → C2 เหลือ 25 ข้อ · เทสใน `units.test.ts` ล็อกกฎทั้งสองข้อไว้
@@ -329,7 +436,7 @@ SentenceBuilderBlock | ListeningBlock | WritingBlock`) — `switch (block.type)`
 - ตัวเลือกข้อ Fairy ต้นฉบับพิมพ์ `A / B / D` (ข้าม C) → แก้เป็น A/B/C
 - `I am mini human with wings` → เติม article เป็น `I am a mini human with wings`
 
-**เหลืองานเนื้อหา:** ไฟล์เสียง mp3 ของ listening (ตอนนี้ 3 ข้อที่ไม่มีวิดีโอใช้ TTS) · ยูนิตอื่นๆ เพิ่มเติม
+**เหลืองานเนื้อหา:** mp3 ของ Part D ข้อ 7–9 · เนื้อหาชุดใหม่ของ Part C2 ที่ครูจะส่งมา · ยูนิตอื่นๆ เพิ่มเติม
 
 <!-- BEGIN:nextjs-agent-rules -->
 

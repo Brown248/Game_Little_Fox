@@ -43,6 +43,17 @@
   --wrong-fill: #fdeae6;
   --wrong-edge: #f3c2b8;
 
+  /* ---- the top three ----
+     A gold/silver/bronze that belong to this cream page rather than to a
+     trophy shop: every one is pulled towards the warm ground so the board
+     still reads as one thing. */
+  --gold: #dd9a2b;
+  --gold-fill: #fdf1d6;
+  --silver: #9a938a;
+  --silver-fill: #f2efeb;
+  --bronze: #b8794c;
+  --bronze-fill: #f8e7d9;
+
   /* ---- ink ---- */
   --ink: #2e2a26;
   --ink-lead: #5c5348; /* the lead paragraph under a display heading */
@@ -68,6 +79,21 @@
 
   /* ---- rhythm: one fluid gutter and one fluid gap, used everywhere ---- */
   --shell: 1240px;
+  /* The ranking board's fixed columns, shared by the header and every row so
+     the two can never drift apart. Sized down hard on a phone: with a flat
+     44/72/92 and a 16px gap, the NAME was left 38px at 360px — three letters
+     before the ellipsis — once Time became a column of its own. */
+  --board-gap: clamp(9px, 2.5vw, 16px);
+  --board-pad: clamp(12px, 3vw, 18px);
+  --board-rank: clamp(36px, 10vw, 44px);
+  --board-time: clamp(46px, 13vw, 72px);
+  --board-score: clamp(54px, 17vw, 92px);
+
+  /* The app bar's height, and the offset the sticky HUD hangs from. ONE value,
+     because they have to agree: the HUD sits at z-index 20 and the bar at 30,
+     so if the bar ever grows past this the clock slides silently underneath it
+     — and an always-visible clock is the thing the teacher asked for. */
+  --appbar-h: 74px;
   --gutter: clamp(16px, 4vw, 40px);
   --gap-screen: clamp(20px, 3vw, 32px);
   --gap-split: clamp(20px, 3vw, 32px);
@@ -131,8 +157,10 @@ a {
   font-weight: 700;
 }
 
-a:hover {
-  color: var(--marigold);
+@media (hover: hover) {
+  a:hover {
+    color: var(--marigold);
+  }
 }
 
 button,
@@ -204,19 +232,26 @@ html {
   gap: clamp(12px, 2vw, 24px);
   flex-wrap: wrap;
   padding-block: 14px;
+  min-height: var(--appbar-h);
 }
 
+/* Shrinkable on purpose. This was `flex: none`, which meant the bar sized to
+   its longest kicker and could not give the space back: on the play screen the
+   mark plus the kicker came to ~391px inside a 328px phone, and the whole
+   document scrolled sideways. */
 .brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex: none;
+  min-width: 0;
   color: inherit;
   font-weight: inherit;
 }
 
-.brand:hover {
-  color: inherit;
+@media (hover: hover) {
+  .brand:hover {
+    color: inherit;
+  }
 }
 
 /* The artwork already carries its own ring and cream ground, so the mark needs
@@ -249,6 +284,10 @@ html {
   text-transform: uppercase;
   color: var(--deep);
   margin-top: 3px;
+  /* truncate rather than push the page wide */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* pill group of screen links, right-aligned */
@@ -263,7 +302,12 @@ html {
   padding: 5px;
 }
 
+/* 44px is the floor for a touch target, and these were 37px — the primary
+   navigation on every screen, tapped by nine-year-olds. */
 .tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   padding: 8px 16px;
   border-radius: var(--r-pill);
   font-size: 14px;
@@ -302,15 +346,13 @@ html {
   gap: 20px;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  /* one link lives here now, so centre it rather than pinning it to the far
+     left of a very wide band */
+  justify-content: center;
   padding-block: 26px;
   padding-bottom: calc(26px + env(safe-area-inset-bottom));
 }
 
-.appfoot__note {
-  font-size: 14px;
-  color: var(--ink-mute);
-}
 
 /* =============================== layout ================================== */
 
@@ -342,15 +384,14 @@ html {
    not. minmax(min(100%, X), 1fr) is what makes it work without a media query. */
 .split {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  /* 330, not 380: at 380 the second column only arrived at ~854px, so a
+     768px iPad in portrait ran the same single column as a phone while sitting
+     on 707px of space. 330 brings the split in at ~760px. */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
   gap: var(--gap-split);
   align-items: start;
 }
 
-.split--wide {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
-  gap: clamp(24px, 3vw, 40px);
-}
 
 /* The whole-unit card on the unit screen: the loud option, so it gets the
    marigold ground and the fox sitting on it rather than another white card. */
@@ -367,28 +408,12 @@ html {
   box-shadow: var(--lift-card);
 }
 
-.whole__fox {
-  position: absolute;
-  right: -18px;
-  bottom: -22px;
-  width: clamp(110px, 16vw, 168px);
-  height: auto;
-  opacity: 0.22;
-  pointer-events: none;
-  animation: weFloat 5.2s ease-in-out infinite;
-}
 
 /* keep the text above the fox */
 .whole > *:not(.whole__fox) {
   position: relative;
 }
 
-/* the start screen: story on one side, the card you type into on the other */
-.split--hero {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
-  gap: clamp(24px, 4vw, 56px);
-  align-items: center;
-}
 
 .stack {
   display: flex;
@@ -445,12 +470,6 @@ html {
   margin: 0;
 }
 
-.divider {
-  height: 2px;
-  border: 0;
-  background: var(--edge);
-  margin: 4px 0;
-}
 
 /* ================================ hero =================================== */
 
@@ -462,12 +481,6 @@ html {
   text-align: center;
 }
 
-/* left half of the start screen: eyebrow · display line · lead · fact chips */
-.hero-copy {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(16px, 2vw, 24px);
-}
 
 .eyebrow {
   display: inline-flex;
@@ -506,20 +519,7 @@ html {
   margin: 0;
 }
 
-.lead {
-  font-size: clamp(17px, 1.6vw, 21px);
-  line-height: 1.55;
-  color: var(--ink-lead);
-  max-width: 52ch;
-  text-wrap: pretty;
-  margin: 0;
-}
 
-.facts {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-}
 
 .fact {
   display: flex;
@@ -562,25 +562,7 @@ html {
   gap: 22px;
 }
 
-/* the fox hanging off the card's top edge, breathing on a slow loop */
-.join__badge {
-  position: absolute;
-  top: -34px;
-  right: clamp(16px, 4vw, 36px);
-  width: clamp(88px, 12vw, 108px);
-  height: auto;
-  animation: weFloat 4.6s ease-in-out infinite;
-  filter: drop-shadow(0 12px 16px rgba(46, 42, 38, 0.22));
-  pointer-events: none;
-}
 
-.join__title {
-  font-family: var(--font-display-stack);
-  font-size: clamp(28px, 3vw, 36px);
-  font-weight: 800;
-  line-height: 1.1;
-  max-width: 14ch;
-}
 
 .join__foot {
   text-align: center;
@@ -622,6 +604,13 @@ html {
 .card--soft {
   border-radius: 32px;
   box-shadow: var(--lift-soft);
+}
+
+/* The card on a student's page that says they passed. Green edge only — the
+   marking colour, not a whole green panel to read text off. */
+.card--won {
+  border-color: var(--right);
+  box-shadow: 0 4px 0 var(--right-fill);
 }
 
 .card--dashed {
@@ -805,24 +794,7 @@ html {
   color: var(--deep);
 }
 
-/* small pill used for tabs and labels */
-.chip--pill {
-  min-height: 46px;
-  border-radius: var(--r-pill);
-  font-family: var(--font-text-stack);
-  font-weight: 800;
-  font-size: 15px;
-  padding: 0 20px;
-  display: inline-flex;
-  align-items: center;
-  background: var(--surface);
-}
 
-.chip--pill.chip--on {
-  background: var(--marigold);
-  border-color: var(--marigold);
-  color: var(--surface);
-}
 
 /* =============================== fields ================================== */
 
@@ -887,34 +859,9 @@ html {
 
 /* ============================= unit picker =============================== */
 
-.unit-list {
-  display: grid;
-  gap: 12px;
-}
 
 /* The unit and part lists arrive the same way the leaderboard rows do — one
    short rise, 50ms apart. Capped at six so a long list never feels slow. */
-.unit-list > * {
-  animation: weTick 0.3s var(--spring) both;
-}
-.unit-list > *:nth-child(1) {
-  animation-delay: 0.04s;
-}
-.unit-list > *:nth-child(2) {
-  animation-delay: 0.09s;
-}
-.unit-list > *:nth-child(3) {
-  animation-delay: 0.14s;
-}
-.unit-list > *:nth-child(4) {
-  animation-delay: 0.19s;
-}
-.unit-list > *:nth-child(5) {
-  animation-delay: 0.24s;
-}
-.unit-list > *:nth-child(n + 6) {
-  animation-delay: 0.28s;
-}
 
 .unit {
   appearance: none;
@@ -957,50 +904,10 @@ html {
   border-color: var(--marigold);
 }
 
-.unit__no {
-  width: 46px;
-  height: 46px;
-  flex: none;
-  border-radius: 14px;
-  background: var(--page);
-  border: 2px solid var(--edge);
-  display: grid;
-  place-items: center;
-  font-family: var(--font-display-stack);
-  font-weight: 800;
-  font-size: 19px;
-  color: var(--deep);
-}
 
-.unit__body {
-  flex: 1;
-  min-width: 0;
-}
 
-.unit__title {
-  display: block;
-  font-family: var(--font-display-stack);
-  font-weight: 700;
-  font-size: 21px;
-  line-height: 1.15;
-}
 
-.unit__meta {
-  display: block;
-  font-family: var(--font-mono-stack);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
 
-.unit__go {
-  flex: none;
-  font-family: var(--font-display-stack);
-  font-weight: 800;
-  font-size: 22px;
-  color: var(--marigold);
-}
 
 /* ============================== play chrome ============================== */
 
@@ -1013,9 +920,10 @@ html {
    breakpoint either. */
 .hud {
   position: sticky;
-  /* the app bar's own height: a 44px mark, 14px of padding above and below,
-     and its 2px rule. Change one, change the other. */
-  top: 74px;
+  /* + the app bar's own rule: the bar is --appbar-h of content plus a 2px
+     border, and the bar wins on z-index, so at exactly --appbar-h the top of
+     this strip stayed tucked underneath it. */
+  top: calc(var(--appbar-h) + 2px);
   z-index: 20;
   display: flex;
   gap: 6px;
@@ -1199,62 +1107,15 @@ html {
   font-weight: 800;
 }
 
-/* a video clue — same frame language as the artwork, controls left to the
-   browser so a phone gets its native full-screen and volume */
-.clip {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: 22px;
-  border: 2px solid var(--edge);
-  background: var(--ink);
-  display: block;
-}
-
-/* ---------- drawn artwork ---------- */
-
-/* The photo frame from the design doc, finally holding a real picture: the
-   silhouette sits underneath, the coloured animal crossfades over it the moment
-   the word is right, and the dashed frame goes solid marigold to match. */
-.art {
-  position: relative;
-  aspect-ratio: 16 / 9;
-  border-radius: 22px;
-  overflow: hidden;
-  border: 2px dashed var(--kraft);
-  /* Flat cream, not the mock's hatch for an empty photo slot. The artwork is
-     cut out of its purple backdrop now, so the frame is seen THROUGH the
-     animal — a hatch behind a polar bear reads as stripes on the bear. */
-  background: var(--page);
-  transition: border-color 0.35s ease;
-}
-
-/* contain, not cover. The cut-outs are trimmed tight to the animal, so cover
-   would crop it — and the crocodile is three and a half times as wide as it is
-   tall, half of which the frame would eat. The padding keeps a nose or a tail
-   off the dashed border. */
-.art img {
-  object-fit: contain;
-  padding: 12px;
-}
-
-.art__reveal {
-  opacity: 0;
-  transition: opacity 0.45s ease;
-}
-
-.art--lit {
-  border-style: solid;
-  border-color: var(--marigold);
-}
-
-.art--lit .art__reveal {
-  opacity: 1;
-}
-
 /* ---------- shadow animal ---------- */
 
 /* The emoji is rendered as a pure silhouette (brightness(0) keeps the alpha
-   shape and blacks out every pixel), then lights up in colour when answered. */
+   shape and blacks out every pixel), then lights up in colour when answered.
+   This is the whole question: whose shadow is this?
+
+   The drawn-artwork frame that used to sit above this (.art, aspect-ratio 16/9,
+   holding a real picture that crossfaded out of its own silhouette) is gone —
+   the teacher had every animal picture removed and asked for the emoji alone. */
 .shadow-stage {
   display: flex;
   flex-direction: column;
@@ -1319,7 +1180,10 @@ html {
   background: var(--surface);
   border: 3px solid var(--edge);
   border-radius: var(--r-btn);
-  padding: 16px 20px;
+  /* Right side is wider: the .seal stamp lands there once the question is
+     answered, and a long option that wraps to fill the tile used to have its
+     tail covered by it on a phone. */
+  padding: 16px 74px 16px 20px;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -1612,116 +1476,87 @@ html {
 
 /* =============================== results ================================= */
 
-.result-hero {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: clamp(18px, 2vw, 26px);
-}
 
-.rank-seal {
-  align-self: center;
-  width: clamp(160px, 22vw, 240px);
-  height: clamp(160px, 22vw, 240px);
-  border-radius: 50%;
-  background: var(--surface);
-  border: 5px dashed var(--marigold);
-  display: grid;
-  place-items: center;
-  animation: wePop 0.55s var(--spring);
-}
 
-.rank-seal__inner {
-  width: 78%;
-  height: 78%;
-  border-radius: 50%;
-  background: var(--marigold);
+
+
+
+
+
+
+
+
+
+
+
+.board-title {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  color: var(--surface);
-}
-
-.rank-seal__label {
-  font-family: var(--font-display-stack);
-  font-size: clamp(14px, 1.4vw, 17px);
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  color: var(--glow);
-}
-
-.rank-seal__value {
-  font-family: var(--font-display-stack);
-  font-size: clamp(52px, 7vw, 78px);
-  font-weight: 800;
-  line-height: 0.88;
-}
-
-.rank-seal__of {
-  font-family: var(--font-mono-stack);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  color: var(--glow);
-}
-
-.result-title {
+  gap: 12px;
   text-align: center;
+}
+
+.board-title span {
+  font-size: 0.8em;
+  animation: weFloat 3.8s ease-in-out infinite;
+}
+
+/* The run that just finished, above the board. It used to be a plain card
+   with a number in it; on the screen a child lands on after twenty minutes of
+   play, the number should be the loudest thing there. */
+.mine {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--glow) 0%, var(--surface) 62%);
+  border: 3px solid var(--marigold);
+  border-radius: 34px;
+  box-shadow: 0 10px 0 rgba(242, 140, 40, 0.22), var(--lift-soft);
+  padding: clamp(20px, 3vw, 28px);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
 }
 
-/* everything under the seal spans the column: title, buttons, links */
-.result-hero > *:not(.rank-seal) {
-  align-self: stretch;
+.mine__time {
+  font-family: var(--font-mono-stack);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin-top: 4px;
 }
 
-/* drifting confetti shapes behind the seal */
-.confetti {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
+.mine__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
-.confetti i {
-  position: absolute;
-  display: block;
-  animation: weFloat 3.6s ease-in-out infinite;
-}
-
-.confetti i:nth-child(1) {
-  top: 18px;
-  left: 6px;
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  background: var(--marigold);
-  animation-duration: 3.2s;
-}
-
-.confetti i:nth-child(2) {
-  top: 64px;
-  right: 10px;
-  width: 10px;
-  height: 10px;
+.mine__place {
+  flex: none;
+  width: 74px;
+  height: 74px;
   border-radius: 50%;
-  background: var(--glow);
-  border: 2px solid var(--marigold);
-  animation-duration: 4.1s;
+  display: grid;
+  place-items: center;
+  background: var(--marigold);
+  color: var(--surface);
+  font-family: var(--font-display-stack);
+  font-weight: 800;
+  font-size: 30px;
+  line-height: 1;
+  box-shadow: 0 0 0 5px var(--surface), 0 6px 14px rgba(46, 42, 38, 0.18);
 }
 
-.confetti i:nth-child(3) {
-  top: 6px;
-  right: 46px;
-  width: 12px;
-  height: 12px;
-  background: var(--kraft);
-  transform: rotate(45deg);
-  animation-duration: 3.7s;
+.mine__place--1 {
+  background: var(--gold);
+}
+.mine__place--2 {
+  background: var(--silver);
+}
+.mine__place--3 {
+  background: var(--bronze);
 }
 
 .score-line {
@@ -1782,25 +1617,6 @@ html {
   font-variant-numeric: tabular-nums;
 }
 
-/* the stat row and the reward row stagger in, 60ms apart */
-.stagger > * {
-  animation: weTick 0.34s var(--spring) both;
-}
-.stagger > *:nth-child(1) {
-  animation-delay: 0.06s;
-}
-.stagger > *:nth-child(2) {
-  animation-delay: 0.12s;
-}
-.stagger > *:nth-child(3) {
-  animation-delay: 0.18s;
-}
-.stagger > *:nth-child(4) {
-  animation-delay: 0.24s;
-}
-.stagger > *:nth-child(5) {
-  animation-delay: 0.3s;
-}
 
 .breakdown {
   display: grid;
@@ -1830,120 +1646,21 @@ html {
   font-variant-numeric: tabular-nums;
 }
 
-.rank-line {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
-  border-radius: 18px;
-  background: var(--page);
-}
 
-.rank-line__place {
-  font-family: var(--font-display-stack);
-  font-size: 32px;
-  font-weight: 800;
-  color: var(--deep);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
 
 /* ============================= leaderboard =============================== */
 
-.board-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
-}
 
-/* the top three, raised onto cards; the winner's card stands taller */
-.podium {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
-  gap: 16px;
-  align-items: end;
-}
 
-.podium__card {
-  background: var(--surface);
-  border: 3px solid var(--edge);
-  border-radius: 30px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 22px 44px -34px rgba(46, 42, 38, 0.45);
-  min-height: 230px;
-  justify-content: center;
-  animation: weTick 0.4s var(--spring) both;
-}
 
-.podium__card--first {
-  min-height: 260px;
-}
 
-.podium__card--me {
-  border-color: var(--marigold);
-}
 
-.podium__card:nth-child(1) {
-  animation-delay: 0.06s;
-}
-.podium__card:nth-child(2) {
-  animation-delay: 0.12s;
-}
-.podium__card:nth-child(3) {
-  animation-delay: 0.18s;
-}
 
-.podium__medal {
-  width: 62px;
-  height: 62px;
-  border-radius: 50%;
-  background: var(--page);
-  color: var(--deep);
-  display: grid;
-  place-items: center;
-  font-family: var(--font-display-stack);
-  font-size: 28px;
-  font-weight: 800;
-}
 
-.podium__card--first .podium__medal {
-  background: var(--marigold);
-  color: var(--surface);
-}
 
-.podium__card--me .podium__medal {
-  background: var(--glow);
-}
 
-.podium__name {
-  font-family: var(--font-display-stack);
-  font-size: clamp(24px, 2.4vw, 30px);
-  font-weight: 800;
-  line-height: 1.1;
-  text-align: center;
-  overflow-wrap: anywhere;
-}
 
-.podium__meta {
-  font-family: var(--font-mono-stack);
-  font-size: 11px;
-  color: var(--ink-faint);
-}
 
-.podium__score {
-  font-family: var(--font-display-stack);
-  font-size: clamp(30px, 3vw, 40px);
-  font-weight: 800;
-  color: var(--deep);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
 
 /* the full list, every explorer, inside one white sheet */
 .board-sheet {
@@ -1956,10 +1673,12 @@ html {
   gap: 10px;
 }
 
+/* +2px of padding for the border the rows below have and this does not —
+   without it every column label sits two pixels left of its column. */
 .board-cols {
   display: flex;
-  gap: 16px;
-  padding: 6px 18px;
+  gap: var(--board-gap);
+  padding: 6px calc(var(--board-pad) + 2px);
   font-family: var(--font-mono-stack);
   font-size: 10px;
   letter-spacing: 0.14em;
@@ -1968,7 +1687,7 @@ html {
 }
 
 .board-cols__rank {
-  width: 44px;
+  width: var(--board-rank);
   flex: none;
 }
 
@@ -1976,10 +1695,35 @@ html {
   flex: 1;
 }
 
+/* Fluid, and it has to match .board__score exactly — this is the header above
+   that column. At a flat 92px the two of them plus the place badge ate 168 of
+   the 256px a 360px phone has, and a name was cut to about eight letters. */
 .board-cols__score {
-  width: 92px;
+  width: var(--board-score);
   flex: none;
   text-align: right;
+}
+
+/* Time is a column of its own now: the teacher asked the ranking to show
+   place, name, score and time, and it used to be a scrap of grey mono tucked
+   under the name where nobody read it.
+   The header keeps the 10px mono of its neighbours; only the cell is sized. */
+.board-cols__time,
+.board__time {
+  width: var(--board-time);
+  flex: none;
+  text-align: right;
+}
+
+.board__time {
+  font-family: var(--font-mono-stack);
+  font-size: clamp(13px, 1.4vw, 15px);
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.board__row--me .board__time {
+  color: var(--deep);
 }
 
 .board {
@@ -1994,11 +1738,11 @@ html {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--board-gap);
   background: var(--surface-warm);
   border: 2px solid var(--edge);
   border-radius: 22px;
-  padding: 14px 18px;
+  padding: 14px var(--board-pad);
   animation: weTick 0.3s var(--spring) both;
   transition: transform 0.16s ease;
 }
@@ -2032,7 +1776,9 @@ html {
 .board__row--me {
   background: var(--glow);
   border: 3px solid var(--marigold);
-  padding: 17px 18px;
+  /* one less pixel each side to pay for the thicker border, so this row's
+     columns still line up with the header and with every row above it */
+  padding: 13px calc(var(--board-pad) - 1px);
   box-shadow: 0 6px 0 rgba(242, 140, 40, 0.28);
   margin: 6px 0;
 }
@@ -2051,8 +1797,8 @@ html {
 }
 
 .board__place {
-  width: 44px;
-  height: 44px;
+  width: var(--board-rank);
+  height: var(--board-rank);
   flex: none;
   border-radius: 50%;
   background: var(--page);
@@ -2064,10 +1810,60 @@ html {
   font-size: 21px;
 }
 
-/* top three get the marigold disc */
+/* The top three are the whole point of a leaderboard, so they are the only
+   rows that change colour — one each, rather than three identical marigold
+   discs that said nothing about the order. */
 .board__place--top {
   background: var(--marigold);
   color: var(--surface);
+}
+
+.board__row--1 {
+  background: var(--gold-fill);
+  border-color: var(--gold);
+  box-shadow: 0 6px 0 rgba(221, 154, 43, 0.24);
+}
+.board__row--2 {
+  background: var(--silver-fill);
+  border-color: var(--silver);
+}
+.board__row--3 {
+  background: var(--bronze-fill);
+  border-color: var(--bronze);
+}
+
+.board__place--1 {
+  background: var(--gold);
+  box-shadow: 0 0 0 4px var(--gold-fill);
+}
+.board__place--2 {
+  background: var(--silver);
+  box-shadow: 0 0 0 4px var(--silver-fill);
+}
+.board__place--3 {
+  background: var(--bronze);
+  box-shadow: 0 0 0 4px var(--bronze-fill);
+}
+
+/* a crown for first place, hanging off the disc and bobbing */
+.board__crown {
+  position: absolute;
+  top: -14px;
+  left: calc(var(--board-pad) + var(--board-rank) / 2);
+  translate: -50% 0;
+  font-size: 22px;
+  line-height: 1;
+  animation: weFloat 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* the player's own row always wins the colour fight, even in the top three */
+.board__row--me,
+.board__row--me.board__row--1,
+.board__row--me.board__row--2,
+.board__row--me.board__row--3 {
+  background: var(--glow);
+  border-color: var(--marigold);
 }
 
 .board__row--me .board__place {
@@ -2092,19 +1888,13 @@ html {
   white-space: nowrap;
 }
 
-.board__meta {
-  font-family: var(--font-mono-stack);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: var(--ink-faint);
-}
 
 .board__row--me .board__meta {
   color: var(--deep);
 }
 
 .board__score {
-  width: 92px;
+  width: var(--board-score);
   flex: none;
   text-align: right;
   font-family: var(--font-display-stack);
@@ -2131,38 +1921,27 @@ html {
   padding: 20px 24px;
 }
 
-.board-foot__note {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  font-size: 16px;
-  line-height: 1.4;
-  color: var(--ink-soft);
-  min-width: 0;
-}
 
-.board-foot__note::before {
-  content: "";
-  width: 44px;
-  height: 44px;
-  flex: none;
-  border-radius: 50%;
-  background: var(--glow);
-  border: 2px solid var(--marigold);
-}
 
 /* ============================ admin (teacher) ============================ */
 
+/* The teacher's own bar. Sticky, because these pages are long tables and the
+   way back out should not need a scroll to the top. */
 .adminbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
   border: 2px solid var(--edge);
   border-radius: var(--r-tile);
   padding: 10px 14px;
+  box-shadow: var(--lift-soft);
 }
 
 .adminbar__links {
@@ -2172,16 +1951,74 @@ html {
 }
 
 .adminbar__link {
-  padding: 8px 14px;
+  display: inline-flex;
+  align-items: center;
+  /* 44px, like every other thing a finger has to hit */
+  min-height: 44px;
+  padding: 8px 16px;
   border-radius: var(--r-pill);
   font-size: 15px;
   font-weight: 800;
   color: var(--ink-soft);
+  transition: background 0.16s ease, color 0.16s ease;
 }
 
-.adminbar__link--on {
-  background: var(--glow);
+@media (hover: hover) {
+  .adminbar__link:hover {
+    background: var(--surface-warm);
+    color: var(--deep);
+  }
+}
+
+.adminbar__link--on,
+.adminbar__link--on:hover {
+  background: var(--marigold);
+  color: var(--surface);
+}
+
+/* Page heading with the count beside it rather than baked into the words.
+   "Explorers (24)" read as part of the title and the number was easy to miss;
+   as a chip it is the thing the eye lands on. */
+.adminhead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.adminhead h1 {
+  margin: 0;
+}
+
+.adminhead__count {
+  font-family: var(--font-display-stack);
+  font-size: 17px;
+  font-weight: 800;
   color: var(--deep);
+  background: var(--glow);
+  border: 2px solid var(--edge);
+  border-radius: var(--r-pill);
+  padding: 2px 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A yes, in a table full of numbers. Green because that is what "right" is
+   everywhere else in this project — the teacher's own marking colour. */
+.pill {
+  display: inline-block;
+  font-family: var(--font-display-stack);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  border-radius: var(--r-pill);
+  padding: 3px 11px;
+  white-space: nowrap;
+}
+
+.pill--good {
+  color: var(--right);
+  background: var(--right-fill);
+  border: 2px solid var(--right);
 }
 
 .tiles {
@@ -2194,7 +2031,69 @@ html {
   background: var(--surface);
   border: 2px solid var(--edge);
   border-radius: var(--r-tile);
-  padding: 14px 16px;
+  padding: 16px 18px;
+  /* a marigold spine so a wall of numbers still reads as a row of cards */
+  border-left: 5px solid var(--marigold);
+}
+
+/* A tile that goes somewhere. It has to look pressable without becoming a
+   button — same spring as everything else, and the underline comes off so it
+   reads as a card rather than a link inside one. */
+.tile--link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform 160ms var(--spring),
+    box-shadow 160ms ease;
+}
+
+.tile--link:active {
+  transform: translateY(2px);
+}
+
+@media (hover: hover) {
+  .tile--link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--kraft);
+  }
+}
+
+/* A card's heading doubling as the disclosure control. The marker sits inline
+   with the <h2> because the heading is the thing being tapped. */
+.card > details > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card > details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.card > details > summary h2 {
+  margin: 0;
+}
+
+.card > details > summary::after {
+  content: "▾";
+  color: var(--ink-mute);
+  transition: transform 160ms var(--spring);
+}
+
+.card > details[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+.tile--good {
+  border-left-color: var(--right);
+  background: var(--right-fill);
+}
+
+.tile--good .tile__value {
+  color: var(--right);
 }
 
 .tile__value {
@@ -2229,9 +2128,21 @@ html {
 .table th,
 .table td {
   text-align: left;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-bottom: 2px solid var(--edge);
   white-space: nowrap;
+}
+
+/* every other row tinted: these tables are wide enough that the eye loses the
+   line it was reading halfway across */
+.table tbody tr:nth-child(even) td {
+  background: var(--surface-warm);
+}
+
+@media (hover: hover) {
+  .table tbody tr:hover td {
+    background: var(--glow);
+  }
 }
 
 .table th {
@@ -2245,6 +2156,81 @@ html {
 
 .table tr.is-me td {
   background: var(--glow);
+}
+
+/* ---------- the certificate roster ---------- */
+
+.roster {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roster__row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  background: var(--surface-warm);
+  border: 2px solid var(--edge);
+  border-radius: var(--r-tile);
+  padding: 12px 16px;
+}
+
+.roster__row--earned {
+  background: var(--right-fill);
+  border-color: var(--right-edge);
+}
+
+.roster__medal {
+  flex: none;
+  width: 30px;
+  text-align: center;
+  font-size: 20px;
+  color: var(--ink-faint);
+}
+
+.roster__who {
+  flex: 1;
+  min-width: min(100%, 180px);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.roster__name {
+  font-family: var(--font-display-stack);
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.roster__meta {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.roster__score {
+  flex: none;
+  font-family: var(--font-display-stack);
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--deep);
+  font-variant-numeric: tabular-nums;
+}
+
+.roster__row--earned .roster__score {
+  color: var(--right);
+}
+
+.roster__error {
+  flex-basis: 100%;
+  font-family: var(--font-mono-stack);
+  font-size: 12px;
+  color: var(--wrong);
+  word-break: break-word;
 }
 
 /* =============================== keyframes =============================== */
@@ -2365,20 +2351,7 @@ html {
   }
 }
 
-@keyframes weWipe {
-  0% {
-    transform: translateY(18px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
 
-.wipe-up {
-  animation: weWipe 0.34s ease-out;
-}
 
 /* ============================ accessibility ============================== */
 
@@ -2398,10 +2371,13 @@ html {
 
   /* the endless loops go entirely — a 0.01ms infinite animation still runs */
   .logo,
-  .join__badge,
-  .whole__fox,
-  .confetti i,
-  .shadow-animal {
+  .shadow-animal,
+  .board-title span,
+  .board__crown,
+  .door__fox,
+  .door__glow,
+  .door__sky i,
+  .btn--ready {
     animation: none !important;
   }
 
@@ -2435,4 +2411,315 @@ html {
   .print-area {
     border: 0;
   }
+}
+
+/* ============================ text links ================================= */
+
+/* A bare <a> in a row is one 17px line box — a 25px tap target, and the result
+   screen had three of them side by side 10px apart. Same look, finger-sized. */
+.textlink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 4px;
+  color: var(--deep);
+  font-weight: 700;
+}
+
+@media (hover: hover) {
+  .textlink:hover {
+    color: var(--marigold);
+  }
+}
+
+/* ======================== fold-away detail =============================== */
+
+/* Plain <details>: used for the part list on the unit picker, and to fold the
+   technical half of an error away from the child it would mean nothing to.
+   No JavaScript, and the browser gives us the keyboard behaviour for free. */
+.more {
+  margin: 0;
+}
+
+
+
+
+
+.more[open] .unit-list,
+details[open] > .unit-list {
+  animation: weSlide 0.24s var(--spring);
+}
+
+
+
+/* ============================== the door ================================= */
+
+/* The first screen is one card and nothing else, so it sits in the middle of
+   the glass rather than at the top of a page of copy. */
+.page--door {
+  max-width: 560px;
+  justify-content: center;
+  /* the scene sits behind the whole viewport, not just this column */
+  isolation: isolate;
+}
+
+/* A warm sun above and a pool of light below.
+   ONE element covering the whole viewport, with both glows painted as sized
+   radial gradients inside it. The first attempt used two rounded boxes, and a
+   rounded box whose gradient has not finished fading by the time it reaches the
+   corner shows its own edge — a hard arc was drawn straight across the page.
+   A gradient positioned with `at` inside a full-bleed box has no edge to show. */
+.page--door::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(
+      62% 42% at 50% 18%,
+      var(--glow) 0%,
+      rgba(255, 232, 201, 0.45) 45%,
+      transparent 72%
+    ),
+    radial-gradient(
+      75% 38% at 50% 100%,
+      rgba(242, 140, 40, 0.13) 0%,
+      transparent 70%
+    );
+}
+
+/* ============================ the door =================================== */
+
+/* The first screen a child ever sees, and the only one they judge the game on
+   before playing it.
+   Laid out in FLOW, not with absolute positioning: the fox is a real item and
+   the card is pulled up under it by a fixed overlap, so the two cannot drift
+   apart as the fox resizes. The first attempt positioned the fox absolutely and
+   guessed the card's top padding — at desk width the fox grew past the guess
+   and sat on top of "Type your name". */
+.door {
+  --fox: clamp(146px, 34vw, 196px);
+  --fox-overlap: clamp(30px, 6vw, 42px);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.door__fox {
+  position: relative;
+  width: var(--fox);
+  margin-bottom: calc(var(--fox-overlap) * -1);
+  animation: weDrop 0.7s var(--spring) both, weFloat 4.4s ease-in-out 0.7s infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.door__fox img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 14px 20px rgba(46, 42, 38, 0.26));
+}
+
+/* One hop, the moment a name appears in the box. The element is re-keyed in
+   React so the animation actually restarts instead of being ignored. */
+.door__fox--happy {
+  animation: weHop 0.62s var(--spring) both, weFloat 4.4s ease-in-out 0.62s infinite;
+}
+
+/* a soft sun behind the fox, breathing on its own slower clock */
+.door__glow {
+  position: absolute;
+  inset: -14%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--glow) 0%, transparent 68%);
+  animation: weBreathe 5.2s ease-in-out infinite;
+  z-index: -1;
+}
+
+/* the card clears the overlap, then breathes on its own */
+/* The signature of this whole design is a slab sitting on a hard shadow — it
+   is what every button does. The door's card was the one big surface that did
+   not, so it read as a generic white form. Now it is a card you could pick up. */
+.door .join {
+  width: 100%;
+  padding: calc(var(--fox-overlap) + clamp(22px, 3vw, 34px)) clamp(22px, 4vw, 38px)
+    clamp(24px, 3vw, 34px);
+  align-items: stretch;
+  border-width: 3px;
+  border-radius: 40px;
+  box-shadow: 0 10px 0 var(--kraft), var(--lift-card);
+  animation: weEnter 0.5s 0.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* one instruction, centred over the box it belongs to */
+.door .field {
+  align-items: center;
+  gap: 10px;
+}
+
+/* Six marigold bubbles drifting up behind the card — enough to feel alive on a
+   desk-sized screen, few enough that it never becomes a lava lamp. */
+/* Spread well past the card: at desk width the card is 560px of a 1900px
+   screen, so bubbles kept to its own column read as one lonely dot. */
+.door__sky {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.door__sky i {
+  position: absolute;
+  bottom: -12%;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--marigold);
+  opacity: 0.3;
+  animation: weRiseSlow 12s linear infinite;
+}
+
+.door__sky i:nth-child(1) {
+  left: 2%;
+}
+.door__sky i:nth-child(2) {
+  left: 22%;
+  width: 24px;
+  height: 24px;
+  animation-delay: 2.4s;
+  animation-duration: 15s;
+}
+.door__sky i:nth-child(3) {
+  left: 46%;
+  width: 11px;
+  height: 11px;
+  animation-delay: 5s;
+  animation-duration: 10s;
+}
+.door__sky i:nth-child(4) {
+  left: 71%;
+  width: 20px;
+  height: 20px;
+  animation-delay: 7.4s;
+  animation-duration: 14s;
+}
+.door__sky i:nth-child(5) {
+  left: 90%;
+  width: 13px;
+  height: 13px;
+  animation-delay: 9.8s;
+  animation-duration: 11s;
+}
+.door__sky i:nth-child(6) {
+  left: 58%;
+  width: 18px;
+  height: 18px;
+  animation-delay: 12.6s;
+  animation-duration: 16s;
+}
+
+/* the name box is the one thing being asked for, so it is the biggest input */
+.input--name {
+  font-family: var(--font-display-stack);
+  font-size: clamp(24px, 4.5vw, 30px);
+  font-weight: 800;
+  text-align: center;
+}
+
+.input--name:focus-visible {
+  border-color: var(--marigold);
+}
+
+/* Play wakes up once there is a name to play with. */
+.btn--ready {
+  animation: weReady 2.4s ease-in-out infinite;
+}
+
+/* Waiting for a name, not out of order. The shared disabled style is kraft on
+   kraft, which on the very first screen read as a dead button — the child's
+   first impression of the game was something that does not work. */
+.door .btn:disabled {
+  background: var(--glow);
+  box-shadow: 0 8px 0 var(--glow-edge);
+  color: var(--deep);
+  opacity: 1;
+}
+
+@keyframes weDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px) scale(0.86);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes weHop {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  35% {
+    transform: translateY(-16px) rotate(-6deg);
+  }
+  65% {
+    transform: translateY(0) rotate(4deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes weBreathe {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes weRiseSlow {
+  0% {
+    transform: translateY(0) scale(0.9);
+    opacity: 0;
+  }
+  14% {
+    opacity: 0.3;
+  }
+  86% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-110vh) scale(1.15);
+    opacity: 0;
+  }
+}
+
+@keyframes weReady {
+  0%,
+  100% {
+    box-shadow: 0 8px 0 var(--marigold-press);
+  }
+  50% {
+    box-shadow: 0 8px 0 var(--marigold-press), 0 0 0 7px var(--glow);
+  }
+}
+
+/* One instruction, said once, at the size of a heading. */
+.field__label--lg {
+  font-family: var(--font-display-stack);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.01em;
 }

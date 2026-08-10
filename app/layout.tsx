@@ -1,4 +1,5 @@
 import { Baloo_2, IBM_Plex_Mono, Nunito } from "next/font/google";
+import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
 import "./globals.css";
 
 // Self-hosted at build time by next/font: no request to Google from a
@@ -6,7 +7,12 @@ import "./globals.css";
 // network that blocks external font hosts.
 const display = Baloo_2({
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  // 700 and 800 are the only weights globals.css ever asks Baloo for.
+  // Note this does NOT make the download smaller — Baloo 2 is a variable font,
+  // so next/font ships one file per subset covering every weight either way
+  // (measured: same 19 files, same 428KB, with two weights or four). It is
+  // here to say what the design system actually uses.
+  weight: ["700", "800"],
   variable: "--font-display",
   display: "swap",
 });
@@ -39,19 +45,23 @@ const siteUrl =
 export const metadata = {
   metadataBase: siteUrl ? new URL(siteUrl) : undefined,
   title: {
-    default: "Little Fox Game",
+    default: SITE_NAME,
     // every other page just names itself; the suffix is added here
-    template: "%s · Little Fox Game",
+    template: `%s · ${SITE_NAME}`,
   },
-  applicationName: "Little Fox Game",
-  description:
-    "A ranked English word game from Little Fox Language School — play a unit, climb the class leaderboard.",
+  applicationName: SITE_NAME,
+  description: SITE_DESCRIPTION,
 };
 
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 5,
+  // viewportFit is what makes env(safe-area-inset-*) resolve to anything other
+  // than zero on iOS. Without it the two places that reserve room for the home
+  // indicator — .page's bottom padding and .appfoot__in — were dead code, and
+  // the last button on a screen sat under the gesture strip.
+  viewportFit: "cover",
+  // No maximumScale: pinch-zoom is left uncapped on purpose.
   themeColor: "#FDF3E3",
 };
 

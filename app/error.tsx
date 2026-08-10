@@ -22,18 +22,18 @@ export default function AppError({
     <main className="page page--narrow">
       <div className="card card--lg stack">
         <h1>Something broke</h1>
-        <p className="muted">
-          If you were in the middle of a unit, that attempt was not saved — you
-          can start it again.
-        </p>
+        <p className="muted">Your score was not saved. You can play again.</p>
         <div className="notice notice--error">
-          {error.message || "Unknown error"}
-          {error.digest && <span className="muted"> ({error.digest})</span>}
+          <details>
+            <summary>For the teacher</summary>
+            {error.message || "Unknown error"}
+            {error.digest && <span className="muted"> ({error.digest})</span>}
+          </details>
         </div>
         <button className="btn btn--block" type="button" onClick={reset}>
           Try again
         </button>
-        <Link href="/" style={{ textAlign: "center" }}>
+        <Link className="textlink" href="/" style={{ textAlign: "center" }}>
           Back to the start
         </Link>
       </div>

@@ -3,17 +3,15 @@
 //    worth, and which listening clips have no recording yet.
 // 2. Play stats per unit — how many students, average accuracy, weakest skill.
 
-import Link from "next/link";
 import { LoadFailed, ServiceKeyMissing } from "@/components/admin/SetupNotice";
 import { fetchAttempts, summariseUnits } from "@/lib/admin-data";
 import { formatPercent, formatTime, gameLabel } from "@/lib/format";
+import { fullQuestionCount } from "@/lib/game";
 import { serviceConfigured } from "@/lib/supabase-admin";
 import type { UnitStats } from "@/lib/types";
 import { auditUnits, listBrokenUnitFiles } from "@/lib/units";
 
 export const dynamic = "force-dynamic";
-
-const PLANNED_UNITS = 20;
 
 export default async function AdminUnitsPage() {
   const audits = auditUnits();
@@ -32,20 +30,25 @@ export default async function AdminUnitsPage() {
 
   return (
     <div className="stack">
-      <h1>Units</h1>
+      <h1>Content</h1>
 
       <div className="tiles">
+        {/* What a child actually plays: every file joined into one run. The
+            old "n / 20 units written" tile counted towards a target that no
+            longer exists — there is one game now, not twenty units. */}
         <div className="tile">
-          <div className="tile__value">
-            {audits.length} / {PLANNED_UNITS}
-          </div>
-          <div className="tile__label">JSON files written</div>
+          <div className="tile__value">{fullQuestionCount()}</div>
+          <div className="tile__label">Questions in the game</div>
         </div>
         <div className="tile">
+          <div className="tile__value">{audits.length}</div>
+          <div className="tile__label">Content files</div>
+        </div>
+        <div className={`tile${broken.length === 0 ? " tile--good" : ""}`}>
           <div className="tile__value">{broken.length}</div>
           <div className="tile__label">Files with errors</div>
         </div>
-        <div className="tile">
+        <div className={`tile${missingAudio.length === 0 ? " tile--good" : ""}`}>
           <div className="tile__value">{missingAudio.length}</div>
           <div className="tile__label">Clues on the device voice</div>
         </div>
@@ -60,12 +63,12 @@ export default async function AdminUnitsPage() {
       )}
 
       <div className="card">
-        <h2>Content</h2>
+        <h2>Files</h2>
         <div className="table-wrap">
           <table className="table">
             <thead>
               <tr>
-                <th>Unit</th>
+                <th>File</th>
                 <th>Title</th>
                 <th>Blocks</th>
                 <th>Questions</th>
@@ -116,8 +119,7 @@ export default async function AdminUnitsPage() {
             <p className="muted">
               These clues are read aloud by the student&apos;s own device
               instead of a recording. Drop an mp3 at{" "}
-              <code>public/audio/&lt;path&gt;</code> to replace one — video
-              clues carry their own sound and never appear here.
+              <code>public/audio/&lt;path&gt;</code> to replace one.
             </p>
             <div className="breakdown">
               {missingAudio.map((clip, i) => (
@@ -155,7 +157,6 @@ export default async function AdminUnitsPage() {
                   <th>Avg accuracy</th>
                   <th>Best time</th>
                   <th>Weakest skill</th>
-                  <th />
                 </tr>
               </thead>
               <tbody>
@@ -176,9 +177,6 @@ export default async function AdminUnitsPage() {
                             unit.weakestSkill.correct / unit.weakestSkill.total
                           )})`
                         : "—"}
-                    </td>
-                    <td>
-                      <Link href={`/leaderboard/${unit.unitId}`}>Board</Link>
                     </td>
                   </tr>
                 ))}

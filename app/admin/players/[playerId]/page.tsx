@@ -4,20 +4,25 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AttemptsTable from "@/components/admin/AttemptsTable";
+import CertificateButton from "@/components/admin/CertificateButton";
 import { LoadFailed, ServiceKeyMissing } from "@/components/admin/SetupNotice";
 import {
+  certificateRoster,
   fetchAttemptsForPlayer,
   fetchPlayer,
   summarisePlayer,
 } from "@/lib/admin-data";
 import {
+  certificateNeeds,
+  formatDate,
   formatDateTime,
   formatPercent,
   formatTime,
   gameLabel,
 } from "@/lib/format";
+import { GAME_ID, fullQuestionCount } from "@/lib/game";
+import { SITE_NAME } from "@/lib/site";
 import { serviceConfigured } from "@/lib/supabase-admin";
-import { listUnits } from "@/lib/units";
 
 export const dynamic = "force-dynamic";
 
@@ -44,10 +49,23 @@ export default async function AdminPlayerPage({
 
   const allAttempts = attempts ?? [];
   const summary = summarisePlayer(player, allAttempts);
-  const units = listUnits();
-  const totalUnits = units.length;
-  const playedUnits = new Set(allAttempts.map((a) => a.unit_id));
-  const notStarted = units.filter((u) => !playedUnits.has(u.id));
+  // Runs of the one game, ignoring anything saved before the units were joined
+  // into it. "Units played" used to be a tile here; with one game it could only
+  // ever read "1 / 2", and the card underneath insisted every unit was
+  // unstarted for a child who had in fact finished the lot.
+  const runs = allAttempts.filter((a) => a.unit_id === GAME_ID).length;
+
+  // Same roster the Certificates page builds, for one student. Building it the
+  // same way is the point: a teacher who opens a name from the list must not be
+  // told something different from the list itself.
+  const full = fullQuestionCount();
+  const certificate = certificateRoster(
+    [player],
+    allAttempts.map((a) => ({ ...a, players: { name: player.name } })),
+    GAME_ID,
+    full
+  )[0];
+  const won = certificate.state === "earned" ? certificate.earnedWith : null;
 
   return (
     <div className="stack">
@@ -63,10 +81,8 @@ export default async function AdminPlayerPage({
           <div className="tile__label">Accuracy</div>
         </div>
         <div className="tile">
-          <div className="tile__value">
-            {summary.unitsPlayed} / {totalUnits}
-          </div>
-          <div className="tile__label">Units played</div>
+          <div className="tile__value">{runs}</div>
+          <div className="tile__label">Runs of the game</div>
         </div>
         <div className="tile">
           <div className="tile__value">{summary.attemptCount}</div>
@@ -76,6 +92,37 @@ export default async function AdminPlayerPage({
           <div className="tile__value">{formatTime(summary.totalTimeSeconds)}</div>
           <div className="tile__label">Total time</div>
         </div>
+      </div>
+
+      <div className={`card${won ? " card--won" : ""}`}>
+        <div className="row row--between">
+          <h2>Certificate</h2>
+          {won && <span className="pill pill--good">earned</span>}
+        </div>
+        {won ? (
+          <div className="stack" style={{ gap: 12 }}>
+            <p className="muted">
+              {certificate.correctCount}/{certificate.totalQuestions} right ·{" "}
+              {formatTime(won.time_seconds)} · {formatDate(won.completed_at)}
+            </p>
+            <CertificateButton
+              name={player.name}
+              gameTitle={SITE_NAME}
+              gameId={GAME_ID}
+              score={won.score}
+              maxScore={won.max_score}
+              timeSeconds={won.time_seconds}
+            />
+          </div>
+        ) : (
+          <p className="muted">
+            {certificate.state === "never-played"
+              ? "Has not played yet."
+              : certificate.state === "stopped-early"
+                ? `Stopped after ${certificate.totalQuestions} of ${full} questions. The whole game has to be played.`
+                : `Finished, but got ${certificate.correctCount} right — needs ${certificateNeeds(full)}.`}
+          </p>
+        )}
       </div>
 
       <div className="card">
@@ -101,18 +148,9 @@ export default async function AdminPlayerPage({
       </div>
 
       <div className="card">
-        <h2>Units not started</h2>
-        {notStarted.length === 0 ? (
-          <p className="muted">Every unit has been played at least once. 🎉</p>
-        ) : (
-          <p>{notStarted.map((u) => u.id).join(", ")}</p>
-        )}
-      </div>
-
-      <div className="card">
         <h2>Every attempt</h2>
         <p className="muted">
-          All attempts are kept — the leaderboard uses the best one per unit.
+          Every run is kept. The board shows only the best one.
         </p>
         <AttemptsTable attempts={allAttempts} />
       </div>

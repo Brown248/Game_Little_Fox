@@ -6,20 +6,19 @@ import AttemptsTable from "@/components/admin/AttemptsTable";
 import { LoadFailed, ServiceKeyMissing } from "@/components/admin/SetupNotice";
 import {
   bestAttemptPerUnit,
+  certificateRoster,
   fetchAttempts,
   fetchPlayers,
   tallySkills,
 } from "@/lib/admin-data";
 import { formatDateTime, formatPercent, gameLabel } from "@/lib/format";
+import { GAME_ID, fullQuestionCount } from "@/lib/game";
 import { serviceConfigured } from "@/lib/supabase-admin";
-import { listUnits } from "@/lib/units";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   if (!serviceConfigured()) return <ServiceKeyMissing />;
-
-  const units = listUnits();
 
   let players;
   let attempts;
@@ -31,7 +30,10 @@ export default async function AdminPage() {
 
   const best = bestAttemptPerUnit(attempts);
   const cohortSkills = tallySkills(best).filter((s) => s.total > 0);
-  const unitsWithData = new Set(attempts.map((a) => a.unit_id)).size;
+  const questions = fullQuestionCount();
+  const earned = certificateRoster(players, attempts, GAME_ID, questions).filter(
+    (row) => row.state === "earned"
+  ).length;
 
   return (
     <div className="stack">
@@ -39,14 +41,19 @@ export default async function AdminPage() {
 
       <div className="tiles">
         <Stat value={players.length} label="Explorers" />
-        <Stat value={attempts.length} label="Attempts" />
-        {/* Two separate numbers, not a ratio: attempts can outlive a unit's
-            JSON file, and "2 / 1 units played" would just look broken. */}
-        <Stat value={unitsWithData} label="Units with attempts" />
-        <Stat value={units.length} label="Unit files" />
+        {/* The one number the teacher came here for; green, and it goes
+            straight to the list of names behind it. */}
+        <Stat
+          value={earned}
+          label="Certificates"
+          href="/admin/certificates"
+          good
+        />
+        <Stat value={attempts.length} label="Runs played" />
+        <Stat value={questions} label="Questions in the game" />
         <Stat
           value={formatDateTime(attempts[0]?.completed_at)}
-          label="Last attempt"
+          label="Last played"
         />
       </div>
 
@@ -85,15 +92,64 @@ export default async function AdminPage() {
         </div>
         <AttemptsTable attempts={attempts.slice(0, 25)} showPlayer />
       </div>
+
+      {/* This used to be printed on the students' own leaderboards — twice per
+          screen, in words like "average accuracy" and "dominate". No child read
+          it, and the teacher asked for the reading to come down. It is a
+          teacher's question, so it lives here now. */}
+      <div className="card">
+        <details>
+          <summary>
+            <h2>How the board is ordered</h2>
+          </summary>
+          <div className="stack" style={{ gap: 10, marginTop: 12 }}>
+          <p className="muted">
+            There is one game and one board. It shows each explorer&apos;s
+            single best run: highest score first, and a faster time breaks a
+            tie. Replays are all kept, but only the best one is ever shown.
+          </p>
+          <p className="muted">
+            Every run is saved under <code>{GAME_ID}</code>. Attempts from
+            before the game was joined into one — <code>unit-01</code>,{" "}
+            <code>unit-02</code> and the <code>-part-</code> rows — are still in
+            the database and still listed below, but they are not on the
+            board: they were different sets of questions and would not compare.
+          </p>
+          <p className="muted">
+            If the questions change enough to move the total, bump{" "}
+            <code>GAME_ID</code> in <code>lib/game.ts</code> so the board starts
+            clean rather than mixing two different games.
+          </p>
+          </div>
+        </details>
+      </div>
     </div>
   );
 }
 
-function Stat({ value, label }: { value: string | number; label: string }) {
-  return (
-    <div className="tile">
+function Stat({
+  value,
+  label,
+  href,
+  good,
+}: {
+  value: string | number;
+  label: string;
+  href?: string;
+  good?: boolean;
+}) {
+  const body = (
+    <>
       <div className="tile__value">{value}</div>
       <div className="tile__label">{label}</div>
-    </div>
+    </>
+  );
+  const className = `tile${good ? " tile--good" : ""}${href ? " tile--link" : ""}`;
+  return href ? (
+    <Link className={className} href={href}>
+      {body}
+    </Link>
+  ) : (
+    <div className={className}>{body}</div>
   );
 }

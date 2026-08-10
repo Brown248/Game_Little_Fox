@@ -14,14 +14,14 @@ export interface QuizChoiceItem {
 export interface UnscrambleItem {
   scrambled: string;
   answer: string;
-  /** Optional emoji shown as a black silhouette above the letters — the
-   *  "shadow" of the Shadow Animal Challenge. Revealed in colour once answered. */
+  /** One emoji, drawn as a black silhouette above the letters and revealed in
+   *  colour once the student answers — the Shadow Animal Challenge. Leave it
+   *  out and the block is a plain word scramble.
+   *
+   *  There was an `art` field beside this one for eight animals that had been
+   *  drawn properly, shown as a picture instead. The teacher had all of it
+   *  removed; do not add it back. */
   shadow?: string;
-  /** Artwork slug, used instead of the emoji when the animal has been drawn.
-   *  One word covers both halves of the reveal: `<slug>-shadow.webp` is shown
-   *  before answering and `<slug>.webp` after, both from public/images/animals
-   *  (built by `npm run images`). See animalArt() in lib/format.ts. */
-  art?: string;
 }
 
 export interface SentenceBuilderItem {
@@ -31,11 +31,12 @@ export interface SentenceBuilderItem {
 }
 
 export interface ListeningItem {
-  audioUrl?: string; // path under public/audio/, e.g. "unit-04/clue-1.mp3"
-  /** Video clue, path under public/videos/ (e.g. "unit-05/clue-1.mp4") or a
-   *  full https:// URL. When present it replaces the audio player: the class
-   *  watches instead of listening, and the block titles itself accordingly. */
-  videoUrl?: string;
+  /** Path under public/audio/ ("unit-02/clue-1.mp3") or a full https:// URL.
+   *  Missing or unloadable means the device reads clueText aloud instead.
+   *
+   *  Sound only. There was a videoUrl beside this once; the teacher asked for
+   *  the audio alone, so the clips and the player for them are gone. */
+  audioUrl?: string;
   clueText: string; // shown when "show clue text" is toggled
   options: string[];
   answerIndex: number;
@@ -167,6 +168,26 @@ export interface PlayerSummary {
   lastPlayedAt: string | null;
   skills: SkillTally[];
   weakestSkill: SkillTally | null;
+}
+
+/** Why a student has or has not got a certificate, for the teacher's roster. */
+export type CertificateState =
+  | "earned"
+  | "stopped-early"
+  | "not-enough"
+  | "never-played";
+
+export interface CertificateRow {
+  player: PlayerRow;
+  state: CertificateState;
+  /** The run the certificate is for. Only set when state is "earned". */
+  earnedWith: AttemptWithPlayer | null;
+  /** Their best run of the current game, whatever state it is in — what the
+   *  teacher needs to see to know how close someone is. */
+  bestAny: AttemptWithPlayer | null;
+  /** How many they got right in that best run, and out of how many. */
+  correctCount: number;
+  totalQuestions: number;
 }
 
 export interface UnitStats {

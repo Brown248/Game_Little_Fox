@@ -8,7 +8,14 @@ export interface ScoringState {
   correctCount: number;
   totalQuestions: number;
   breakdown: Record<string, { correct: number; total: number }>;
+  /** When the CURRENT sitting began. */
   startedAt: number;
+  /** Seconds already played in earlier sittings, before this one resumed.
+   *
+   *  The game is one long run now, and a child can close the tab and come back
+   *  tomorrow. Without this the clock would read the wall time since they first
+   *  started — eight hours for a run they slept through the middle of. */
+  accumulatedSeconds: number;
 }
 
 export function createScoringState(): ScoringState {
@@ -19,7 +26,17 @@ export function createScoringState(): ScoringState {
     totalQuestions: 0,
     breakdown: {},
     startedAt: Date.now(),
+    accumulatedSeconds: 0,
   };
+}
+
+/** Picks a saved run back up: the clock restarts from now, on top of whatever
+ *  had already been played. */
+export function resumeScoringState(
+  saved: ScoringState,
+  playedSeconds: number
+): ScoringState {
+  return { ...saved, startedAt: Date.now(), accumulatedSeconds: playedSeconds };
 }
 
 export function recordAnswer(
@@ -46,6 +63,8 @@ export function recordAnswer(
   };
 }
 
+/** Time actually spent playing, across every sitting. */
 export function elapsedSeconds(state: ScoringState): number {
-  return Math.floor((Date.now() - state.startedAt) / 1000);
+  const thisSitting = Math.floor((Date.now() - state.startedAt) / 1000);
+  return state.accumulatedSeconds + Math.max(0, thisSitting);
 }

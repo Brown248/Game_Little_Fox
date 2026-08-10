@@ -17,7 +17,7 @@ describe("the app bar", () => {
   it("offers playing and the ranking, and nothing else", () => {
     render(<SiteHeader active="start" />);
 
-    expect(tabs().map((tab) => tab.textContent)).toEqual(["Play", "Ranking"]);
+    expect(tabs().map((tab) => tab.textContent)).toEqual(["Play", "Top scores"]);
   });
 
   it("marks which of the two you are on", () => {
@@ -26,7 +26,7 @@ describe("the app bar", () => {
     const [play, ranking] = tabs();
     expect(play.className).not.toContain("tab--on");
     expect(ranking.className).toContain("tab--on");
-    expect(ranking.getAttribute("href")).toBe("/leaderboard/overall");
+    expect(ranking.getAttribute("href")).toBe("/rank");
   });
 
   // A stray tap on a tab mid-question would throw the run away; /play asks

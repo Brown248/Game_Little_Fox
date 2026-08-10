@@ -4,7 +4,6 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { gameLabel, partScoreId } from "./format";
 import type { GameBlock, GameType, UnitConfig } from "./types";
 
 const UNITS_DIR = path.join(process.cwd(), "content", "units");
@@ -39,45 +38,6 @@ export function listUnits(): UnitSummary[] {
       maxScore: questionCount * POINTS_PER_QUESTION,
     };
   });
-}
-
-/** One separately playable part of a unit. */
-export interface PartSummary {
-  /** Index into unit.games. */
-  index: number;
-  /** What an attempt on this part is saved and ranked under. */
-  scoreId: string;
-  /** "Part 3 · Sentence builder" */
-  label: string;
-  type: GameType;
-  questionCount: number;
-  maxScore: number;
-}
-
-/** The parts of a unit that can be played on their own.
- *
- *  Writing is left out: it is never scored, so a "rank" for it would be a table
- *  of zeroes. It still plays as the tail of the whole unit. */
-export function listParts(unitId: string): PartSummary[] {
-  const unit = getUnit(unitId);
-  if (!unit) return [];
-
-  return unit.games
-    .map((block, index) => ({ block, index }))
-    .filter(({ block }) => isScored(block))
-    .map(({ block, index }) => {
-      const questionCount = block.type === "writing" ? 0 : block.items.length;
-      return {
-        index,
-        scoreId: partScoreId(unit.id, index),
-        // the worksheet's own name for the part when it has one, so two blocks
-        // of the same game type don't read as the same thing
-        label: block.title ?? `Part ${index + 1} · ${gameLabel(block.type)}`,
-        type: block.type,
-        questionCount,
-        maxScore: questionCount * POINTS_PER_QUESTION,
-      };
-    });
 }
 
 /** Matches the default in lib/scoring.ts — one shot per question, 10 points. */

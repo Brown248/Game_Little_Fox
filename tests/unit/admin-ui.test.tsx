@@ -102,33 +102,45 @@ describe("AdminLogin", () => {
 });
 
 describe("PlayersTable", () => {
-  it("shows accuracy, units, attempts and the weakest skill", () => {
-    render(<PlayersTable summaries={[summary]} totalUnits={20} />);
+  it("shows accuracy, attempts and the weakest skill", () => {
+    render(<PlayersTable summaries={[summary]} certifiedIds={[]} />);
     expect(screen.getByText("Mint")).toBeTruthy();
     expect(screen.getByText("75%")).toBeTruthy();
-    expect(screen.getByText("2 / 20")).toBeTruthy();
     expect(screen.getByText(/Listening/)).toBeTruthy();
     expect(screen.getByText(/\(17%\)/)).toBeTruthy();
+  });
+
+  // The column the teacher actually scans down. It is a plain yes/no because
+  // the reason a student has not earned one belongs on the certificates page,
+  // where there is room to say it.
+  it("ticks the explorers who have a certificate", () => {
+    render(<PlayersTable summaries={[summary]} certifiedIds={["p1"]} />);
+    expect(screen.getByText("earned")).toBeTruthy();
+  });
+
+  it("leaves the certificate blank for everyone else", () => {
+    render(<PlayersTable summaries={[summary]} certifiedIds={["someone-else"]} />);
+    expect(screen.queryByText("earned")).toBeNull();
   });
 
   it("says when there is not enough data to name a weakest skill", () => {
     render(
       <PlayersTable
         summaries={[{ ...summary, weakestSkill: null }]}
-        totalUnits={20}
+        certifiedIds={[]}
       />
     );
     expect(screen.getByText("not enough data")).toBeTruthy();
   });
 
   it("says when there are no explorers", () => {
-    render(<PlayersTable summaries={[]} totalUnits={20} />);
+    render(<PlayersTable summaries={[]} certifiedIds={[]} />);
     expect(screen.getByText(/No explorers yet/)).toBeTruthy();
   });
 
   it("has no class field to edit — the name is the whole identity", async () => {
     const user = userEvent.setup();
-    render(<PlayersTable summaries={[summary]} totalUnits={20} />);
+    render(<PlayersTable summaries={[summary]} certifiedIds={[]} />);
 
     await user.click(screen.getByRole("button", { name: "Edit" }));
     expect(screen.queryByLabelText("Class")).toBeNull();
@@ -136,7 +148,7 @@ describe("PlayersTable", () => {
 
   it("saves a corrected name", async () => {
     const user = userEvent.setup();
-    render(<PlayersTable summaries={[summary]} totalUnits={20} />);
+    render(<PlayersTable summaries={[summary]} certifiedIds={[]} />);
 
     await user.click(screen.getByRole("button", { name: "Edit" }));
     const name = screen.getByLabelText("Name");
@@ -156,7 +168,7 @@ describe("PlayersTable", () => {
       error: "Another explorer already uses that name — merge them instead.",
     });
     const user = userEvent.setup();
-    render(<PlayersTable summaries={[summary]} totalUnits={20} />);
+    render(<PlayersTable summaries={[summary]} certifiedIds={[]} />);
 
     await user.click(screen.getByRole("button", { name: "Edit" }));
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -168,7 +180,7 @@ describe("PlayersTable", () => {
 
   it("asks before deleting an explorer and mentions how much is lost", async () => {
     const user = userEvent.setup();
-    render(<PlayersTable summaries={[summary]} totalUnits={20} />);
+    render(<PlayersTable summaries={[summary]} certifiedIds={[]} />);
 
     await user.click(screen.getByRole("button", { name: "Edit" }));
     await user.click(screen.getByRole("button", { name: "Delete" }));
@@ -188,7 +200,7 @@ describe("PlayersTable", () => {
 
   it("cancels an edit without calling the server", async () => {
     const user = userEvent.setup();
-    render(<PlayersTable summaries={[summary]} totalUnits={20} />);
+    render(<PlayersTable summaries={[summary]} certifiedIds={[]} />);
 
     await user.click(screen.getByRole("button", { name: "Edit" }));
     await user.click(screen.getByRole("button", { name: "Cancel" }));

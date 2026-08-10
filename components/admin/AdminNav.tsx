@@ -8,7 +8,8 @@ import { logoutAction } from "@/app/admin/actions";
 const LINKS = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/players", label: "Students" },
-  { href: "/admin/units", label: "Units" },
+  { href: "/admin/certificates", label: "Certificates" },
+  { href: "/admin/units", label: "Content" },
   { href: "/admin/qr", label: "QR code" },
 ];
 

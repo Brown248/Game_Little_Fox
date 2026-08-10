@@ -10,10 +10,16 @@ import type { PlayerSummary } from "@/lib/types";
 
 interface Props {
   summaries: PlayerSummary[];
-  totalUnits: number;
+  /** Ids of the students who have earned a certificate.
+   *
+   *  Worked out on the server by certificateRoster(), never re-derived here:
+   *  the teacher scanning this list and the child looking at /rank have to be
+   *  told the same thing about the same run. */
+  certifiedIds: string[];
 }
 
-export default function PlayersTable({ summaries, totalUnits }: Props) {
+export default function PlayersTable({ summaries, certifiedIds }: Props) {
+  const certified = new Set(certifiedIds);
   const [editing, setEditing] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,7 +27,7 @@ export default function PlayersTable({ summaries, totalUnits }: Props) {
     return (
       <div className="card card--dashed">
         <p className="muted">
-          No explorers yet — nobody has started a unit.
+          No explorers yet — nobody has played.
         </p>
       </div>
     );
@@ -35,8 +41,8 @@ export default function PlayersTable({ summaries, totalUnits }: Props) {
           <thead>
             <tr>
               <th>Explorer</th>
+              <th>Certificate</th>
               <th>Accuracy</th>
-              <th>Units</th>
               <th>Attempts</th>
               <th>Weakest skill</th>
               <th>Last played</th>
@@ -59,10 +65,14 @@ export default function PlayersTable({ summaries, totalUnits }: Props) {
                       {summary.player.name}
                     </Link>
                   </td>
-                  <td>{formatPercent(summary.accuracy)}</td>
                   <td>
-                    {summary.unitsPlayed} / {totalUnits}
+                    {certified.has(summary.player.id) ? (
+                      <span className="pill pill--good">earned</span>
+                    ) : (
+                      <span className="muted">—</span>
+                    )}
                   </td>
+                  <td>{formatPercent(summary.accuracy)}</td>
                   <td>{summary.attemptCount}</td>
                   <td>
                     {summary.weakestSkill ? (

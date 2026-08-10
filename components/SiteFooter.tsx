@@ -1,10 +1,12 @@
-// Closes every student screen. Deliberately plain: one mono line about how the
-// layout behaves and one sentence of housekeeping.
+// Closes every student screen, and holds exactly one thing: the way to /me.
 //
-// It also carries the way to /me. That screen has no tab of its own, because
-// the bar is down to Play and Ranking, but it must still be findable from
-// anywhere — looking your own scores up again is exactly what the teacher
-// asked for.
+// That screen has no tab of its own — the bar is down to Play and Top scores —
+// but it must still be reachable from anywhere, because looking your own scores
+// up again is exactly what the teacher asked for.
+//
+// What used to be here: a mono line reading "Responsive · 360px → 1440px ·
+// fluid grid, no breakpoints", printed under every screen a nine-year-old ever
+// saw, and a sentence about logins that the first screen already said.
 
 import Link from "next/link";
 
@@ -12,13 +14,9 @@ export default function SiteFooter() {
   return (
     <footer className="appfoot no-print">
       <div className="appfoot__in shell">
-        <span className="kicker kicker--faint">
-          Responsive · 360px → 1440px · fluid grid, no breakpoints
-        </span>
-        <span className="appfoot__note">
-          Your name is your only login — use the same one every time.{" "}
-          <Link href="/me">See my scores</Link>
-        </span>
+        <Link className="textlink" href="/me">
+          My scores
+        </Link>
       </div>
     </footer>
   );

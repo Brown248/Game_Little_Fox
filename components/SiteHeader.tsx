@@ -23,7 +23,7 @@ interface Props {
 }
 
 export default function SiteHeader({
-  kicker = "A ranked English expedition",
+  kicker = "Little Fox Language School",
   active,
   nav = true,
 }: Props) {
@@ -57,9 +57,9 @@ export default function SiteHeader({
             </Link>
             <Link
               className={`tab${active === "ranking" ? " tab--on" : ""}`}
-              href="/leaderboard/overall"
+              href="/rank"
             >
-              Ranking
+              Top scores
             </Link>
           </nav>
         )}

@@ -48,10 +48,34 @@ const LOGO = { size: 22, top: 14 };
  *  page under it is white anyway, so there is nothing to see either way. */
 const LOGO_SRC = "/little-fox-logo-print.png";
 
+/** jspdf and the logo, fetched once and kept.
+ *
+ *  Not just a speed trick. Safari on iOS only lets a page start a download
+ *  while it still counts as reacting to the tap, and a network round trip in
+ *  the middle of the handler spends that budget — the button then does nothing
+ *  at all, which is exactly what the teacher reported ("โหลดไม่ได้ ต้องเเคปเอา").
+ *  Warming both up while the button is merely on screen leaves the tap itself
+ *  with nothing to wait for. */
+let warmed: Promise<[typeof import("jspdf"), Uint8Array | null]> | null = null;
+
+function assets() {
+  // Deliberately does NOT populate the cache — only warmCertificate() does.
+  // A screen that never warmed up gets a fresh fetch, which is the behaviour
+  // this has always had, rather than bytes from some earlier page.
+  return warmed ?? Promise.all([import("jspdf"), loadLogo()]);
+}
+
+/** Call this as soon as a certificate becomes available, before it is asked
+ *  for. Safe to call repeatedly; the work happens once. */
+export function warmCertificate(): void {
+  warmed ??= Promise.all([import("jspdf"), loadLogo()]);
+  void warmed;
+}
+
 export async function downloadCertificate(data: CertificateData): Promise<void> {
-  // both in parallel: the PDF cannot be drawn without jspdf, and waiting for
-  // the logo afterwards would double the wait before the file appears
-  const [{ jsPDF }, logo] = await Promise.all([import("jspdf"), loadLogo()]);
+  // Resolves from the warm cache in a microtask when warmCertificate() has run,
+  // so the tap that got here is still the tap that starts the download.
+  const [{ jsPDF }, logo] = await assets();
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a5" });
 
   const w = doc.internal.pageSize.getWidth(); // 210
@@ -91,7 +115,7 @@ export async function downloadCertificate(data: CertificateData): Promise<void> 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(25);
   doc.setTextColor(...INK);
-  doc.text("Certificate of Expedition", mid, 53, { align: "center" });
+  doc.text("Certificate", mid, 53, { align: "center" });
 
   // short marigold rule
   doc.setFillColor(...MARIGOLD);
@@ -100,7 +124,7 @@ export async function downloadCertificate(data: CertificateData): Promise<void> 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...INK_SOFT);
-  doc.text("awarded to", mid, 66, { align: "center" });
+  doc.text("given to", mid, 66, { align: "center" });
 
   // the name — the whole point of the page
   doc.setFont("helvetica", "bold");
@@ -117,24 +141,22 @@ export async function downloadCertificate(data: CertificateData): Promise<void> 
   doc.setFontSize(10);
   doc.setTextColor(...INK);
   doc.text(
-    `for completing ${data.unitId.replace("-", " ")} · ${data.unitTitle}`,
+    `for finishing ${data.unitId.replace("-", " ")} · ${data.unitTitle}`,
     mid,
     92,
     { align: "center", maxWidth: w - 80 }
   );
   doc.setTextColor(...INK_SOFT);
   doc.setFontSize(9);
-  doc.text("with courage, curiosity and very good English.", mid, 99, {
-    align: "center",
-  });
+  doc.text("with very good English.", mid, 99, { align: "center" });
 
   // stat row, with hairline dividers
   const stats: [string, string][] = [
     ["SCORE", `${data.score} / ${data.maxScore}`],
     ["TIME", formatTime(data.timeSeconds)],
-    ["ACCURACY", formatPercent(data.accuracy)],
+    ["RIGHT", formatPercent(data.accuracy)],
   ];
-  if (data.rankLabel) stats.push(["CLASS RANK", data.rankLabel]);
+  if (data.rankLabel) stats.push(["PLACE", data.rankLabel]);
 
   const columnWidth = 34;
   const rowWidth = columnWidth * stats.length;

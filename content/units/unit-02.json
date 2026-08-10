@@ -7,52 +7,20 @@
       "title": "Part B · Guess the Animal",
       "items": [
         {
-          "clue": "It has a long neck. It eats leaves from tall trees.",
-          "options": [
-            "Zebra",
-            "Giraffe",
-            "Lion",
-            "Tiger"
-          ],
-          "answerIndex": 1
-        },
-        {
           "clue": "It has black and white stripes. It looks like a horse.",
           "options": [
-            "Donkey",
             "Zebra",
             "Deer",
             "Camel"
           ],
-          "answerIndex": 1
-        },
-        {
-          "clue": "It has sharp claws and loves to hunt at night.",
-          "options": [
-            "Rabbit",
-            "Fox",
-            "Tiger",
-            "Cow"
-          ],
-          "answerIndex": 2
+          "answerIndex": 0
         },
         {
           "clue": "It has a shell. It walks slowly.",
           "options": [
             "Turtle",
             "Frog",
-            "Snake",
-            "Penguin"
-          ],
-          "answerIndex": 0
-        },
-        {
-          "clue": "It has white feathers, an orange beak, and cannot fly.",
-          "options": [
-            "Duck",
-            "Chicken",
-            "Eagle",
-            "Owl"
+            "Snake"
           ],
           "answerIndex": 0
         },
@@ -61,38 +29,16 @@
           "options": [
             "Hippopotamus",
             "Elephant",
-            "Rhinoceros",
             "Buffalo"
           ],
           "answerIndex": 1
-        },
-        {
-          "clue": "The father has a big mane. People call it the king of the jungle.",
-          "options": [
-            "Wolf",
-            "Bear",
-            "Lion",
-            "Leopard"
-          ],
-          "answerIndex": 2
-        },
-        {
-          "clue": "It has a long tail. It climbs trees and loves bananas.",
-          "options": [
-            "Monkey",
-            "Koala",
-            "Squirrel",
-            "Panda"
-          ],
-          "answerIndex": 0
         },
         {
           "clue": "It is black and white. It lives in China and eats bamboo.",
           "options": [
             "Zebra",
             "Penguin",
-            "Panda",
-            "Cow"
+            "Panda"
           ],
           "answerIndex": 2
         },
@@ -101,38 +47,7 @@
           "options": [
             "Rabbit",
             "Kangaroo",
-            "Frog",
             "Deer"
-          ],
-          "answerIndex": 1
-        },
-        {
-          "clue": "It sleeps almost all day in a tree. It eats eucalyptus leaves.",
-          "options": [
-            "Koala",
-            "Sloth",
-            "Monkey",
-            "Bear"
-          ],
-          "answerIndex": 0
-        },
-        {
-          "clue": "It has a hump on its back. It can walk for days with no water.",
-          "options": [
-            "Horse",
-            "Buffalo",
-            "Camel",
-            "Donkey"
-          ],
-          "answerIndex": 2
-        },
-        {
-          "clue": "It has a long body and no legs at all. It says \"hiss\".",
-          "options": [
-            "Worm",
-            "Snake",
-            "Lizard",
-            "Eel"
           ],
           "answerIndex": 1
         },
@@ -141,57 +56,15 @@
           "options": [
             "Frog",
             "Turtle",
-            "Snake",
             "Fish"
           ],
           "answerIndex": 0
-        },
-        {
-          "clue": "It is a bird. It sleeps in the day and hunts at night.",
-          "options": [
-            "Parrot",
-            "Eagle",
-            "Owl",
-            "Chicken"
-          ],
-          "answerIndex": 2
-        },
-        {
-          "clue": "It is a big bird with sharp eyes. It flies very high in the sky.",
-          "options": [
-            "Eagle",
-            "Duck",
-            "Penguin",
-            "Flamingo"
-          ],
-          "answerIndex": 0
-        },
-        {
-          "clue": "It is a colourful bird. It can copy the words you say.",
-          "options": [
-            "Owl",
-            "Parrot",
-            "Eagle",
-            "Peacock"
-          ],
-          "answerIndex": 1
-        },
-        {
-          "clue": "It is a pink bird. It often stands on only one leg.",
-          "options": [
-            "Swan",
-            "Duck",
-            "Crane",
-            "Flamingo"
-          ],
-          "answerIndex": 3
         },
         {
           "clue": "It was a caterpillar first. Now it has beautiful wings.",
           "options": [
             "Bee",
             "Butterfly",
-            "Bird",
             "Bat"
           ],
           "answerIndex": 1
@@ -201,28 +74,7 @@
           "options": [
             "Shark",
             "Dolphin",
-            "Tuna",
             "Turtle"
-          ],
-          "answerIndex": 1
-        },
-        {
-          "clue": "It is the biggest animal in the world. It lives in the ocean.",
-          "options": [
-            "Elephant",
-            "Shark",
-            "Blue whale",
-            "Giraffe"
-          ],
-          "answerIndex": 2
-        },
-        {
-          "clue": "It lives in the sea. It has many rows of very sharp teeth.",
-          "options": [
-            "Dolphin",
-            "Shark",
-            "Whale",
-            "Seal"
           ],
           "answerIndex": 1
         },
@@ -231,78 +83,16 @@
           "options": [
             "Squid",
             "Crab",
-            "Octopus",
-            "Starfish"
+            "Octopus"
           ],
           "answerIndex": 2
-        },
-        {
-          "clue": "It has hard skin and big teeth. It waits quietly in the river.",
-          "options": [
-            "Hippopotamus",
-            "Crocodile",
-            "Turtle",
-            "Snake"
-          ],
-          "answerIndex": 1
         },
         {
           "clue": "It is orange with a bushy tail. People say it is very clever.",
           "options": [
             "Fox",
-            "Wolf",
             "Dog",
             "Cat"
-          ],
-          "answerIndex": 0
-        },
-        {
-          "clue": "It looks like a big grey dog. It lives in a group and howls at the moon.",
-          "options": [
-            "Fox",
-            "Hyena",
-            "Wolf",
-            "Bear"
-          ],
-          "answerIndex": 2
-        },
-        {
-          "clue": "It has long ears and a small tail. It hops and eats carrots.",
-          "options": [
-            "Rabbit",
-            "Mouse",
-            "Deer",
-            "Kangaroo"
-          ],
-          "answerIndex": 0
-        },
-        {
-          "clue": "It is the biggest monkey family animal. It is strong and lives in the forest.",
-          "options": [
-            "Chimpanzee",
-            "Gorilla",
-            "Baboon",
-            "Orangutan"
-          ],
-          "answerIndex": 1
-        },
-        {
-          "clue": "It is a small insect with yellow and black stripes. It makes honey.",
-          "options": [
-            "Ant",
-            "Fly",
-            "Bee",
-            "Wasp"
-          ],
-          "answerIndex": 2
-        },
-        {
-          "clue": "It is white and very big. It lives where there is ice and snow.",
-          "options": [
-            "Polar bear",
-            "Panda",
-            "Seal",
-            "Wolf"
           ],
           "answerIndex": 0
         }
@@ -317,8 +107,7 @@
           "options": [
             "Snake",
             "Lion",
-            "Cow",
-            "Dog"
+            "Cow"
           ],
           "answerIndex": 1
         },
@@ -327,8 +116,7 @@
           "options": [
             "Snake",
             "Cat",
-            "Dog",
-            "Cow"
+            "Dog"
           ],
           "answerIndex": 0
         },
@@ -337,8 +125,7 @@
           "options": [
             "Dog",
             "Cat",
-            "Cow",
-            "Lion"
+            "Cow"
           ],
           "answerIndex": 2
         },
@@ -347,8 +134,7 @@
           "options": [
             "Cat",
             "Cow",
-            "Dog",
-            "Snake"
+            "Dog"
           ],
           "answerIndex": 2
         },
@@ -357,10 +143,9 @@
           "options": [
             "Dog",
             "Lion",
-            "Snake",
             "Cat"
           ],
-          "answerIndex": 3
+          "answerIndex": 2
         }
       ]
     },
@@ -810,6 +595,16 @@
           "answerIndex": 1
         },
         {
+          "audioUrl": "unit-02/clue-7.mp3",
+          "clueText": "I am tall and covered in white fur. I live in the snowy mountains. People look for me, but nobody can find me.",
+          "options": [
+            "Polar Bear",
+            "Monster",
+            "Yeti"
+          ],
+          "answerIndex": 2
+        },
+        {
           "clueText": "I am a giant bird. When I die, I become ashes. Then I am born again.",
           "options": [
             "Griffin",
@@ -828,13 +623,13 @@
           "answerIndex": 1
         },
         {
-          "clueText": "I look like a beautiful horse. I have one magical horn. I am gentle and kind.",
+          "clueText": "I am half woman and half fish. I live deep in the ocean. I sing beautiful songs.",
           "options": [
-            "Pegasus",
-            "Unicorn",
-            "Centaur"
+            "Mermaid",
+            "Elf",
+            "Naga"
           ],
-          "answerIndex": 1
+          "answerIndex": 0
         }
       ]
     },

@@ -3,27 +3,25 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import PlayClient from "@/components/PlayClient";
+import { buildGame } from "@/lib/game";
+import { clearProgress } from "@/lib/progress";
 import { savePlayer } from "@/lib/session";
-import { getUnit } from "@/lib/units";
-import type { AttemptRecord, UnitConfig } from "@/lib/types";
+import type { AttemptRecord, GameBlock, UnitConfig } from "@/lib/types";
 import { routerMock } from "@/tests/setup";
 
 const saveAttempt = vi.fn<(record: AttemptRecord) => Promise<void>>();
-const getUnitRanking = vi.fn();
-const getOverallRanking = vi.fn();
 
 vi.mock("@/lib/supabase", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/supabase")>()),
   saveAttempt: (record: AttemptRecord) => saveAttempt(record),
-  getUnitRanking: (unitId: string) => getUnitRanking(unitId),
-  getOverallRanking: () => getOverallRanking(),
   findOrCreatePlayer: vi.fn(),
 }));
 
+const GAME_ID = "game-01";
 const PLAYER = { id: "player-1", name: "Mint" };
 
-// One small unit with every block type. Deliberately a fixture and not real
-// content: these tests are about the engine, and must not churn when a unit's
+// One small game with every block type. Deliberately a fixture and not real
+// content: these tests are about the engine, and must not churn when the
 // questions change.
 const UNIT: UnitConfig = {
   id: "unit-09",
@@ -61,6 +59,8 @@ const UNIT: UnitConfig = {
   ],
 };
 
+const GAMES: GameBlock[] = UNIT.games;
+
 // Fixed clock so the recorded time is deterministic.
 let clock = 1_700_000_000_000;
 const advance = (ms: number) => {
@@ -71,19 +71,17 @@ beforeEach(() => {
   clock = 1_700_000_000_000;
   vi.spyOn(Date, "now").mockImplementation(() => clock);
   saveAttempt.mockReset().mockResolvedValue(undefined);
-  getUnitRanking.mockReset().mockResolvedValue([
-    { player_id: "other", name: "Ann", unit_id: "unit-09", score: 50, max_score: 50, time_seconds: 50, completed_at: "" },
-    { player_id: PLAYER.id, name: "Mint", unit_id: "unit-09", score: 30, max_score: 50, time_seconds: 7, completed_at: "" },
-  ]);
-  getOverallRanking.mockReset().mockResolvedValue([
-    { player_id: "other", name: "Ann", overall_accuracy: 1, units_completed: 1 },
-    { player_id: PLAYER.id, name: "Mint", overall_accuracy: 0.6, units_completed: 1 },
-  ]);
+  clearProgress();
 });
 
-/** Answers the whole fixture: 1 of 2 unscramble, quiz right, sentence right,
+/** Mounts the engine the only way it can be mounted now: the whole game. */
+function play() {
+  return render(<PlayClient games={GAMES} gameId={GAME_ID} />);
+}
+
+/** Plays the whole game: 1 of 2 unscramble, quiz right, sentence right,
  *  listening wrong. 3 of 5 correct = 30 / 50. */
-async function playWholeUnit(user: ReturnType<typeof userEvent.setup>) {
+async function playItAll(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText("Your answer"), "ELEPHANT{Enter}");
   await user.click(screen.getByRole("button", { name: "Next word" }));
   await user.type(screen.getByLabelText("Your answer"), "WRONG{Enter}");
@@ -106,111 +104,45 @@ async function playWholeUnit(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("button", { name: /Finish and see my score/ }));
 }
 
-/** The same walk, but every answer wrong: 0 of 5. */
-async function playWholeUnitBadly(user: ReturnType<typeof userEvent.setup>) {
-  await user.type(screen.getByLabelText("Your answer"), "WRONG{Enter}");
+/** Finishes only the first block, which leaves a saved run behind. */
+async function playFirstBlock(user: ReturnType<typeof userEvent.setup>) {
+  await user.type(screen.getByLabelText("Your answer"), "ELEPHANT{Enter}");
   await user.click(screen.getByRole("button", { name: "Next word" }));
-  await user.type(screen.getByLabelText("Your answer"), "WRONG{Enter}");
+  await user.type(screen.getByLabelText("Your answer"), "LION{Enter}");
   await user.click(screen.getByRole("button", { name: "Finish this part" }));
-
-  await user.click(screen.getByRole("button", { name: /Zebra/ }));
-  await user.click(screen.getByRole("button", { name: "Finish this part" }));
-
-  for (const word of ["snake", "the"]) {
-    await user.click(screen.getByRole("button", { name: word }));
-  }
-  await user.click(screen.getByRole("button", { name: "Check" }));
-  await user.click(screen.getByRole("button", { name: "Finish this part" }));
-
-  await user.click(screen.getByRole("button", { name: /Unicorn/ }));
-  await user.click(screen.getByRole("button", { name: "Finish this part" }));
-
-  await user.click(screen.getByRole("button", { name: /Finish and see my score/ }));
 }
 
-// The certificate is the one reward with a bar to clear: a whole unit, and at
-// least half the questions right. Anything else must not offer the button.
-describe("the certificate", () => {
-  const CERT = { name: "Get my certificate" };
-
-  it("is offered after a whole unit with half the answers right", async () => {
-    savePlayer(PLAYER);
-    const user = userEvent.setup();
-    render(<PlayClient unit={UNIT} totalUnits={20} />);
-    await screen.findByText(UNIT.title);
-
-    await playWholeUnit(user); // 3 of 5 = 60%
-
-    expect(await screen.findByRole("button", CERT)).toBeTruthy();
-    expect(screen.queryByText(/right to earn a certificate/)).toBeNull();
-  });
-
-  it("is withheld below half, and says how many were needed", async () => {
-    savePlayer(PLAYER);
-    const user = userEvent.setup();
-    render(<PlayClient unit={UNIT} totalUnits={20} />);
-    await screen.findByText(UNIT.title);
-
-    await playWholeUnitBadly(user); // 0 of 5
-
-    expect(
-      await screen.findByText(/Answer 3 of 5 right to earn a certificate. You got 0./)
-    ).toBeTruthy();
-    expect(screen.queryByRole("button", CERT)).toBeNull();
-  });
-
-  it("is never offered for a single part, however well it went", async () => {
-    savePlayer(PLAYER);
-    const user = userEvent.setup();
-    // block 1 is the one-question quiz; answering it right is a perfect score
-    render(<PlayClient unit={UNIT} partIndex={1} totalUnits={20} />);
-    await screen.findByText(UNIT.title);
-
-    await user.click(screen.getByRole("button", { name: /Giraffe/ }));
-    await user.click(screen.getByRole("button", { name: "Finish this part" }));
-
-    expect(
-      await screen.findByText(/Certificates come from playing a whole unit/)
-    ).toBeTruthy();
-    expect(screen.queryByRole("button", CERT)).toBeNull();
-    expect(screen.getByRole("button", { name: "Play this part again" })).toBeTruthy();
-  });
-});
-
-describe("PlayClient — the engine loop", () => {
+describe("PlayClient — one game, no choosing", () => {
   it("sends a player with no session back to the start", async () => {
-    render(<PlayClient unit={UNIT} totalUnits={20} />);
+    play();
     await waitFor(() => expect(routerMock.replace).toHaveBeenCalledWith("/"));
-    expect(screen.queryByText(/Unscramble the word/)).toBeNull();
+    expect(screen.queryByText(/Make the word/)).toBeNull();
   });
 
-  it("starts the unit for a known player", async () => {
+  // The teacher's instruction in one test: there is nothing to pick, and the
+  // very first thing on screen is question one.
+  it("opens on the first question of the first block", async () => {
     savePlayer(PLAYER);
-    render(<PlayClient unit={UNIT} totalUnits={20} />);
+    play();
 
-    expect(await screen.findByText(UNIT.title)).toBeTruthy();
+    expect(
+      await screen.findByRole("heading", { name: "Make the word" })
+    ).toBeTruthy();
     expect(screen.getByText(/part 1 of 5/i)).toBeTruthy();
     expect(screen.getByText(/Mint/)).toBeTruthy();
-    // HUD: score, timer ring, streak — all at zero
     expect(screen.getByText("Score")).toBeTruthy();
-    expect(screen.getByText("Streak")).toBeTruthy();
+    expect(screen.getByText("In a row")).toBeTruthy();
     expect(screen.getByText("0:00")).toBeTruthy();
     expect(screen.getAllByText("0")).toHaveLength(2);
-    expect(screen.getByRole("heading", { name: "Unscramble the word" })).toBeTruthy();
   });
 
-  it("walks every block in the JSON order", async () => {
+  it("walks every block in order", async () => {
     savePlayer(PLAYER);
     const user = userEvent.setup();
-    render(<PlayClient unit={UNIT} totalUnits={20} />);
-    await screen.findByText(UNIT.title);
+    play();
+    await screen.findByRole("heading", { name: "Make the word" });
 
-    expect(screen.getByRole("heading", { name: "Unscramble the word" })).toBeTruthy();
-    await user.type(screen.getByLabelText("Your answer"), "ELEPHANT{Enter}");
-    await user.click(screen.getByRole("button", { name: "Next word" }));
-    await user.type(screen.getByLabelText("Your answer"), "LION{Enter}");
-    await user.click(screen.getByRole("button", { name: "Finish this part" }));
-
+    await playFirstBlock(user);
     expect(screen.getByText(/part 2 of 5/i)).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Guess the animal" })).toBeTruthy();
 
@@ -236,8 +168,8 @@ describe("PlayClient — the engine loop", () => {
   it("keeps the running score in the HUD", async () => {
     savePlayer(PLAYER);
     const user = userEvent.setup();
-    render(<PlayClient unit={UNIT} totalUnits={20} />);
-    await screen.findByText(UNIT.title);
+    play();
+    await screen.findByRole("heading", { name: "Make the word" });
 
     await user.type(screen.getByLabelText("Your answer"), "ELEPHANT{Enter}");
     expect(screen.getByText("10")).toBeTruthy();
@@ -251,8 +183,8 @@ describe("PlayClient — the engine loop", () => {
   it("counts a streak of correct answers and resets it on a miss", async () => {
     savePlayer(PLAYER);
     const user = userEvent.setup();
-    render(<PlayClient unit={UNIT} totalUnits={20} />);
-    await screen.findByText(UNIT.title);
+    play();
+    await screen.findByRole("heading", { name: "Make the word" });
 
     await user.type(screen.getByLabelText("Your answer"), "ELEPHANT{Enter}");
     await user.click(screen.getByRole("button", { name: "Next word" }));
@@ -266,50 +198,23 @@ describe("PlayClient — the engine loop", () => {
     expect(screen.getByText("0")).toBeTruthy();
   });
 
-  // A part is played and ranked on its own. It must score only its own block
-  // and save under its own id, or it would land on the unit's leaderboard with
-  // a fraction of the questions and beat everyone on time.
-  it("plays one part on its own and ranks it separately", async () => {
-    savePlayer(PLAYER);
-    const user = userEvent.setup();
-    render(<PlayClient unit={UNIT} partIndex={1} totalUnits={20} />);
-    await screen.findByText(UNIT.title);
-
-    // only the chosen block is in play — the block track has one segment, not
-    // five. (The per-question track inside the game also uses .seg, so this
-    // picks the engine's own one by its aria-hidden.)
-    expect(
-      document.querySelectorAll('.segs[aria-hidden="true"] > .seg')
-    ).toHaveLength(1);
-    expect(screen.getByRole("heading", { name: "Guess the animal" })).toBeTruthy();
-
-    await user.click(screen.getByRole("button", { name: /Giraffe/ }));
-    await user.click(screen.getByRole("button", { name: "Finish this part" }));
-
-    await waitFor(() => expect(saveAttempt).toHaveBeenCalled());
-    const record = saveAttempt.mock.calls[0][0];
-    expect(record.unit_id).toBe("unit-09-part-2");
-    expect(record.total_questions).toBe(1);
-    expect(record.max_score).toBe(10);
-  });
-
-  it("saves exactly one attempt with the right record, even under StrictMode", async () => {
+  it("saves exactly one attempt under the game id, even under StrictMode", async () => {
     savePlayer(PLAYER);
     const user = userEvent.setup();
     render(
       <StrictMode>
-        <PlayClient unit={UNIT} totalUnits={20} />
+        <PlayClient games={GAMES} gameId={GAME_ID} />
       </StrictMode>
     );
-    await screen.findByText(UNIT.title);
+    await screen.findByRole("heading", { name: "Make the word" });
 
-    await playWholeUnit(user);
+    await playItAll(user);
 
     await waitFor(() => expect(saveAttempt).toHaveBeenCalled());
     expect(saveAttempt).toHaveBeenCalledTimes(1);
     expect(saveAttempt.mock.calls[0][0]).toEqual({
       player_id: PLAYER.id,
-      unit_id: "unit-09",
+      unit_id: GAME_ID,
       score: 30,
       max_score: 50,
       correct_count: 3,
@@ -324,214 +229,262 @@ describe("PlayClient — the engine loop", () => {
     });
   });
 
+  // The whole point of the back-button fix. push would leave a finished game
+  // sitting in history, and backing out of the ranking would walk straight into
+  // it and start it over — exactly what the teacher reported.
+  it("replaces the game with the ranking so back goes to the start", async () => {
+    savePlayer(PLAYER);
+    const user = userEvent.setup();
+    play();
+    await screen.findByRole("heading", { name: "Make the word" });
+
+    await playItAll(user);
+
+    await waitFor(() => expect(routerMock.replace).toHaveBeenCalledWith("/rank"));
+    expect(routerMock.push).not.toHaveBeenCalledWith("/rank");
+  });
+
   it("never scores the writing block", async () => {
     savePlayer(PLAYER);
     const user = userEvent.setup();
-    render(<PlayClient unit={UNIT} totalUnits={20} />);
-    await screen.findByText(UNIT.title);
-    await playWholeUnit(user);
+    play();
+    await screen.findByRole("heading", { name: "Make the word" });
+
+    await playItAll(user);
 
     await waitFor(() => expect(saveAttempt).toHaveBeenCalled());
     const record = saveAttempt.mock.calls[0][0];
-    expect(record.game_type_breakdown).not.toHaveProperty("writing");
     expect(record.total_questions).toBe(5);
+    expect(record.game_type_breakdown?.writing).toBeUndefined();
   });
 
-  it("shows the result screen with score, accuracy, time and breakdown", async () => {
+  it("asks before finishing early, in its own dialog", async () => {
     savePlayer(PLAYER);
     const user = userEvent.setup();
-    render(<PlayClient unit={UNIT} totalUnits={20} />);
-    await screen.findByText(UNIT.title);
-    await playWholeUnit(user);
+    play();
+    await screen.findByRole("heading", { name: "Make the word" });
 
-    expect(await screen.findByText(/Great expedition/)).toBeTruthy();
-    await waitFor(() => expect(screen.getByText("30")).toBeTruthy());
-    expect(screen.getByText("/50")).toBeTruthy();
-    expect(screen.getByText("60%")).toBeTruthy(); // 30/50
-    expect(screen.getByText("0:07")).toBeTruthy();
-    expect(screen.getByText("3/5")).toBeTruthy();
-    expect(screen.getByText(/writing part is practice only/)).toBeTruthy();
-  });
+    await user.type(screen.getByLabelText("Your answer"), "ELEPHANT{Enter}");
+    await user.click(screen.getByRole("button", { name: "Finish" }));
+    expect(screen.getByText("Finish here?")).toBeTruthy();
 
-  it("shows both ranks only after the attempt is stored", async () => {
-    savePlayer(PLAYER);
-    const user = userEvent.setup();
-    render(<PlayClient unit={UNIT} totalUnits={20} />);
-    await screen.findByText(UNIT.title);
-    await playWholeUnit(user);
-
-    // 2nd of 2 on both boards: the unit board and the overall board
-    expect(await screen.findAllByText("#2")).toHaveLength(2);
-    expect(screen.getAllByText(/of 2 explorers/)).toHaveLength(2);
-    expect(screen.getByText(/1 of 20 units played/)).toBeTruthy();
-    expect(getUnitRanking).toHaveBeenCalledWith("unit-09");
-    expect(getOverallRanking).toHaveBeenCalled();
-  });
-
-  it("keeps the score visible and offers a retry when saving fails", async () => {
-    savePlayer(PLAYER);
-    saveAttempt.mockRejectedValueOnce(new TypeError("Failed to fetch"));
-    const user = userEvent.setup();
-    render(<PlayClient unit={UNIT} totalUnits={20} />);
-    await screen.findByText(UNIT.title);
-    await playWholeUnit(user);
-
-    expect(await screen.findByText(/Could not reach the scoreboard/)).toBeTruthy();
-    expect(screen.getByText(/result above is still correct/)).toBeTruthy();
-    await waitFor(() => expect(screen.getByText("30")).toBeTruthy());
-    expect(screen.queryByText("Your ranking")).toBeNull();
-
-    await user.click(screen.getByRole("button", { name: "Try again" }));
-    await waitFor(() => expect(saveAttempt).toHaveBeenCalledTimes(2));
-    expect(await screen.findByText("Your ranking")).toBeTruthy();
-  });
-
-  it("still shows the result when the leaderboard query fails", async () => {
-    savePlayer(PLAYER);
-    getUnitRanking.mockRejectedValue({ message: "view missing", code: "42P01" });
-    const user = userEvent.setup();
-    render(<PlayClient unit={UNIT} totalUnits={20} />);
-    await screen.findByText(UNIT.title);
-    await playWholeUnit(user);
-
-    expect(await screen.findByText(/leaderboard could not be loaded/)).toBeTruthy();
-    await waitFor(() => expect(screen.getByText("30")).toBeTruthy());
-  });
-
-  it("asks before abandoning a unit, in the game's own dialog", async () => {
-    savePlayer(PLAYER);
-    const user = userEvent.setup();
-    render(<PlayClient unit={UNIT} totalUnits={20} />);
-    await screen.findByText(UNIT.title);
-
-    // nothing is asked until Exit is pressed
-    expect(screen.queryByText("Leave this expedition?")).toBeNull();
-
-    await user.click(screen.getByRole("button", { name: "Exit" }));
-    expect(screen.getByText("Leave this expedition?")).toBeTruthy();
-    expect(routerMock.push).not.toHaveBeenCalled();
-
-    // backing out leaves the run untouched
     await user.click(screen.getByRole("button", { name: "Keep playing" }));
-    expect(routerMock.push).not.toHaveBeenCalled();
-
-    await user.click(screen.getByRole("button", { name: "Exit" }));
-    await user.click(screen.getByRole("button", { name: "Leave" }));
-    // back to the unit picker, not the door: the name is already known
-    expect(routerMock.push).toHaveBeenCalledWith("/units");
     expect(saveAttempt).not.toHaveBeenCalled();
-  });
-
-  it("runs a unit that has no writing block at all", async () => {
-    savePlayer(PLAYER);
-    const user = userEvent.setup();
-    render(
-      <PlayClient
-        unit={{
-          id: "unit-11",
-          title: "Quiz only",
-          games: [
-            {
-              type: "quiz-choice",
-              items: [{ clue: "c", options: ["yes", "no"], answerIndex: 0 }],
-            },
-          ],
-        }}
-        totalUnits={20}
-      />
-    );
-    await screen.findByText("Quiz only");
-
-    await user.click(screen.getByRole("button", { name: /yes/ }));
-    advance(3_000);
-    await user.click(screen.getByRole("button", { name: "Finish this part" }));
-
-    await waitFor(() => expect(saveAttempt).toHaveBeenCalled());
-    expect(saveAttempt.mock.calls[0][0]).toMatchObject({
-      unit_id: "unit-11",
-      score: 10,
-      max_score: 10,
-      total_questions: 1,
-      time_seconds: 3,
-    });
+    // still in the game, on the same question
+    expect(screen.getByRole("heading", { name: "Make the word" })).toBeTruthy();
   });
 });
 
-// The engine is exercised above with a fixture; these prove the shipped
-// content is actually playable through the same engine.
-describe("the real units are playable", () => {
-  it("opens the Shadow Animal Challenge on its first silhouette", async () => {
-    savePlayer(PLAYER);
-    const unit = getUnit("unit-01")!;
-    render(<PlayClient unit={unit} totalUnits={20} />);
+// One run is every question there is, but a class only reaches them a part at a
+// time. Without a way out that keeps the score, a child taught up to Part 1
+// would face 69 questions from lessons they have not had — and lose everything
+// by closing the tab, because a score is only written at the very end.
+describe("stopping early", () => {
+  async function finishNow(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(screen.getByRole("button", { name: "Finish" }));
+    await user.click(screen.getByRole("button", { name: "Finish now" }));
+  }
 
-    expect(await screen.findByText("Shadow Animal Challenge")).toBeTruthy();
-    expect(screen.getByText("PHETNALE")).toBeTruthy();
-    // Part 1 lost giraffe, flamingo and parrot on the teacher's list
-    expect(screen.getByText("1 / 27")).toBeTruthy();
-    expect(screen.getByText(/whose shadow is this/)).toBeTruthy();
-    // this unit is the emoji silhouette version
-    expect(screen.getByLabelText("shadow of an animal")).toBeTruthy();
-  });
-
-  it("answers a shadow word and reveals the animal", async () => {
+  it("banks only the questions that were answered", async () => {
     savePlayer(PLAYER);
     const user = userEvent.setup();
-    render(<PlayClient unit={getUnit("unit-01")!} totalUnits={20} />);
-    await screen.findByText("Shadow Animal Challenge");
+    play();
+    await screen.findByRole("heading", { name: "Make the word" });
 
-    await user.type(screen.getByLabelText("Your answer"), "elephant{Enter}");
+    await user.type(screen.getByLabelText("Your answer"), "ELEPHANT{Enter}");
+    await user.click(screen.getByRole("button", { name: "Next word" }));
+    await user.type(screen.getByLabelText("Your answer"), "LION{Enter}");
+    advance(4_000);
 
-    expect(screen.getByText(/Correct/)).toBeTruthy();
-    // the silhouette lights up and is now named
-    expect(screen.getByLabelText("ELEPHANT").className).toContain(
-      "shadow-animal--lit"
-    );
-    expect(screen.queryByText(/whose shadow is this/)).toBeNull();
-    expect(screen.getByText("10")).toBeTruthy();
+    await finishNow(user);
+
+    await waitFor(() => expect(saveAttempt).toHaveBeenCalled());
+    const record = saveAttempt.mock.calls[0][0];
+    expect(record.total_questions).toBe(2);
+    expect(record.correct_count).toBe(2);
+    expect(record.score).toBe(20);
+    expect(record.max_score).toBe(20);
+    expect(record.time_seconds).toBe(4);
+    // and it lands on the ranking, same as a run played to the end
+    await waitFor(() => expect(routerMock.replace).toHaveBeenCalledWith("/rank"));
   });
 
-  // Part 2 of the same unit is the illustrated one: real artwork, no emoji.
-  // Played on its own so the test doesn't have to type Part 1's thirty words.
-  it("plays Part 2 with drawn animals instead of emoji", async () => {
+  // Opened by mistake and answered nothing: a 0-of-0 row would be noise on the
+  // board and nothing to be proud of.
+  it("saves nothing when no question has been answered", async () => {
     savePlayer(PLAYER);
     const user = userEvent.setup();
-    const unit = getUnit("unit-01")!;
-    render(
-      <PlayClient unit={{ ...unit, games: [unit.games[1]] }} totalUnits={20} />
-    );
-    await screen.findByText("Shadow Animal Challenge");
+    play();
+    await screen.findByRole("heading", { name: "Make the word" });
 
-    expect(screen.getByText("POTAMUSHIPPO")).toBeTruthy();
-    expect(screen.queryByLabelText("shadow of an animal")).toBeNull();
-    expect(document.querySelector(".art")!.className).not.toContain("art--lit");
-    expect(screen.queryByAltText("HIPPOPOTAMUS")).toBeNull();
+    await finishNow(user);
 
-    await user.type(screen.getByLabelText("Your answer"), "hippopotamus{Enter}");
-
-    expect(document.querySelector(".art")!.className).toContain("art--lit");
-    expect(screen.getByAltText("HIPPOPOTAMUS")).toBeTruthy();
+    expect(saveAttempt).not.toHaveBeenCalled();
+    expect(routerMock.push).toHaveBeenCalledWith("/");
   });
 
-  it("opens unit-02 on Part B's first clue", async () => {
+  it("throws the half-finished run away once it is banked", async () => {
     savePlayer(PLAYER);
-    render(<PlayClient unit={getUnit("unit-02")!} totalUnits={20} />);
+    const user = userEvent.setup();
+    const first = play();
+    await screen.findByRole("heading", { name: "Make the word" });
 
-    expect(await screen.findByText("Wild Life and Wonderful Creatures")).toBeTruthy();
+    await playFirstBlock(user); // finishes block 1, so progress is saved
+    await finishNow(user);
+    await waitFor(() => expect(saveAttempt).toHaveBeenCalled());
+    first.unmount();
+
+    play();
+    expect(await screen.findByText(/part 1 of 5/i)).toBeTruthy();
+    expect(screen.queryByText("Carry on where you stopped?")).toBeNull();
+  });
+
+  it("keeps the score and offers a retry when saving fails", async () => {
+    savePlayer(PLAYER);
+    saveAttempt.mockRejectedValue(new TypeError("Failed to fetch"));
+    const user = userEvent.setup();
+    play();
+    await screen.findByRole("heading", { name: "Make the word" });
+
+    await playItAll(user);
+
+    expect(await screen.findByText(/did not save/i)).toBeTruthy();
+    expect(screen.getByText(/No internet/)).toBeTruthy();
+    expect(routerMock.replace).not.toHaveBeenCalledWith("/rank");
+
+    saveAttempt.mockResolvedValue(undefined);
+    await user.click(screen.getByRole("button", { name: "Try again" }));
+    await waitFor(() => expect(routerMock.replace).toHaveBeenCalledWith("/rank"));
+  });
+});
+
+// One run is every question there is, and the teacher wants it played at home
+// too. Losing it to a closed tab would mean nobody ever reaches the end.
+describe("carrying a half-finished run", () => {
+  it("offers to carry on, and keeps the score and the clock", async () => {
+    savePlayer(PLAYER);
+    const user = userEvent.setup();
+    const first = play();
+    await screen.findByRole("heading", { name: "Make the word" });
+
+    await playFirstBlock(user); // 2 right = 20 points
+    advance(9_000);
+    first.unmount(); // the tab closes here
+
+    play();
+    expect(await screen.findByText("Carry on where you stopped?")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Carry on" }));
+
+    // straight back to block 2, with the score intact
     expect(screen.getByRole("heading", { name: "Guess the animal" })).toBeTruthy();
-    expect(screen.getByText(/It has a long neck/)).toBeTruthy();
-    expect(screen.getByText("1 / 30")).toBeTruthy();
-    expect(screen.getByText(/part 1 of 5/i)).toBeTruthy();
+    expect(screen.getByText(/part 2 of 5/i)).toBeTruthy();
+    expect(screen.getByText("20")).toBeTruthy();
   });
 
-  // Part D is audio-only now, so every clue should resolve to a real mp3.
-  it("ships every Part D clip as a real audio file the player can load", () => {
-    const unit = getUnit("unit-02")!;
-    const listening = unit.games.find((g) => g.type === "listening");
-    if (listening?.type !== "listening") throw new Error("no listening block");
+  // Time away is not time played. Without this a child who stopped overnight
+  // would come back to a clock reading eight hours.
+  it("does not count the time the tab was closed", async () => {
+    savePlayer(PLAYER);
+    const user = userEvent.setup();
+    const first = play();
+    await screen.findByRole("heading", { name: "Make the word" });
 
-    const withAudio = listening.items.filter((item) => item.audioUrl);
-    expect(withAudio).toHaveLength(6);
-    expect(withAudio[0].audioUrl).toBe("unit-02/clue-1.mp3");
+    await playFirstBlock(user);
+    first.unmount();
+
+    advance(8 * 60 * 60 * 1000); // asleep
+    play();
+    await user.click(await screen.findByRole("button", { name: "Carry on" }));
+
+    expect(screen.getByText("0:00")).toBeTruthy();
+    expect(screen.queryByText(/8:00:00/)).toBeNull();
+  });
+
+  it("starts clean when the player asks to", async () => {
+    savePlayer(PLAYER);
+    const user = userEvent.setup();
+    const first = play();
+    await screen.findByRole("heading", { name: "Make the word" });
+
+    await playFirstBlock(user);
+    first.unmount();
+
+    const second = play();
+    await user.click(await screen.findByRole("button", { name: "Start again" }));
+
+    expect(screen.getByRole("heading", { name: "Make the word" })).toBeTruthy();
+    expect(screen.getByText(/part 1 of 5/i)).toBeTruthy();
+    expect(screen.getAllByText("0")).toHaveLength(2);
+    second.unmount();
+
+    // and the offer is gone for good
+    play();
+    expect(screen.queryByText("Carry on where you stopped?")).toBeNull();
+  });
+
+  it("does not offer someone else's run", async () => {
+    savePlayer(PLAYER);
+    const user = userEvent.setup();
+    const first = play();
+    await screen.findByRole("heading", { name: "Make the word" });
+    await playFirstBlock(user);
+    first.unmount();
+
+    savePlayer({ id: "player-2", name: "Ploy" });
+    play();
+
+    expect(await screen.findByText(/part 1 of 5/i)).toBeTruthy();
+    expect(screen.queryByText("Carry on where you stopped?")).toBeNull();
+  });
+
+  it("throws the saved run away once the score is banked", async () => {
+    savePlayer(PLAYER);
+    const user = userEvent.setup();
+    const first = play();
+    await screen.findByRole("heading", { name: "Make the word" });
+
+    await playItAll(user);
+    await waitFor(() => expect(saveAttempt).toHaveBeenCalled());
+    first.unmount();
+
+    play();
+    expect(await screen.findByText(/part 1 of 5/i)).toBeTruthy();
+    expect(screen.queryByText("Carry on where you stopped?")).toBeNull();
+  });
+});
+
+// The real content, played through the same engine.
+describe("the real game", () => {
+  it("is every question in every unit, in file order", () => {
+    const blocks = buildGame();
+
+    expect(blocks.map((b) => b.type)).toEqual([
+      "unscramble", // unit-01 — the 27 emoji silhouettes
+      "quiz-choice", // unit-02 Part B
+      "quiz-choice", // unit-02 Part C1
+      "sentence-builder", // unit-02 Part C2
+      "listening", // unit-02 Part D
+      "writing", // unit-02 Part E — never scored
+    ]);
+
+    const questions = blocks.reduce(
+      (n, b) => n + (b.type === "writing" ? 0 : b.items.length),
+      0
+    );
+    expect(questions).toBe(77);
+    expect(questions * 10).toBe(770);
+  });
+
+  it("opens on the very first shadow", async () => {
+    savePlayer(PLAYER);
+    render(<PlayClient games={buildGame()} gameId={GAME_ID} />);
+
+    expect(
+      await screen.findByRole("heading", { name: "Make the word" })
+    ).toBeTruthy();
+    expect(screen.getByText("PHETNALE")).toBeTruthy();
+    expect(screen.getByLabelText("shadow of an animal")).toBeTruthy();
+    expect(screen.getByText("1 / 27")).toBeTruthy();
+    expect(screen.getByText(/part 1 of 6/i)).toBeTruthy();
   });
 });

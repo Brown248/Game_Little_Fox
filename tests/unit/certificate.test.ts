@@ -124,12 +124,12 @@ describe("certificate", () => {
     });
   });
 
-  it("prints the club line, the title and the explorer's name", async () => {
+  it("prints the school line, the title and the player's name", async () => {
     await downloadCertificate(data);
 
     expect(printed()).toContain(spaced("LITTLE FOX LANGUAGE SCHOOL"));
-    expect(printed()).toContain("Certificate of Expedition");
-    expect(printed()).toContain("awarded to");
+    expect(printed()).toContain("Certificate");
+    expect(printed()).toContain("given to");
     expect(printed()).toContain("Mint Suwan");
   });
 
@@ -142,24 +142,24 @@ describe("certificate", () => {
     ).toBe(true);
   });
 
-  it("prints score, time and accuracy as separate columns", async () => {
+  it("prints score, time and how many were right as separate columns", async () => {
     await downloadCertificate(data);
 
     expect(printed()).toContain(spaced("SCORE"));
     expect(printed()).toContain("40 / 60");
     expect(printed()).toContain(spaced("TIME"));
     expect(printed()).toContain("3:07");
-    expect(printed()).toContain(spaced("ACCURACY"));
+    expect(printed()).toContain(spaced("RIGHT"));
     expect(printed()).toContain("67%");
   });
 
-  it("adds the class rank column only when the rank is known", async () => {
+  it("adds the place column only when the place is known", async () => {
     await downloadCertificate(data);
-    expect(printed()).not.toContain(spaced("CLASS RANK"));
+    expect(printed()).not.toContain(spaced("PLACE"));
 
     calls.text = [];
     await downloadCertificate({ ...data, rankLabel: "3 / 24" });
-    expect(printed()).toContain(spaced("CLASS RANK"));
+    expect(printed()).toContain(spaced("PLACE"));
     expect(printed()).toContain("3 / 24");
   });
 
